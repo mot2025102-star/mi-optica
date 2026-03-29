@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard Admin')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}" th:with="activePage='dashboard'"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">🔧 Panel de Administración</div>
+            <div class="topbar-sub"
+                 th:text="'Bienvenido, ' + ${usuario.nombreCompleto} + ' — ' + ${usuario.sucursal?.nombre}">
+            </div>
+        </div>
+        <div class="topbar-actions">
+            
+            <a th:href="@{/usuarios/nuevo}" class="btn btn-primary">➕ Nuevo Usuario</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon turquesa">📦</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statProductos" >...</div>
+                    <div class="stat-label" >Productos en catálogo</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon verde">💰</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statVentasHoy">...</div>
+                    <div class="stat-label">Ventas hoy</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amarillo">👥</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statClientes">...</div>
+                    <div class="stat-label" >Clientes registrados</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon rojo" >⚠️</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${stockBajo.size()}" >0</div>
+                    <div class="stat-label" >Stock bajo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock bajo -->
+        <div class="card" th:if="${!stockBajo.isEmpty()}">
+            <div class="card-header">
+                <div class="card-title" >⚠️ Productos con Stock Bajo</div>
+                <a th:href="@{/inventario}" class="btn btn-secondary btn-sm" >Ver inventario →</a>
+            </div>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Sucursal</th>
+                            <th style="text-align:center">Existencia</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="inv : ${stockBajo}">
+                        <td>
+                            <div class="fw-600" th:text="${inv.producto.detalle}"></div>
+                            <div class="text-gris text-sm" th:text="${inv.producto.codigo}"></div>
+                        </td>
+                        <td class="text-sm" th:text="${inv.sucursal.nombre}"></td>
+                        <td style="text-align:center">
+                            <span class="badge"
+                                  th:class="${inv.existencia == 0 ? 'badge badge-danger' : 'badge badge-warning'}"
+                                  th:text="${inv.existencia}">
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/traslados(pid=${inv.producto.idProducto})}"
+                               class="btn btn-sm btn-warning">🔄 Trasladar</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Accesos rápidos -->
+        <div class="stats-grid">
+            <a th:href="@{/ventas}" class="stat-card" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon turquesa" >🧾</div>
+                <div class="stat-info"><div class="stat-value" style="font-size:15px" >Nueva Venta</div></div>
+            </a>
+            <a th:href="@{/clientes}" class="stat-card" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon amarillo" >👥</div>
+                <div class="stat-info"><div class="stat-value" style="font-size:15px" >Clientes</div></div>
+            </a>
+            <a th:href="@{/inventario}" class="stat-card" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon turquesa" >📊</div>
+                <div class="stat-info"><div class="stat-value" style="font-size:15px" >Inventario</div></div>
+            </a>
+            <a th:href="@{/reportes}" class="stat-card" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon verde" >📋</div>
+                <div class="stat-info"><div class="stat-value" style="font-size:15px" >Reportes</div></div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Cargar stats vía API REST (asíncrono)
+async function cargarStats() {
+    try {
+        const r = await fetch('/api/stats/admin');
+        const d = await r.json();
+        document.getElementById('statProductos').textContent  = d.productos  ?? '—';
+        document.getElementById('statVentasHoy').textContent  = 'Q' + (d.ventasHoy ?? '0.00');
+        document.getElementById('statClientes').textContent   = d.clientes   ?? '—';
+    } catch(e) { console.warn('Stats no disponibles aún'); }
+}
+cargarStats();
+</script>
+</body>
+</html>
