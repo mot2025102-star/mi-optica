@@ -23,7 +23,7 @@ import java.util.List;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+    //hola
     // Ahora sí estamos usando esta variable para quitar la advertencia amarilla
     private final UsuarioDetailsService usuarioDetailsService;
 
