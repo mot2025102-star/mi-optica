@@ -42,6 +42,8 @@ public class AuthController {
         return "dashboard/admin";
     }
 
+    //holaaaaaaa MEEEEEDAAAAAAAAAAAAAA MMMMMMMMMMMMMMMMMMMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     @GetMapping("/dashboard/vendedor")
     public String dashboardVendedor(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Usuario usuario = usuarioRepo.findByUsername(userDetails.getUsername()).orElseThrow();
