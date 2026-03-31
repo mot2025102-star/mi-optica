@@ -18,8 +18,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/productos")
 @RequiredArgsConstructor
-public class ProductoController { //Reportes me llamo Adrian sansm
-
+public class ProductoController { 
+// -Controladores
     private final ProductoService productoService;
 
     // ─── LISTA ────────────────────────────────────────────────────
