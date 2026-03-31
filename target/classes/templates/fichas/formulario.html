@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head(${editando} ? 'Editar Ficha' : 'Nueva Ficha')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title"
+                 th:text="${editando} ? '✏️ Editar Ficha Clínica' : '➕ Nueva Ficha Clínica'"></div>
+            <div class="topbar-sub"
+                 th:text="${editando} ? 'Modificando ficha #' + ficha.idFicha : 'Registrar nueva consulta'"></div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/fichas}" class="btn btn-secondary">← Volver</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div th:if="${mensajeError}" class="alert alert-danger">
+            ❌ <span th:text="${mensajeError}"></span>
+        </div>
+
+        <form th:action="@{/fichas/guardar}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="idFicha" th:value="${ficha.idFicha}"/>
+
+            <!-- ── DATOS GENERALES ─────────────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👤 Datos Generales</div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Cliente *</label>
+                            <select name="cliente.idCliente" class="form-select" required>
+                                <option value="">— Selecciona cliente —</option>
+                                <option th:each="c : ${clientes}"
+                                        th:value="${c.idCliente}"
+                                        th:text="${c.nombre}"
+                                        th:selected="${ficha.cliente != null and ficha.cliente.idCliente == c.idCliente}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sucursal *</label>
+                            <select name="sucursal.idSucursal" class="form-select" required>
+                                <option value="">— Selecciona sucursal —</option>
+                                <option th:each="s : ${sucursales}"
+                                        th:value="${s.idSucursal}"
+                                        th:text="${s.nombre}"
+                                        th:selected="${ficha.sucursal != null and ficha.sucursal.idSucursal == s.idSucursal}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Optometrista *</label>
+                            <select name="optometrista.idUsuario" class="form-select" required>
+                                <option value="">— Selecciona optometrista —</option>
+                                <option th:each="u : ${optometras}"
+                                        th:value="${u.idUsuario}"
+                                        th:text="${u.nombreCompleto != null ? u.nombreCompleto : u.username}"
+                                        th:selected="${ficha.optometrista != null and ficha.optometrista.idUsuario == u.idUsuario}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Fecha consulta *</label>
+                            <input type="date" name="fecha" class="form-control" required
+                                   th:value="${ficha.fecha}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Motivo de consulta</label>
+                            <input type="text" name="motivoConsulta" class="form-control"
+                                   placeholder="Ej: Revisión rutinaria, dolor de cabeza..."
+                                   th:value="${ficha.motivoConsulta}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── GRADUACIÓN ─────────────────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👁️ Graduación</div>
+                </div>
+                <div class="card-body">
+
+                    <!-- Tabla de graduación -->
+                    <div style="overflow-x:auto">
+                        <table style="width:100%;border-collapse:collapse;font-size:13px">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.03)">
+                                    <th style="padding:10px 14px;text-align:left;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Ojo</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Esfera</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Cilindro</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Eje</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Adición</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- OD -->
+                                <tr style="border-bottom:1px solid var(--gris-borde)">
+                                    <td style="padding:10px 14px;font-weight:700;color:var(--turquesa)">OD (Derecho)</td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="odEsfera" class="form-control"
+                                               step="0.25" placeholder="0.00"
+                                               th:value="${ficha.odEsfera}" style="text-align:center">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="odCilindro" class="form-control"
+                                               step="0.25" placeholder="0.00"
+                                               th:value="${ficha.odCilindro}" style="text-align:center">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="odEje" class="form-control"
+                                               min="0" max="180" placeholder="0"
+                                               th:value="${ficha.odEje}" style="text-align:center">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="odAdicion" class="form-control"
+                                               step="0.25" placeholder="0.00"
+                                               th:value="${ficha.odAdicion}" style="text-align:center">
+                                    </td>
+                                </tr>
+                                <!-- OI -->
+                                <tr>
+                                    <td style="padding:10px 14px;font-weight:700;color:var(--amarillo)">OI (Izquierdo)</td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="oiEsfera" class="form-control"
+                                               step="0.25" placeholder="0.00"
+                                               th:value="${ficha.oiEsfera}" style="text-align:center">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="oiCilindro" class="form-control"
+                                               step="0.25" placeholder="0.00"
+                                               th:value="${ficha.oiCilindro}" style="text-align:center">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="oiEje" class="form-control"
+                                               min="0" max="180" placeholder="0"
+                                               th:value="${ficha.oiEje}" style="text-align:center">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="number" name="oiAdicion" class="form-control"
+                                               step="0.25" placeholder="0.00"
+                                               th:value="${ficha.oiAdicion}" style="text-align:center">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Agudeza visual -->
+                    <div style="margin-top:20px;font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">
+                        Agudeza Visual
+                    </div>
+                    <div class="form-row form-row-4">
+                        <div class="form-group">
+                            <label class="form-label">AV OD s/c</label>
+                            <input type="text" name="avOdSc" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOdSc}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AV OI s/c</label>
+                            <input type="text" name="avOiSc" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOiSc}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AV OD c/c</label>
+                            <input type="text" name="avOdCc" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOdCc}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AV OI c/c</label>
+                            <input type="text" name="avOiCc" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOiCc}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── PEDIDO ──────────────────────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">📦 Pedido y Entrega</div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Armazón</label>
+                            <input type="text" name="armazon" class="form-control"
+                                   placeholder="Descripción del armazón..."
+                                   th:value="${ficha.armazon}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Detalle de lentes</label>
+                            <input type="text" name="detalleLentes" class="form-control"
+                                   placeholder="Tipo de lentes, tratamiento..."
+                                   th:value="${ficha.detalleLentes}">
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Fecha estimada de entrega</label>
+                            <input type="date" name="fechaEntrega" class="form-control"
+                                   th:value="${ficha.fechaEntrega}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estado de entrega</label>
+                            <select name="estadoEntrega" class="form-select">
+                                <option value="Pendiente"  th:selected="${ficha.estadoEntrega == 'Pendiente'}">⏳ Pendiente</option>
+                                <option value="En proceso" th:selected="${ficha.estadoEntrega == 'En proceso'}">🔄 En proceso</option>
+                                <option value="Entregado"  th:selected="${ficha.estadoEntrega == 'Entregado'}">✅ Entregado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── COBRO ───────────────────────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">💰 Cobro</div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Total (Q)</label>
+                            <input type="number" name="total" class="form-control"
+                                   min="0" step="0.01" placeholder="0.00"
+                                   th:value="${ficha.total}"
+                                   oninput="calcularSaldo()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Abono (Q)</label>
+                            <input type="number" name="abono" class="form-control"
+                                   min="0" step="0.01" placeholder="0.00"
+                                   th:value="${ficha.abono}"
+                                   oninput="calcularSaldo()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Saldo (Q)</label>
+                            <input type="number" name="saldo" id="campoSaldo" class="form-control"
+                                   min="0" step="0.01" placeholder="0.00"
+                                   th:value="${ficha.saldo}" readonly
+                                   style="background:rgba(234,84,85,0.08);color:var(--rojo);font-weight:700">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── OBSERVACIONES ──────────────────────────────── -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Observaciones</label>
+                        <textarea name="observaciones" class="form-control" rows="3"
+                                  placeholder="Notas adicionales..."
+                                  th:text="${ficha.observaciones}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <a th:href="@{/fichas}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary" style="min-width:160px">
+                    💾 <span th:text="${editando} ? 'Actualizar Ficha' : 'Guardar Ficha'"></span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+function calcularSaldo() {
+    const total = parseFloat(document.querySelector('[name="total"]').value) || 0;
+    const abono = parseFloat(document.querySelector('[name="abono"]').value) || 0;
+    const saldo = Math.max(0, total - abono);
+    document.getElementById('campoSaldo').value = saldo.toFixed(2);
+}
+</script>
+
+</body>
+</html>

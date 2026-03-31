@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Corte de Caja')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">🏧 Corte de Caja</div>
+            <div class="topbar-sub"
+                 th:text="${sucursal?.nombre} + ' — ' + ${#temporals.format(fecha,'EEEE dd/MM/yyyy')}">
+            </div>
+        </div>
+        <div class="topbar-actions no-print">
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Selector fecha + sucursal -->
+        <div class="card mb-3 no-print">
+            <div class="card-body" style="padding:14px 20px">
+                <form th:action="@{/corte-caja}" method="get"
+                      style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+                    <div>
+                        <label class="form-label">Fecha</label>
+                        <input type="date" name="fecha" class="form-control" th:value="${fecha}">
+                    </div>
+                    <div th:if="${esAdmin}" style="min-width:180px">
+                        <label class="form-label">Sucursal</label>
+                        <select name="idSucursal" class="form-select">
+                            <option th:each="s : ${sucursales}"
+                                    th:value="${s.idSucursal}"
+                                    th:text="${s.nombre}"
+                                    th:selected="${idSucursal == s.idSucursal}">
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">🔍 Generar corte</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── ENCABEZADO DEL CORTE (imprimible) ── -->
+        <div style="background:var(--gris-oscuro);border:1px solid var(--gris-borde);border-radius:12px;overflow:hidden;max-width:800px">
+
+            <!-- Header -->
+            <div style="background:#0a0a0a;padding:20px 28px;display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;gap:14px">
+                    <div style="width:48px;height:48px;background:#27C2C9;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">👁️</div>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#fff">Mi Óptica</div>
+                        <div style="font-size:11px;color:#27C2C9;text-transform:uppercase;letter-spacing:1px">Corte de Caja</div>
+                    </div>
+                </div>
+                <div style="text-align:right">
+                    <div class="fw-600" th:text="${sucursal?.nombre}"></div>
+                    <div style="font-size:13px;color:#999;margin-top:2px"
+                         th:text="${#temporals.format(fecha,'dd/MM/yyyy')}">
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding:24px 28px">
+
+                <!-- Stats del día -->
+                <div class="stats-grid" style="margin-bottom:20px">
+                    <div class="stat-card">
+                        <div class="stat-icon verde">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-value"
+                                 th:text="'Q' + ${#numbers.formatDecimal(corte.totalVentas,1,'COMMA',2,'POINT')}">
+                            </div>
+                            <div class="stat-label">Ventas del día</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon turquesa">🧾</div>
+                        <div class="stat-info">
+                            <div class="stat-value" th:text="${corte.cantVentas}">0</div>
+                            <div class="stat-label">Facturas</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon amarillo">💵</div>
+                        <div class="stat-info">
+                            <div class="stat-value"
+                                 th:text="'Q' + ${#numbers.formatDecimal(corte.totalEfectivo,1,'COMMA',2,'POINT')}">
+                            </div>
+                            <div class="stat-label">Efectivo</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon rojo">❌</div>
+                        <div class="stat-info">
+                            <div class="stat-value" th:text="${corte.ventasAnuladas}">0</div>
+                            <div class="stat-label">Anuladas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desglose por forma de pago -->
+                <div style="margin-bottom:20px">
+                    <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">
+                        💳 Desglose por forma de pago
+                    </div>
+                    <div th:if="${corte.porFormaPago.isEmpty()}"
+                         class="text-gris text-sm" style="padding:12px">
+                        Sin recibos registrados este día.
+                    </div>
+                    <div th:each="entry : ${corte.porFormaPago}"
+                         style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:6px">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span th:text="${entry.key == 'Contado'} ? '💵' :
+                                           ${entry.key == 'Tarjeta'} ? '💳' :
+                                           ${entry.key == 'Transferencia'} ? '📱' : '📝'">
+                            </span>
+                            <span class="fw-600" th:text="${entry.key}"></span>
+                        </div>
+                        <span class="fw-600 text-verde"
+                              th:text="'Q' + ${#numbers.formatDecimal(entry.value,1,'COMMA',2,'POINT')}">
+                        </span>
+                    </div>
+                    <!-- Total recibos -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:8px;margin-top:8px">
+                        <span class="fw-600">TOTAL COBRADO</span>
+                        <span style="font-size:18px;font-weight:700;color:var(--turquesa)"
+                              th:text="'Q' + ${#numbers.formatDecimal(corte.totalRecibos,1,'COMMA',2,'POINT')}">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Descuentos -->
+                <div th:if="${corte.totalDescuentos.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                     style="display:flex;justify-content:space-between;padding:10px 16px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;margin-bottom:20px">
+                    <span>🏷️ Total descuentos aplicados</span>
+                    <span class="fw-600" style="color:var(--amarillo)"
+                          th:text="'- Q' + ${#numbers.formatDecimal(corte.totalDescuentos,1,'COMMA',2,'POINT')}">
+                    </span>
+                </div>
+
+                <!-- Lista de ventas del día -->
+                <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">
+                    🧾 Facturas del día (<span th:text="${corte.ventas.size()}">0</span>)
+                </div>
+                <div th:if="${corte.ventas.isEmpty()}"
+                     style="text-align:center;padding:30px;color:var(--gris-texto)">
+                    Sin ventas registradas este día.
+                </div>
+                <div class="table-wrapper" th:if="${!corte.ventas.isEmpty()}">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Factura</th>
+                                <th>Cliente</th>
+                                <th>Vendedor</th>
+                                <th style="text-align:right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="v : ${corte.ventas}">
+                                <td class="text-turquesa fw-600 text-sm" th:text="${v.numeroFactura}"></td>
+                                <td class="text-sm" th:text="${v.cliente != null ? v.cliente.nombre : 'CF'}"></td>
+                                <td class="text-sm text-gris" th:text="${v.usuario.nombreCompleto}"></td>
+                                <td style="text-align:right" class="fw-600"
+                                    th:text="'Q' + ${#numbers.formatDecimal(v.total,1,'COMMA',2,'POINT')}">
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background:rgba(39,194,201,0.08)">
+                                <td colspan="3" class="fw-600">TOTAL</td>
+                                <td style="text-align:right" class="fw-600 text-turquesa"
+                                    th:text="'Q' + ${#numbers.formatDecimal(corte.totalVentas,1,'COMMA',2,'POINT')}">
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Firmas -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:40px;padding-top:20px;border-top:1px solid var(--gris-borde)">
+                    <div style="text-align:center">
+                        <div style="border-top:1px solid #555;padding-top:8px;font-size:12px;color:var(--gris-texto)">
+                            Elaborado por
+                        </div>
+                    </div>
+                    <div style="text-align:center">
+                        <div style="border-top:1px solid #555;padding-top:8px;font-size:12px;color:var(--gris-texto)">
+                            Revisado / Vo.Bo.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+@media print {
+    body { background:#fff!important; color:#000!important }
+    .sidebar, .topbar, .no-print { display:none!important }
+    .main-content { margin:0!important; padding:0!important }
+    .page-body { padding:0!important }
+    .card, [style*="background:var(--gris-oscuro)"] { border:1px solid #ddd!important; border-radius:0!important; background:#fff!important }
+    .stat-card { border:1px solid #ddd!important; background:#f9f9f9!important }
+    .stat-value, .fw-600 { color:#000!important }
+    .text-turquesa { color:#0e8f93!important }
+    .text-verde    { color:#1a7a35!important }
+}
+</style>
+</body>
+</html>
