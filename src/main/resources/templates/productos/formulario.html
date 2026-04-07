@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+ 
+<head th:replace="~{fragments/layout :: head('Producto')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+ 
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" th:text="${editando} ? '✏️ Editar Producto' : '➕ Nuevo Producto'"></div>
+            <div class="topbar-sub" th:text="${editando} ? 'Modificar información del producto' : 'Registrar nuevo producto en el sistema'"></div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/productos}" class="btn btn-secondary">← Volver</a>
+        </div>
+    </div>
+ 
+    <div class="page-body">
+ 
+        <div id="alertaValidacion" class="alert alert-danger" style="display:none"></div>
+        <div th:if="${mensajeError}" class="alert alert-danger">❌ <span th:text="${mensajeError}"></span></div>
+ 
+        <!-- Form oculto con todos los hiddens -->
+        <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"
+              onsubmit="return sincronizarYValidar()">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="idProducto"                     th:value="${producto.idProducto}"/>
+            <input type="hidden" id="hTipo"      name="tipoProducto"   th:value="${producto.tipoProducto}"/>
+            <input type="hidden" id="hCodigo"    name="codigo"         th:value="${producto.codigo}"/>
+            <input type="hidden" id="hDetalle"   name="detalle"        th:value="${producto.detalle}"/>
+            <input type="hidden" id="hDesc"      name="descripcion"    th:value="${producto.descripcion}"/>
+            <input type="hidden" id="hUnidad"    name="unidadMedida"   th:value="${producto.unidadMedida != null ? producto.unidadMedida : 'Unidad'}"/>
+            <input type="hidden" id="hColor"     name="color"          th:value="${producto.color}"/>
+            <input type="hidden" id="hModelo"    name="modelo"         th:value="${producto.modelo}"/>
+            <input type="hidden" id="hMarca"     name="marca.idMarca"  th:value="${producto.marca != null ? producto.marca.idMarca : ''}"/>
+            <input type="hidden" id="hCategoria" name="categoria.idCategoria" th:value="${producto.categoria != null ? producto.categoria.idCategoria : ''}"/>
+            <input type="hidden" id="hTipoL"     name="tipoLente.idTipo"             th:value="${producto.tipoLente != null ? producto.tipoLente.idTipo : ''}"/>
+            <input type="hidden" id="hMaterialL" name="materialLente.idMaterial"     th:value="${producto.materialLente != null ? producto.materialLente.idMaterial : ''}"/>
+            <input type="hidden" id="hTratL"     name="tratamientoLente.idTratamiento" th:value="${producto.tratamientoLente != null ? producto.tratamientoLente.idTratamiento : ''}"/>
+        </form>
+ 
+        <!-- ═══ SELECCIÓN DE TIPO ══════════════════════════════════ -->
+        <div id="panelTipos" class="card mb-3"
+             th:style="${producto.tipoProducto != null and !#strings.isEmpty(producto.tipoProducto)} ? 'display:none' : ''">
+            <div class="card-header">
+                <div class="card-title">🏷️ ¿Qué tipo de producto vas a registrar?</div>
+            </div>
+            <div class="card-body" style="padding:24px">
+                <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+                    <div class="tipo-card" id="card-ARMAZON"   onclick="seleccionarTipo('ARMAZON')">
+                        <div style="font-size:40px">🕶️</div>
+                        <div class="fw-600" style="font-size:15px;margin-top:8px">Armazón</div>
+                        <div class="text-gris text-sm">Marca, modelo, color</div>
+                    </div>
+                    <div class="tipo-card" id="card-LENTE"     onclick="seleccionarTipo('LENTE')">
+                        <div style="font-size:40px">🔬</div>
+                        <div class="fw-600" style="font-size:15px;margin-top:8px">Lente</div>
+                        <div class="text-gris text-sm">Tipo, material, tratamiento</div>
+                    </div>
+                    <div class="tipo-card" id="card-LIMPIEZA"  onclick="seleccionarTipo('LIMPIEZA')">
+                        <div style="font-size:40px">🧴</div>
+                        <div class="fw-600" style="font-size:15px;margin-top:8px">Limpieza</div>
+                        <div class="text-gris text-sm">Líquidos, paños</div>
+                    </div>
+                    <div class="tipo-card" id="card-ACCESORIO" onclick="seleccionarTipo('ACCESORIO')">
+                        <div style="font-size:40px">🎒</div>
+                        <div class="fw-600" style="font-size:15px;margin-top:8px">Accesorio</div>
+                        <div class="text-gris text-sm">Estuches, cordones</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- ═══ PANEL ARMAZÓN ═════════════════════════════════════ -->
+        <div id="panelArmazon" style="display:none">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-title">🕶️ Datos del Armazón</div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
+                </div>
+                <div class="card-body" style="padding:20px">
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Código *</label>
+                            <input type="text" id="vCodigoA" class="form-control" placeholder="Ej: BZ147" th:value="${producto.codigo}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombre / Detalle *</label>
+                            <input type="text" id="vDetalleA" class="form-control" placeholder="Ej: Armazón Baron BZ147 BLACK" th:value="${producto.detalle}">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Marca</label>
+                            <div style="display:flex;gap:8px">
+                                <select id="vMarcaA" class="form-select">
+                                    <option value="">— Sin marca —</option>
+                                    <option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}"
+                                            th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Modelo</label>
+                            <input type="text" id="vModeloA" class="form-control" placeholder="Ej: BZ147" th:value="${producto.modelo}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Color</label>
+                            <input type="text" id="vColorA" class="form-control" placeholder="Ej: BLACK, BROWN" th:value="${producto.color}">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Unidad de Medida</label>
+                            <select id="vUnidadA" class="form-select">
+                                <option value="Unidad"  th:selected="${producto.unidadMedida == null or producto.unidadMedida == 'Unidad'}">Unidad</option>
+                                <option value="Par"     th:selected="${producto.unidadMedida == 'Par'}">Par</option>
+                                <option value="Caja"    th:selected="${producto.unidadMedida == 'Caja'}">Caja</option>
+                                <option value="Paquete" th:selected="${producto.unidadMedida == 'Paquete'}">Paquete</option>
+                                <option value="Docena"  th:selected="${producto.unidadMedida == 'Docena'}">Docena</option>
+                                <option value="Frasco"  th:selected="${producto.unidadMedida == 'Frasco'}">Frasco</option>
+                                <option value="Tubo"    th:selected="${producto.unidadMedida == 'Tubo'}">Tubo</option>
+                                <option value="Estuche" th:selected="${producto.unidadMedida == 'Estuche'}">Estuche</option>
+                                <option value="Kit"     th:selected="${producto.unidadMedida == 'Kit'}">Kit</option>
+                                <option value="Rollo"   th:selected="${producto.unidadMedida == 'Rollo'}">Rollo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción (opcional)</label>
+                        <textarea id="vDescA" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${!editando}" class="card mb-3">
+                <div class="card-header"><div class="card-title">📊 Stock Inicial por Sucursal</div></div>
+                <div class="card-body" style="padding:20px">
+                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+                            <input type="checkbox" th:id="'chkA'+${s.idSucursal}" onchange="toggleStock(this,'divA'+this.id.slice(4))">
+                            <span class="fw-600" th:text="${s.nombre}"></span>
+                        </label>
+                        <div th:id="'divA'+${s.idSucursal}" style="display:none">
+                            <div class="form-row form-row-3">
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:name="'existencia_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:name="'costo_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:name="'precio_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
+                <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" form="formPrincipal" class="btn btn-primary">💾 <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+            </div>
+        </div>
+ 
+        <!-- ═══ PANEL LENTE ════════════════════════════════════════ -->
+        <div id="panelLente" style="display:none">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-title">🔬 Datos del Lente</div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
+                </div>
+                <div class="card-body" style="padding:20px">
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Código *</label>
+                            <input type="text" id="vCodigoL" class="form-control" placeholder="Ej: LT-MONO-PC-AR" th:value="${producto.codigo}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombre / Detalle *</label>
+                            <input type="text" id="vDetalleL" class="form-control" placeholder="Ej: Lente Monofocal Policarbonato" th:value="${producto.detalle}">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Lente</label>
+                            <select id="vTipoL" class="form-select" onchange="consultarPrecio()">
+                                <option value="">— Selecciona —</option>
+                                <option th:each="t : ${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}"
+                                        th:selected="${producto.tipoLente != null and producto.tipoLente.idTipo == t.idTipo}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Material</label>
+                            <select id="vMaterialL" class="form-select" onchange="consultarPrecio()">
+                                <option value="">— Selecciona —</option>
+                                <option th:each="m : ${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}"
+                                        th:selected="${producto.materialLente != null and producto.materialLente.idMaterial == m.idMaterial}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tratamiento</label>
+                            <select id="vTratamientoL" class="form-select" onchange="consultarPrecio()">
+                                <option value="">— Selecciona —</option>
+                                <option th:each="t : ${tratamientos}" th:value="${t.idTratamiento}" th:text="${t.nombre}"
+                                        th:selected="${producto.tratamientoLente != null and producto.tratamientoLente.idTratamiento == t.idTratamiento}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Color (opcional)</label>
+                            <input type="text" id="vColorL" class="form-control" placeholder="Ej: Transparente" th:value="${producto.color}">
+                        </div>
+                    </div>
+                    <div id="precioAutoBox" style="display:none;margin-top:16px;padding:20px;background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.25);border-radius:10px">
+                        <div class="fw-600" style="color:var(--turquesa);margin-bottom:12px">💰 Precio según combinación</div>
+                        <div style="display:flex;gap:32px">
+                            <div><div class="text-gris text-sm">Costo</div><div class="fw-600" style="font-size:22px" id="lblCosto">—</div></div>
+                            <div><div class="text-gris text-sm">Precio Venta</div><div class="fw-600" style="font-size:22px;color:var(--turquesa)" id="lblPrecio">—</div></div>
+                        </div>
+                    </div>
+                    <div id="precioNoEncontrado" style="display:none;margin-top:12px;padding:12px 16px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;font-size:13px;color:var(--amarillo)">
+                        ⚠️ No hay precio configurado para esta combinación. Puedes guardarlo y configurarlo después.
+                    </div>
+                    <div class="form-group" style="margin-top:16px">
+                        <label class="form-label">Descripción (opcional)</label>
+                        <textarea id="vDescL" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${!editando}" class="card mb-3">
+                <div class="card-header"><div class="card-title">📊 Stock Inicial por Sucursal</div></div>
+                <div class="card-body" style="padding:20px">
+                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+                            <input type="checkbox" th:id="'chkL'+${s.idSucursal}" onchange="toggleStock(this,'divL'+this.id.slice(4))">
+                            <span class="fw-600" th:text="${s.nombre}"></span>
+                        </label>
+                        <div th:id="'divL'+${s.idSucursal}" style="display:none">
+                            <div class="form-row form-row-3">
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:name="'existencia_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:name="'costo_'+${s.idSucursal}" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:name="'precio_'+${s.idSucursal}" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
+                <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" form="formPrincipal" class="btn btn-primary">💾 <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+            </div>
+        </div>
+ 
+        <!-- ═══ PANEL LIMPIEZA / ACCESORIO ════════════════════════ -->
+        <div id="panelOtro" style="display:none">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-title" id="tituloOtro">📦 Datos del Producto</div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
+                </div>
+                <div class="card-body" style="padding:20px">
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Código *</label>
+                            <input type="text" id="vCodigoO" class="form-control" placeholder="Ej: LMP-001" th:value="${producto.codigo}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombre / Detalle *</label>
+                            <input type="text" id="vDetalleO" class="form-control" placeholder="Ej: Líquido limpiador" th:value="${producto.detalle}">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Marca</label>
+                            <div style="display:flex;gap:8px">
+                                <select id="vMarcaO" class="form-select">
+                                    <option value="">— Sin marca —</option>
+                                    <option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}"
+                                            th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Color (opcional)</label>
+                            <input type="text" id="vColorO" class="form-control" placeholder="Ej: Azul" th:value="${producto.color}">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Unidad de Medida</label>
+                            <select id="vUnidadO" class="form-select">
+                                <option value="Unidad"  th:selected="${producto.unidadMedida == null or producto.unidadMedida == 'Unidad'}">Unidad</option>
+                                <option value="Par"     th:selected="${producto.unidadMedida == 'Par'}">Par</option>
+                                <option value="Caja"    th:selected="${producto.unidadMedida == 'Caja'}">Caja</option>
+                                <option value="Paquete" th:selected="${producto.unidadMedida == 'Paquete'}">Paquete</option>
+                                <option value="Docena"  th:selected="${producto.unidadMedida == 'Docena'}">Docena</option>
+                                <option value="Frasco"  th:selected="${producto.unidadMedida == 'Frasco'}">Frasco</option>
+                                <option value="Tubo"    th:selected="${producto.unidadMedida == 'Tubo'}">Tubo</option>
+                                <option value="Estuche" th:selected="${producto.unidadMedida == 'Estuche'}">Estuche</option>
+                                <option value="Kit"     th:selected="${producto.unidadMedida == 'Kit'}">Kit</option>
+                                <option value="Rollo"   th:selected="${producto.unidadMedida == 'Rollo'}">Rollo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción (opcional)</label>
+                        <textarea id="vDescO" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${!editando}" class="card mb-3">
+                <div class="card-header"><div class="card-title">📊 Stock Inicial por Sucursal</div></div>
+                <div class="card-body" style="padding:20px">
+                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+                            <input type="checkbox" th:id="'chkO'+${s.idSucursal}" onchange="toggleStock(this,'divO'+this.id.slice(4))">
+                            <span class="fw-600" th:text="${s.nombre}"></span>
+                        </label>
+                        <div th:id="'divO'+${s.idSucursal}" style="display:none">
+                            <div class="form-row form-row-3">
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:name="'existencia_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:name="'costo_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:name="'precio_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
+                <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" form="formPrincipal" class="btn btn-primary">💾 <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+            </div>
+        </div>
+ 
+    </div>
+</div>
+ 
+<style>
+.tipo-card { cursor:pointer; padding:24px 20px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); text-align:center; min-width:130px; flex:1; max-width:170px; transition:all 0.2s; }
+.tipo-card:hover { border-color:rgba(39,194,201,0.5); background:rgba(39,194,201,0.07); transform:translateY(-2px); }
+.tipo-card.activo { border-color:var(--turquesa); background:rgba(39,194,201,0.12); }
+</style>
+ 
+<script th:inline="javascript">
+const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
+ 
+const TITULOS = {
+    ARMAZON:  '🕶️ Armazón',
+    LENTE:    '🔬 Lente',
+    LIMPIEZA: '🧴 Producto de Limpieza',
+    ACCESORIO:'🎒 Accesorio'
+};
+ 
+const CAMPOS = {
+    ARMAZON:  { codigo:'vCodigoA', detalle:'vDetalleA', desc:'vDescA', color:'vColorA', unidad:'vUnidadA', marca:'vMarcaA', categoria:null, modelo:'vModeloA', tipoL:null, matL:null, tratL:null },
+    LENTE:    { codigo:'vCodigoL', detalle:'vDetalleL', desc:'vDescL', color:'vColorL', unidad:null,       marca:null,      categoria:null, modelo:null,       tipoL:'vTipoL', matL:'vMaterialL', tratL:'vTratamientoL' },
+    LIMPIEZA: { codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO', color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO', categoria:null, modelo:null,       tipoL:null, matL:null, tratL:null },
+    ACCESORIO:{ codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO', color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO', categoria:null, modelo:null,       tipoL:null, matL:null, tratL:null },
+};
+ 
+document.addEventListener('DOMContentLoaded', () => {
+    if (tipoInicial && tipoInicial !== '') seleccionarTipo(tipoInicial);
+});
+ 
+function seleccionarTipo(tipo) {
+    document.getElementById('panelTipos').style.display   = 'none';
+    document.getElementById('panelArmazon').style.display = 'none';
+    document.getElementById('panelLente').style.display   = 'none';
+    document.getElementById('panelOtro').style.display    = 'none';
+ 
+    document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('activo'));
+    document.getElementById('card-' + tipo)?.classList.add('activo');
+    document.getElementById('hTipo').value = tipo;
+ 
+    if (tipo === 'ARMAZON') {
+        document.getElementById('panelArmazon').style.display = 'block';
+    } else if (tipo === 'LENTE') {
+        document.getElementById('panelLente').style.display = 'block';
+        consultarPrecio();
+    } else {
+        document.getElementById('tituloOtro').textContent = (TITULOS[tipo] ? TITULOS[tipo] + ' — Datos' : '📦 Datos del Producto');
+        document.getElementById('panelOtro').style.display = 'block';
+    }
+}
+ 
+function cambiarTipo() {
+    document.getElementById('panelTipos').style.display   = 'block';
+    document.getElementById('panelArmazon').style.display = 'none';
+    document.getElementById('panelLente').style.display   = 'none';
+    document.getElementById('panelOtro').style.display    = 'none';
+    document.getElementById('hTipo').value = '';
+}
+ 
+function sincronizarYValidar() {
+    const tipo   = document.getElementById('hTipo').value;
+    const alerta = document.getElementById('alertaValidacion');
+ 
+    if (!tipo) {
+        alerta.textContent = '⚠️ Debes seleccionar un tipo de producto.';
+        alerta.style.display = 'block';
+        window.scrollTo(0,0);
+        return false;
+    }
+ 
+    const c = CAMPOS[tipo];
+    const codigo  = document.getElementById(c.codigo)?.value?.trim();
+    const detalle = document.getElementById(c.detalle)?.value?.trim();
+ 
+    if (!codigo)  { alerta.textContent = '⚠️ El código es obligatorio.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
+    if (!detalle) { alerta.textContent = '⚠️ El nombre / detalle es obligatorio.'; alerta.style.display='block'; document.getElementById(c.detalle).focus(); return false; }
+ 
+    document.getElementById('hCodigo').value    = codigo;
+    document.getElementById('hDetalle').value   = detalle;
+    document.getElementById('hDesc').value      = document.getElementById(c.desc)?.value    || '';
+    document.getElementById('hColor').value     = c.color    ? (document.getElementById(c.color)?.value    || '') : '';
+    document.getElementById('hUnidad').value    = c.unidad   ? (document.getElementById(c.unidad)?.value   || 'Unidad') : 'Unidad';
+    document.getElementById('hModelo').value    = c.modelo   ? (document.getElementById(c.modelo)?.value   || '') : '';
+    document.getElementById('hMarca').value     = c.marca    ? (document.getElementById(c.marca)?.value    || '') : '';
+    document.getElementById('hCategoria').value = c.categoria? (document.getElementById(c.categoria)?.value|| '') : '';
+    document.getElementById('hTipoL').value     = c.tipoL    ? (document.getElementById(c.tipoL)?.value    || '') : '';
+    document.getElementById('hMaterialL').value = c.matL     ? (document.getElementById(c.matL)?.value     || '') : '';
+    document.getElementById('hTratL').value     = c.tratL    ? (document.getElementById(c.tratL)?.value    || '') : '';
+ 
+    alerta.style.display = 'none';
+    return true;
+}
+ 
+async function consultarPrecio() {
+    const idTipo        = document.getElementById('vTipoL')?.value;
+    const idMaterial    = document.getElementById('vMaterialL')?.value;
+    const idTratamiento = document.getElementById('vTratamientoL')?.value;
+    document.getElementById('precioAutoBox').style.display      = 'none';
+    document.getElementById('precioNoEncontrado').style.display = 'none';
+    if (!idTipo || !idMaterial || !idTratamiento) return;
+    try {
+        const r    = await fetch(`/productos/api/precio-lente?idTipo=${idTipo}&idMaterial=${idMaterial}&idTratamiento=${idTratamiento}`);
+        const data = await r.json();
+        if (data.ok) {
+            document.getElementById('lblCosto').textContent  = 'Q ' + parseFloat(data.costo).toFixed(2);
+            document.getElementById('lblPrecio').textContent = 'Q ' + parseFloat(data.precioVenta).toFixed(2);
+            document.getElementById('precioAutoBox').style.display = 'flex';
+            document.querySelectorAll('[id^="costoL_"]').forEach(el  => el.value = data.costo);
+            document.querySelectorAll('[id^="precioL_"]').forEach(el => el.value = data.precioVenta);
+        } else {
+            document.getElementById('precioNoEncontrado').style.display = 'block';
+        }
+    } catch(e) { console.error(e); }
+}
+ 
+function toggleStock(chk, divId) {
+    document.getElementById(divId).style.display = chk.checked ? 'block' : 'none';
+}
+ 
+async function agregarCategoria(selectId) {
+    const nombre = prompt('Nombre de la nueva categoría:');
+    if (!nombre?.trim()) return;
+    const csrf = document.querySelector('[name="_csrf"]').value;
+    const r = await fetch('/productos/api/categoria', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
+    const data = await r.json();
+    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
+    else alert('Error: ' + data.error);
+}
+ 
+async function agregarMarca(selectId) {
+    const nombre = prompt('Nombre de la nueva marca:');
+    if (!nombre?.trim()) return;
+    const csrf = document.querySelector('[name="_csrf"]').value;
+    const r = await fetch('/productos/api/marca', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
+    const data = await r.json();
+    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
+    else alert('Error: ' + data.error);
+}
+</script>
+ 
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Ventas')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">🧾 Ventas / Facturación</div>
+            <div class="topbar-sub" th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}"></div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/ventas/nueva}" class="btn btn-primary">➕ Nueva Venta</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div th:if="${mensajeOk}"    class="alert alert-success">✅ <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger"> ❌ <span th:text="${mensajeError}"></span></div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon verde">💰</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="'Q' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">Q0.00</div>
+                    <div class="stat-label">Total período</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon turquesa">🧾</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${cantPeriodo}">0</div>
+                    <div class="stat-label">Facturas período</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amarillo">📊</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${cantPeriodo > 0} ? 'Q' + ${#numbers.formatDecimal(totalPeriodo / cantPeriodo, 1,'COMMA',2,'POINT')} : 'Q0.00'">Q0.00</div>
+                    <div class="stat-label">Promedio por venta</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card mb-3">
+            <div class="card-body" style="padding:14px 20px">
+                <form id="formVentas" th:action="@{/ventas}" method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div>
+                            <label class="form-label">Desde</label>
+                            <input type="date" name="fi" class="form-control" th:value="${fi}">
+                        </div>
+                        <span class="text-gris" style="margin-top:20px">al</span>
+                        <div>
+                            <label class="form-label">Hasta</label>
+                            <input type="date" name="ff" class="form-control" th:value="${ff}">
+                        </div>
+                    </div>
+                    <div style="min-width:140px">
+                        <label class="form-label">Estado</label>
+                        <select name="est" class="form-select">
+                            <option value=""        th:selected="${est==''}">Todas</option>
+                            <option value="Pagada"  th:selected="${est=='Pagada'}">✅ Pagadas</option>
+                            <option value="Anulada" th:selected="${est=='Anulada'}">❌ Anuladas</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end">
+                        <button type="submit" class="btn btn-primary">🔍</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title" th:text="'📋 ' + ${ventas.size()} + ' venta(s)'"></div>
+                <input type="text" class="form-control" style="width:200px" placeholder="Filtro rápido..." oninput="filtrar(this.value)">
+            </div>
+            <div class="table-wrapper">
+                <table class="table" id="tblV">
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Vendedor</th>
+                            <th sec:authorize="hasRole('ADMINISTRADOR')">Sucursal</th>
+                            <th style="text-align:right">Desc.</th>
+                            <th style="text-align:right">Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${ventas.isEmpty()}">
+                            <td colspan="9" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                                <div style="font-size:40px">🧾</div>
+                                <div style="margin-top:10px">Sin ventas en el período seleccionado.</div>
+                                <a th:href="@{/ventas/nueva}" class="btn btn-primary btn-sm" style="margin-top:12px">➕ Registrar venta</a>
+                            </td>
+                        </tr>
+                        <tr th:each="v : ${ventas}">
+                            <td class="text-turquesa fw-600" th:text="${v.numeroFactura}"></td>
+                            <td class="text-sm"              th:text="${#temporals.format(v.fecha,'dd/MM/yyyy')}"></td>
+                            <td class="text-sm"              th:text="${v.cliente != null ? v.cliente.nombre : 'CF'}"></td>
+                            <td class="text-sm text-gris"    th:text="${v.usuario != null ? v.usuario.nombreCompleto : '—'}"></td>
+                            <td class="text-sm" sec:authorize="hasRole('ADMINISTRADOR')" th:text="${v.sucursal != null ? v.sucursal.nombre : '—'}"></td>
+                            <td style="text-align:right" class="text-sm"
+                                th:classappend="${v.descuento != null and v.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'text-naranja' : 'text-gris'"
+                                th:text="${v.descuento != null and v.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? '- Q' + ${#numbers.formatDecimal(v.descuento,1,'COMMA',2,'POINT')} : '—'">
+                            </td>
+                            <td style="text-align:right" class="fw-600 text-verde"
+                                th:text="${v.total != null} ? 'Q' + ${#numbers.formatDecimal(v.total,1,'COMMA',2,'POINT')} : 'Q0.00'">
+                            </td>
+                            <td>
+                                <span th:class="${v.estado == 'Pagada'} ? 'badge badge-success' : 'badge badge-danger'"
+                                      th:text="${v.estado}">
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-secondary"
+                                        th:onclick="'verDetalle(' + ${v.idVenta} + ',\'' + ${v.numeroFactura} + '\')'">
+                                    👁️
+                                    </button>
+                                    <a th:href="@{/ventas/factura/{id}(id=${v.idVenta})}"
+                                        target="_blank" class="btn btn-sm btn-secondary" title="Imprimir">🖨️</a>
+                                    <div sec:authorize="hasRole('ADMINISTRADOR')">
+                                        <form th:if="${v.estado == 'Pagada'}"
+                                            th:action="@{/ventas/anular/{id}(id=${v.idVenta})}"
+                                            method="post" style="display:inline"
+                                            onsubmit="return confirm('¿Anular esta venta? El inventario será restaurado.')">
+                                          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                          <button type="submit" class="btn btn-sm btn-danger">❌</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot th:if="${!ventas.isEmpty()}">
+                        <tr style="background:rgba(39,194,201,0.08)">
+                            <td colspan="5" class="fw-600">TOTAL DEL PERÍODO</td>
+                            <td></td>
+                            <td style="text-align:right" class="fw-600 text-turquesa"
+                                th:text="'Q' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" id="modalDet">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="detTitle">🧾 Detalle de Venta</div>
+            <button class="modal-close" onclick="document.getElementById('modalDet').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" id="detBody">
+            <div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="document.getElementById('modalDet').classList.remove('show')">Cerrar</button>
+            <a id="detPdfLink" href="#" class="btn btn-primary" target="_blank">🖨️ Imprimir</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrar(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#tblV tbody tr').forEach(tr =>
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'
+    );
+}
+
+function setHoy() {
+    const h = new Date().toISOString().split('T')[0];
+    document.querySelector('#formVentas [name=\"fi\"]').value = h;
+    document.querySelector('#formVentas [name=\"ff\"]').value = h;
+    document.getElementById('formVentas').submit();
+}
+
+function setMes() {
+    const d = new Date();
+    const fi = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
+    const ff = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().split('T')[0];
+    document.querySelector('#formVentas [name=\"fi\"]').value = fi;
+    document.querySelector('#formVentas [name=\"ff\"]').value = ff;
+    document.getElementById('formVentas').submit();
+}
+
+async function verDetalle(id, num) {
+    document.getElementById('detTitle').textContent = '🧾 ' + num;
+    document.getElementById('detPdfLink').href = '/ventas/factura/' + id;
+    document.getElementById('detBody').innerHTML = '<div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳ Cargando...</div>';
+    document.getElementById('modalDet').classList.add('show');
+
+    const r = await fetch('/ventas/detalle/' + id);
+    const d = await r.json();
+
+    let h = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px">
+        <div><div class="text-gris text-sm">Cliente</div><div class="fw-600">${d.info.cliente}</div></div>
+        <div><div class="text-gris text-sm">NIT</div><div class="fw-600">${d.info.nit}</div></div>
+        <div><div class="text-gris text-sm">Vendedor</div><div class="fw-600">${d.info.vendedor}</div></div>
+        <div><div class="text-gris text-sm">Sucursal</div><div class="fw-600">${d.info.sucursal}</div></div>
+        <div><div class="text-gris text-sm">Fecha</div><div class="fw-600">${d.info.fecha}</div></div>
+        <div><div class="text-gris text-sm">Estado</div><span class="badge ${d.info.estado==='Pagada'?'badge-success':'badge-danger'}">${d.info.estado}</span></div>
+    </div>`;
+    h += '<div class="table-wrapper"><table class="table"><thead><tr><th>Código</th><th>Producto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Precio</th><th style="text-align:right">Desc.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody>';
+    d.items.forEach(it => {
+        h += `<tr>
+            <td class="text-turquesa text-sm fw-600">${it.codigo}</td>
+            <td>${it.detalle}</td>
+            <td style="text-align:center">${it.cantidad}</td>
+            <td style="text-align:right">Q${parseFloat(it.precio).toFixed(2)}</td>
+            <td style="text-align:right">${parseFloat(it.descuento)>0?'Q'+parseFloat(it.descuento).toFixed(2):'—'}</td>
+            <td style="text-align:right" class="fw-600">Q${parseFloat(it.subtotal).toFixed(2)}</td>
+        </tr>`;
+    });
+    h += '</tbody></table></div>';
+    h += `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-borde)">
+        <div><span class="text-gris text-sm">Subtotal: </span><span class="fw-600">Q${parseFloat(d.info.subtotal).toFixed(2)}</span></div>
+        ${parseFloat(d.info.descuento)>0?`<div><span class="text-gris text-sm">Descuento: </span><span class="fw-600 text-naranja">-Q${parseFloat(d.info.descuento).toFixed(2)}</span></div>`:''}
+        <div style="font-size:18px"><span class="text-gris text-sm">TOTAL: </span><span class="fw-600 text-turquesa">Q${parseFloat(d.info.total).toFixed(2)}</span></div>
+    </div>`;
+    document.getElementById('detBody').innerHTML = h;
+}
+</script>
+</body>
+</html>
