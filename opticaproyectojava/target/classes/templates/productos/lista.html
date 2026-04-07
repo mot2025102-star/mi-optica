@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+ 
+<head th:replace="~{fragments/layout :: head('Productos')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+ 
+<div class="main-content">
+ 
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">📦 Catálogo de Productos</div>
+            <div class="topbar-sub"
+                 th:text="${productos.size()} + ' producto(s) — ' + ${categorias.size()} + ' categorías — ' + ${marcas.size()} + ' marcas'">
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
+                <button class="btn btn-secondary" onclick="abrirModalCat()">🏷️ Categorías</button>
+                <button class="btn btn-secondary" onclick="abrirModalMar()">🏷️ Marcas</button>
+                <a th:href="@{/productos/nuevo}" class="btn btn-primary">➕ Nuevo Producto</a>
+            </div>
+        </div>
+    </div>
+ 
+    <div class="page-body">
+ 
+        <div th:if="${mensajeOk}"    class="alert alert-success">✅ <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger"> ❌ <span th:text="${mensajeError}"></span></div>
+ 
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon turquesa">📦</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${productos.size()}">0</div>
+                    <div class="stat-label">Total productos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon verde">✅</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${activos}">0</div>
+                    <div class="stat-label">Activos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amarillo">🏷️</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${categorias.size()}">0</div>
+                    <div class="stat-label">Categorías</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon turquesa">🏭</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${marcas.size()}">0</div>
+                    <div class="stat-label">Marcas</div>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- Filtros -->
+        <div class="card mb-3">
+            <div class="card-body" style="padding:14px 20px">
+                <form th:action="@{/productos}" method="get"
+                      style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                    <input type="hidden" name="vista" th:value="${vista}">
+                    <div style="flex:3;min-width:200px">
+                        <label class="form-label">Buscar</label>
+                        <div style="position:relative">
+                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)">🔍</span>
+                            <input type="text" name="q" class="form-control" style="padding-left:36px"
+                                   placeholder="Código, nombre, modelo..." th:value="${q}">
+                        </div>
+                    </div>
+                    <div style="min-width:160px">
+                        <label class="form-label">Categoría</label>
+                        <select name="cat" class="form-select">
+                            <option value="0">Todas</option>
+                            <option th:each="c : ${categorias}" th:value="${c.idCategoria}"
+                                    th:text="${c.nombre}" th:selected="${cat == c.idCategoria}"></option>
+                        </select>
+                    </div>
+                    <div style="min-width:140px">
+                        <label class="form-label">Marca</label>
+                        <select name="mar" class="form-select">
+                            <option value="0">Todas</option>
+                            <option th:each="m : ${marcas}" th:value="${m.idMarca}"
+                                    th:text="${m.nombre}" th:selected="${mar == m.idMarca}"></option>
+                        </select>
+                    </div>
+                    <div style="min-width:130px">
+                        <label class="form-label">Estado</label>
+                        <select name="est" class="form-select">
+                            <option value="activo"   th:selected="${est=='activo'}">✅ Activos</option>
+                            <option value="inactivo" th:selected="${est=='inactivo'}">❌ Inactivos</option>
+                            <option value="todos"    th:selected="${est=='todos'}">Todos</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end">
+                        <button type="submit" class="btn btn-primary">🔍</button>
+                        <a th:href="@{/productos}" class="btn btn-secondary">✖</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+ 
+        <!-- Toggle vista -->
+        <div class="d-flex justify-between align-center mb-3">
+            <div class="text-gris text-sm" th:text="${productos.size()} + ' resultado(s)'"></div>
+            <div class="d-flex gap-1">
+                <button id="btnTabla" onclick="cambiarVista('tabla')"
+                        th:class="${vista=='tabla'} ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'">☰ Tabla</button>
+                <button id="btnCards" onclick="cambiarVista('cards')"
+                        th:class="${vista=='cards'} ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'">⊞ Tarjetas</button>
+            </div>
+        </div>
+ 
+        <!-- VISTA TABLA -->
+        <div id="vistaTabla" th:style="${vista=='cards'} ? 'display:none' : ''">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📋 Lista de Productos</div>
+                    <input type="text" class="form-control" style="width:200px"
+                           placeholder="Filtro rápido..." oninput="filtrar(this.value)">
+                </div>
+                <div class="table-wrapper">
+                    <table class="table" id="tblP">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Color</th>
+                                <th style="text-align:center">Stock</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${productos.isEmpty()}">
+                                <td colspan="9" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                                    <div style="font-size:40px">📦</div>
+                                    <div style="margin-top:10px">Sin productos con los filtros aplicados.</div>
+                                    <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')">
+                                        <a th:href="@{/productos/nuevo}" class="btn btn-primary btn-sm" style="margin-top:12px">➕ Crear producto</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:each="p : ${productos}">
+                                <td class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></td>
+                                <td>
+                                    <div class="fw-600" th:text="${p.detalle}"></div>
+                                    <div th:if="${p.descripcion != null and !p.descripcion.isEmpty()}"
+                                         class="text-gris text-sm"
+                                         th:text="${#strings.abbreviate(p.descripcion, 50)}"></div>
+                                </td>
+                                <!-- Tipo -->
+                                <td>
+                                    <span th:if="${p.tipoProducto == 'ARMAZON'}"
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa)">🕶️ Armazón</span>
+                                    <span th:if="${p.tipoProducto == 'LENTE'}"
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.12);color:#64b4ff">🔬 Lente</span>
+                                    <span th:if="${p.tipoProducto == 'LIMPIEZA'}"
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)">🧴 Limpieza</span>
+                                    <span th:if="${p.tipoProducto == 'ACCESORIO'}"
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(180,100,255,0.12);color:#b464ff">🎒 Accesorio</span>
+                                    <span th:if="${p.tipoProducto == null or p.tipoProducto == 'GENERAL'}"
+                                          class="text-gris text-sm">📦 General</span>
+                                </td>
+                                <!-- Marca -->
+                                <td>
+                                    <span th:if="${p.marca != null}"
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"
+                                          th:text="${p.marca.nombre}"></span>
+                                    <span th:if="${p.marca == null}" class="text-gris text-sm">—</span>
+                                </td>
+                                <!-- Modelo -->
+                                <td class="text-sm" th:text="${p.modelo != null and !p.modelo.isEmpty() ? p.modelo : '—'}"></td>
+                                <!-- Color -->
+                                <td class="text-sm" th:text="${p.color != null and !p.color.isEmpty() ? p.color : '—'}"></td>
+                                <!-- Stock -->
+                                <td style="text-align:center">
+                                    <th:block th:with="stock=${stockMap[p.idProducto]}">
+                                        <span th:if="${stock == null or stock.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
+                                              class="badge badge-danger" th:text="${stock ?: 0}"
+                                              style="font-size:13px;padding:5px 12px"></span>
+                                        <span th:if="${stock != null and stock.compareTo(T(java.math.BigDecimal).ZERO) > 0 and stock.compareTo(new java.math.BigDecimal('2')) <= 0}"
+                                              class="badge badge-warning" th:text="${stock}"
+                                              style="font-size:13px;padding:5px 12px"></span>
+                                        <span th:if="${stock != null and stock.compareTo(new java.math.BigDecimal('2')) > 0}"
+                                              class="badge badge-success" th:text="${stock}"
+                                              style="font-size:13px;padding:5px 12px"></span>
+                                    </th:block>
+                                </td>
+                                <!-- Estado -->
+                                <td>
+                                    <span th:if="${p.activo}"  class="badge badge-success">Activo</span>
+                                    <span th:if="${!p.activo}" class="badge badge-danger">Inactivo</span>
+                                </td>
+                                <!-- Acciones -->
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
+                                            <a th:href="@{/productos/editar/{id}(id=${p.idProducto})}"
+                                               class="btn btn-sm btn-secondary">✏️ Editar</a>
+                                        </div>
+                                        <a th:href="@{/inventario(pid=${p.idProducto})}"
+                                           class="btn btn-sm btn-secondary" title="Ver inventario">📊</a>
+                                        <div sec:authorize="hasRole('ADMINISTRADOR')" style="display:contents">
+                                            <form th:action="@{/productos/toggle/{id}(id=${p.idProducto})}"
+                                                  method="post" style="display:inline">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                                <button type="submit" th:if="${p.activo}"  class="btn btn-sm btn-danger">🔒</button>
+                                                <button type="submit" th:if="${!p.activo}" class="btn btn-sm btn-success">✅</button>
+                                            </form>
+                                            <form th:action="@{/productos/eliminar/{id}(id=${p.idProducto})}"
+                                                  method="post" style="display:inline"
+                                                  onsubmit="return confirm('¿Eliminar producto? Esta acción no se puede deshacer.')">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                                <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- VISTA TARJETAS -->
+        <div id="vistaCards" th:style="${vista=='tabla'} ? 'display:none' : ''">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+                <div th:each="p : ${productos}"
+                     style="background:var(--gris-oscuro);border:1px solid var(--gris-borde);border-radius:12px;padding:16px;position:relative;overflow:hidden"
+                     onmouseover="this.style.borderColor='var(--turquesa)'"
+                     onmouseout="this.style.borderColor='var(--gris-borde)'">
+                    <div style="position:absolute;top:0;left:0;right:0;height:3px"
+                         th:style="${p.activo} ? 'background:var(--turquesa)' : 'background:var(--gris-borde)'"></div>
+                    <div class="d-flex justify-between align-center mb-2" style="margin-top:4px">
+                        <span class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></span>
+                        <span th:if="${p.activo}"  class="badge badge-success">Activo</span>
+                        <span th:if="${!p.activo}" class="badge badge-danger">Inactivo</span>
+                    </div>
+                    <div class="fw-600" style="margin-bottom:6px;line-height:1.3" th:text="${p.detalle}"></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+                        <span th:if="${p.tipoProducto != null and p.tipoProducto != 'GENERAL'}"
+                              style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.1);color:var(--turquesa)"
+                              th:text="${p.tipoProducto}"></span>
+                        <span th:if="${p.marca != null}"
+                              style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"
+                              th:text="${p.marca.nombre}"></span>
+                        <span th:if="${p.modelo != null and !p.modelo.isEmpty()}"
+                              style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--gris-texto)"
+                              th:text="${p.modelo}"></span>
+                        <span th:if="${p.color != null and !p.color.isEmpty()}"
+                              style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--gris-texto)"
+                              th:text="${p.color}"></span>
+                    </div>
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <div class="text-gris text-sm">Stock</div>
+                            <th:block th:with="stock=${stockMap[p.idProducto]}">
+                                <span th:if="${stock == null or stock.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
+                                      class="badge badge-danger" th:text="${stock ?: 0}"
+                                      style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
+                                <span th:if="${stock != null and stock.compareTo(T(java.math.BigDecimal).ZERO) > 0 and stock.compareTo(new java.math.BigDecimal('2')) <= 0}"
+                                      class="badge badge-warning" th:text="${stock}"
+                                      style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
+                                <span th:if="${stock != null and stock.compareTo(new java.math.BigDecimal('2')) > 0}"
+                                      class="badge badge-success" th:text="${stock}"
+                                      style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
+                            </th:block>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
+                                <a th:href="@{/productos/editar/{id}(id=${p.idProducto})}" class="btn btn-sm btn-secondary">✏️</a>
+                            </div>
+                            <a th:href="@{/inventario(pid=${p.idProducto})}" class="btn btn-sm btn-secondary">📊</a>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${productos.isEmpty()}"
+                     style="grid-column:1/-1;text-align:center;padding:60px;color:var(--gris-texto)">
+                    <div style="font-size:48px">📦</div>
+                    <div style="margin-top:12px">Sin productos encontrados.</div>
+                </div>
+            </div>
+        </div>
+ 
+    </div>
+</div>
+ 
+<!-- MODAL CATEGORÍAS -->
+<div class="modal-overlay" id="modalCat">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">🏷️ Gestión de Categorías</div>
+            <button class="modal-close" onclick="document.getElementById('modalCat').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex;gap:10px;margin-bottom:20px">
+                <input type="text" id="nuevaCat" class="form-control" placeholder="Nombre de la categoría..." style="flex:1">
+                <button class="btn btn-primary" onclick="guardarCategoria()">💾 Guardar</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead><tr><th>Categoría</th></tr></thead>
+                    <tbody><tr th:each="c : ${categorias}"><td th:text="${c.nombre}"></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<!-- MODAL MARCAS -->
+<div class="modal-overlay" id="modalMar">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">🏷️ Gestión de Marcas</div>
+            <button class="modal-close" onclick="document.getElementById('modalMar').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="display:flex;gap:10px;margin-bottom:20px">
+                <input type="text" id="nuevaMar" class="form-control" placeholder="Nombre de la marca..." style="flex:1">
+                <button class="btn btn-primary" onclick="guardarMarca()">💾 Guardar</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead><tr><th>Marca</th></tr></thead>
+                    <tbody><tr th:each="m : ${marcas}"><td th:text="${m.nombre}"></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<script>
+function cambiarVista(v) {
+    document.getElementById('vistaTabla').style.display = v === 'tabla' ? '' : 'none';
+    document.getElementById('vistaCards').style.display = v === 'cards' ? '' : 'none';
+    document.getElementById('btnTabla').className = 'btn btn-sm ' + (v === 'tabla' ? 'btn-primary' : 'btn-secondary');
+    document.getElementById('btnCards').className = 'btn btn-sm ' + (v === 'cards' ? 'btn-primary' : 'btn-secondary');
+    const url = new URL(window.location);
+    url.searchParams.set('vista', v);
+    window.history.replaceState({}, '', url);
+}
+function filtrar(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#tblP tbody tr').forEach(tr =>
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'
+    );
+}
+function abrirModalCat() { document.getElementById('modalCat').classList.add('show'); }
+function abrirModalMar() { document.getElementById('modalMar').classList.add('show'); }
+ 
+const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+ 
+async function guardarCategoria() {
+    const nombre = document.getElementById('nuevaCat').value.trim();
+    if (!nombre) return;
+    const r = await fetch('/productos/api/categoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken },
+        body: 'nombre=' + encodeURIComponent(nombre)
+    });
+    const d = await r.json();
+    if (d.ok) { alert('Categoría guardada: ' + d.nombre); location.reload(); }
+    else { alert('Error: ' + d.error); }
+}
+async function guardarMarca() {
+    const nombre = document.getElementById('nuevaMar').value.trim();
+    if (!nombre) return;
+    const r = await fetch('/productos/api/marca', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken },
+        body: 'nombre=' + encodeURIComponent(nombre)
+    });
+    const d = await r.json();
+    if (d.ok) { alert('Marca guardada: ' + d.nombre); location.reload(); }
+    else { alert('Error: ' + d.error); }
+}
+</script>
+</body>
+</html>

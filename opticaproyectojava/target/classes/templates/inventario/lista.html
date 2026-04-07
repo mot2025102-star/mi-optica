@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Inventario')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">📊 Inventario</div>
+            <div class="topbar-sub"
+                 th:text="${esAdmin} ? 'Todas las sucursales' : 'Tu sucursal'">
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/kardex}" class="btn btn-secondary">📈 Ver Kardex</a>
+            <a th:href="@{/traslados}" class="btn btn-secondary">🔄 Traslados</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div th:if="${mensajeOk}"    class="alert alert-success">✅ <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger"> ❌ <span th:text="${mensajeError}"></span></div>
+
+        <!-- Stats clicables -->
+        <div class="stats-grid">
+            <div class="stat-card" style="cursor:pointer"
+                 th:onclick="'window.location=\'/inventario?est=sin_stock\''">
+                <div class="stat-icon rojo">🔴</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${sinStock}">0</div>
+                    <div class="stat-label">Sin stock</div>
+                </div>
+            </div>
+            <div class="stat-card" style="cursor:pointer"
+                 th:onclick="'window.location=\'/inventario?est=bajo\''">
+                <div class="stat-icon amarillo">🟡</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${stockBajo}">0</div>
+                    <div class="stat-label">Stock bajo (≤2)</div>
+                </div>
+            </div>
+            <div class="stat-card" style="cursor:pointer"
+                 th:onclick="'window.location=\'/inventario?est=ok\''">
+                <div class="stat-icon verde">🟢</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${stockOk}">0</div>
+                    <div class="stat-label">Stock OK</div>
+                </div>
+            </div>
+            <div class="stat-card" style="cursor:pointer"
+                 th:onclick="'window.location=\'/inventario\''">
+                <div class="stat-icon turquesa">📦</div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${items.size()}">0</div>
+                    <div class="stat-label">Total registros</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerta si viene filtrado por producto -->
+        <div th:if="${pid > 0}" class="alert alert-info">
+            📦 Mostrando solo el producto seleccionado.
+            <a th:href="@{/inventario}" style="color:var(--turquesa);font-weight:600">✖ Quitar filtro</a>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"
+                     th:text="'📋 ' + ${items.size()} + ' registro(s)'">
+                </div>
+                <div class="d-flex gap-1">
+                    <input type="text" class="form-control" style="width:200px"
+                           placeholder="Filtro rápido..." oninput="filtrar(this.value)">
+                    <!-- Filtro rápido estado -->
+                    <div style="display:flex;gap:4px">
+                        <a th:href="@{/inventario}"              class="btn btn-sm" th:class="${est==''} ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'">Todos</a>
+                        <a th:href="@{/inventario(est='sin_stock')}" class="btn btn-sm" th:class="${est=='sin_stock'} ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'">🔴</a>
+                        <a th:href="@{/inventario(est='bajo')}"  class="btn btn-sm" th:class="${est=='bajo'} ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'">🟡</a>
+                        <a th:href="@{/inventario(est='ok')}"    class="btn btn-sm" th:class="${est=='ok'} ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'">🟢</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="table" id="tblInv">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th th:if="${esAdmin}">Sucursal</th>
+                            <th style="text-align:center">Existencia</th>
+                            <th style="text-align:right">Costo</th>
+                            <th style="text-align:right">Precio venta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${items.isEmpty()}">
+                            <td colspan="8" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                                <div style="font-size:40px">📦</div>
+                                <div style="margin-top:10px">Sin registros de inventario.</div>
+                            </td>
+                        </tr>
+
+                        <tr th:each="inv : ${items}">
+                            <td class="text-turquesa fw-600 text-sm"
+                                th:text="${inv.producto.codigo}">
+                            </td>
+                            <td>
+                                <div class="fw-600" th:text="${inv.producto.detalle}"></div>
+                                <div class="text-gris text-sm"
+                                     th:text="${inv.producto.unidadMedida ?: 'Unidad'}">
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${inv.producto.categoria != null}"
+                                      style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.1);color:var(--turquesa)"
+                                      th:text="${inv.producto.categoria.nombre}">
+                                </span>
+                            </td>
+                            <td th:if="${esAdmin}" class="text-sm"
+                                th:text="${inv.sucursal.nombre}">
+                            </td>
+
+                            <!-- Badge stock -->
+                            <td style="text-align:center">
+                                <span th:if="${inv.existencia == null or inv.existencia.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
+                                      class="badge badge-danger" style="font-size:14px;padding:5px 14px"
+                                      th:text="${inv.existencia ?: 0}"></span>
+                                <span th:if="${inv.existencia != null and inv.existencia.compareTo(T(java.math.BigDecimal).ZERO) > 0 and inv.existencia.compareTo(new java.math.BigDecimal('2')) <= 0}"
+                                      class="badge badge-warning" style="font-size:14px;padding:5px 14px"
+                                      th:text="${inv.existencia}"></span>
+                                <span th:if="${inv.existencia != null and inv.existencia.compareTo(new java.math.BigDecimal('2')) > 0}"
+                                      class="badge badge-success" style="font-size:14px;padding:5px 14px"
+                                      th:text="${inv.existencia}"></span>
+                            </td>
+
+                            <td style="text-align:right" class="text-sm">
+                                <span th:if="${inv.costo != null and inv.costo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                      th:text="'Q' + ${#numbers.formatDecimal(inv.costo,1,'COMMA',2,'POINT')}"></span>
+                                <span th:if="${inv.costo == null or inv.costo.compareTo(T(java.math.BigDecimal).ZERO) == 0}">—</span>
+                            </td>
+                            <td style="text-align:right" class="fw-600">
+                                <span th:if="${inv.precioVenta != null and inv.precioVenta.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                      th:text="'Q' + ${#numbers.formatDecimal(inv.precioVenta,1,'COMMA',2,'POINT')}"></span>
+                                <span th:if="${inv.precioVenta == null or inv.precioVenta.compareTo(T(java.math.BigDecimal).ZERO) == 0}">—</span>
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <!-- Kardex rápido -->
+                                    <button class="btn btn-sm btn-secondary"
+                                            th:data-id="${inv.producto.idProducto}"
+                                            th:data-nombre="${inv.producto.detalle}"
+                                            onclick="verKardexBtn(this)">
+                                        📈
+                                    </button>
+                                    <!-- Ajuste manual (solo Admin) -->
+                                    <button sec:authorize="hasRole('ADMINISTRADOR')"
+                                            class="btn btn-sm btn-warning"
+                                            th:data-prod="${inv.producto.idProducto}"
+                                            th:data-suc="${inv.sucursal.idSucursal}"
+                                            th:data-exist="${inv.existencia ?: 0}"
+                                            th:data-costo="${inv.costo ?: 0}"
+                                            th:data-precio="${inv.precioVenta ?: 0}"
+                                            th:data-nombre="${inv.producto.detalle}"
+                                            onclick="abrirAjusteBtn(this)">
+                                        🔧
+                                    </button>
+                                    <!-- Traslado rápido -->
+                                    <a th:href="@{/traslados(pid=${inv.producto.idProducto},ori=${inv.sucursal.idSucursal})}"
+                                       class="btn btn-sm btn-secondary" title="Trasladar">🔄</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Modal Ajuste de Stock ─── -->
+<div class="modal-overlay" id="modalAjuste">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">🔧 Ajuste Manual de Stock</div>
+            <button class="modal-close" onclick="document.getElementById('modalAjuste').classList.remove('show')">✕</button>
+        </div>
+        <form th:action="@{/inventario/ajustar}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" id="ajProd" name="idProducto">
+            <input type="hidden" id="ajSuc"  name="idSucursal">
+
+            <div class="modal-body">
+                <div id="ajNombre" class="fw-600 mb-3" style="font-size:15px;color:var(--turquesa)"></div>
+
+                <div class="form-row form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Existencia nueva *</label>
+                        <input type="number" id="ajExist" name="existencia"
+                               class="form-control" min="0" step="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Costo unitario</label>
+                        <input type="number" id="ajCosto" name="costo"
+                               class="form-control" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Precio de venta</label>
+                        <input type="number" id="ajPrecio" name="precio"
+                               class="form-control" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Motivo del ajuste</label>
+                    <input type="text" name="motivo" class="form-control"
+                           placeholder="Ej: Conteo físico, merma, producto dañado...">
+                </div>
+
+                <div style="padding:10px 14px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;font-size:12px;color:var(--amarillo)">
+                    ⚠️ Este ajuste quedará registrado en el Kardex como "Ajuste manual".
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('modalAjuste').classList.remove('show')">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">💾 Aplicar Ajuste</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ─── Modal Kardex rápido ─── -->
+<div class="modal-overlay" id="modalKardex">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="kardexTitle">📈 Kardex</div>
+            <button class="modal-close" onclick="document.getElementById('modalKardex').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" id="kardexBody">
+            <div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="document.getElementById('modalKardex').classList.remove('show')">Cerrar</button>
+            <a th:href="@{/kardex}" class="btn btn-primary">Ver Kardex completo →</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrar(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#tblInv tbody tr').forEach(tr =>
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'
+    );
+}
+
+function abrirAjusteBtn(btn) {
+    abrirAjuste(btn.dataset.prod, btn.dataset.suc, btn.dataset.exist,
+                btn.dataset.costo, btn.dataset.precio, btn.dataset.nombre);
+}
+function verKardexBtn(btn) {
+    verKardex(btn.dataset.id, btn.dataset.nombre);
+}
+
+function abrirAjuste(idProd, idSuc, exist, costo, precio, nombre) {
+    document.getElementById('ajProd').value   = idProd;
+    document.getElementById('ajSuc').value    = idSuc;
+    document.getElementById('ajExist').value  = exist;
+    document.getElementById('ajCosto').value  = costo;
+    document.getElementById('ajPrecio').value = precio;
+    document.getElementById('ajNombre').textContent = nombre;
+    document.getElementById('modalAjuste').classList.add('show');
+}
+
+async function verKardex(idProd, nombre) {
+    document.getElementById('kardexTitle').textContent = '📈 ' + nombre;
+    document.getElementById('kardexBody').innerHTML =
+        '<div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳ Cargando...</div>';
+    document.getElementById('modalKardex').classList.add('show');
+
+    const r = await fetch('/inventario/kardex/' + idProd);
+    const data = await r.json();
+
+    if (!data.length) {
+        document.getElementById('kardexBody').innerHTML =
+            '<div style="text-align:center;padding:30px;color:var(--gris-texto)">Sin movimientos registrados.</div>';
+        return;
+    }
+
+    const TIPOS = {
+        'Entrada':         { icon:'📥', cls:'badge-success'  },
+        'Salida':          { icon:'📤', cls:'badge-danger'   },
+        'Traslado_Entrada':{ icon:'⬅️', cls:'badge-info'     },
+        'Traslado_Salida': { icon:'➡️', cls:'badge-warning'  },
+        'Ajuste':          { icon:'🔧', cls:'badge-secondary'},
+    };
+
+    let h = '<div class="table-wrapper"><table class="table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Sucursal</th><th>Ref.</th><th style="text-align:center">Cant.</th><th style="text-align:center">Ant.</th><th style="text-align:center">Nueva</th></tr></thead><tbody>';
+    data.forEach(m => {
+        const t = TIPOS[m.tipo] || { icon:'•', cls:'badge-secondary' };
+        h += `<tr>
+            <td class="text-sm">${m.fecha}</td>
+            <td><span class="badge ${t.cls}" style="font-size:11px">${t.icon} ${m.tipo}</span></td>
+            <td class="text-sm text-gris">${m.sucursal}</td>
+            <td class="text-sm text-gris">${m.ref}</td>
+            <td style="text-align:center" class="fw-600">${m.cant}</td>
+            <td style="text-align:center" class="text-gris">${m.ant}</td>
+            <td style="text-align:center" class="fw-600 text-turquesa">${m.nueva}</td>
+        </tr>`;
+    });
+    h += '</tbody></table></div>';
+    document.getElementById('kardexBody').innerHTML = h;
+}
+</script>
+</body>
+</html>
