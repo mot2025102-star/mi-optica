@@ -1,13 +1,13 @@
 package com.mioptica.service;
 
 import com.mioptica.dto.ReporteFilaDTO;
+import com.mioptica.dto.VentaDetalleDTO;
 import com.mioptica.model.ReciboCaja;
 import com.mioptica.model.Venta;
 import com.mioptica.repository.ReporteRepository;
 import com.mioptica.repository.ReciboCajaRepository;
 import com.mioptica.repository.VentaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,15 +23,13 @@ public class ReporteService {
     private final VentaRepository      ventaRepo;
     private final ReciboCajaRepository reciboRepo;
 
-    // ─── Helpers para convertir Object[] → DTO ───────────────────
+    // ─── Helper: Object[] → ReporteFilaDTO ───────────────────────
     private List<ReporteFilaDTO> toDTO(List<Object[]> rows, BigDecimal totalGeneral) {
         List<ReporteFilaDTO> lista = new ArrayList<>();
         for (Object[] row : rows) {
             String     etiqueta = row[0] != null ? row[0].toString() : "—";
             Long       cantidad = row[1] instanceof Number ? ((Number) row[1]).longValue() : 0L;
-            BigDecimal total    = row[2] instanceof BigDecimal ? (BigDecimal) row[2]
-                                : row[2] != null ? new BigDecimal(row[2].toString())
-                                : BigDecimal.ZERO;
+            BigDecimal total    = toBD(row[2]);
             BigDecimal pct      = totalGeneral.compareTo(BigDecimal.ZERO) == 0
                                 ? BigDecimal.ZERO
                                 : total.multiply(BigDecimal.valueOf(100))
@@ -41,14 +39,41 @@ public class ReporteService {
         return lista;
     }
 
+    // ─── Helper: convierte Object a BigDecimal seguro ─────────────
+    private BigDecimal toBD(Object val) {
+        if (val instanceof BigDecimal) return (BigDecimal) val;
+        if (val != null) return new BigDecimal(val.toString());
+        return BigDecimal.ZERO;
+    }
+
+    // ─── Helper: Object[] → VentaDetalleDTO ──────────────────────
+    private List<VentaDetalleDTO> toDetalleDTO(List<Object[]> rows) {
+        List<VentaDetalleDTO> lista = new ArrayList<>();
+        for (Object[] row : rows) {
+            String     numeroFactura = row[0] != null ? row[0].toString() : "—";
+            LocalDate  fecha         = row[1] instanceof LocalDate ? (LocalDate) row[1] : null;
+            String     vendedor      = row[2] != null ? row[2].toString() : "—";
+            String     categoria     = row[3] != null ? row[3].toString() : "Sin categoría";
+            String     producto      = row[4] != null ? row[4].toString() : "—";
+            Long       cantidad      = row[5] instanceof Number ? ((Number) row[5]).longValue() : 0L;
+            BigDecimal precioVenta   = toBD(row[6]);
+            String     formaPago     = row[7] != null ? row[7].toString() : "—";
+
+            lista.add(new VentaDetalleDTO(numeroFactura, fecha, vendedor,
+                    categoria, producto, cantidad, precioVenta, formaPago));
+        }
+        return lista;
+    }
+
     // ─── Reporte de ventas ────────────────────────────────────────
     public Map<String, Object> generarReporte(LocalDate fi, LocalDate ff,
-                                               Integer idSucursal, boolean esAdmin) {
-        // Admin con idSucursal=0 ve todo; otros solo su sucursal
-        int idSuc = esAdmin ? 0 : idSucursal;
+                                               Integer idSucursal, boolean esAdmin,
+                                               Integer idCategoria, Integer idVendedor) {
+        int idSuc = esAdmin ? idSucursal : idSucursal;
 
         BigDecimal totalGeneral = reporteRepo.totalPeriodo(fi, ff, idSuc);
         if (totalGeneral == null) totalGeneral = BigDecimal.ZERO;
+
         Long cantFacturas = reporteRepo.countPeriodo(fi, ff, idSuc);
         if (cantFacturas == null) cantFacturas = 0L;
 
@@ -56,20 +81,20 @@ public class ReporteService {
                 ? totalGeneral.divide(BigDecimal.valueOf(cantFacturas), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        List<ReporteFilaDTO> porProducto  = toDTO(reporteRepo.topProductos(fi, ff, idSuc),      totalGeneral);
-        List<ReporteFilaDTO> porVendedor  = toDTO(reporteRepo.ventasPorVendedor(fi, ff, idSuc), totalGeneral);
-        List<ReporteFilaDTO> porCategoria = toDTO(reporteRepo.ventasPorCategoria(fi, ff, idSuc),totalGeneral);
+        List<ReporteFilaDTO> porProducto  = toDTO(reporteRepo.topProductos(fi, ff, idSuc),       totalGeneral);
+        List<ReporteFilaDTO> porVendedor  = toDTO(reporteRepo.ventasPorVendedor(fi, ff, idSuc),  totalGeneral);
+        List<ReporteFilaDTO> porCategoria = toDTO(reporteRepo.ventasPorCategoria(fi, ff, idSuc), totalGeneral);
 
-        // Ventas por día para la gráfica
-        List<Object[]> rawDia = reporteRepo.ventasPorDia(fi, ff, idSuc);
-        List<String>       diasLabels = new ArrayList<>();
-        List<BigDecimal>   diasTotales = new ArrayList<>();
+        List<Object[]>   rawDia     = reporteRepo.ventasPorDia(fi, ff, idSuc);
+        List<String>     diasLabels = new ArrayList<>();
+        List<BigDecimal> diasTotales = new ArrayList<>();
         for (Object[] row : rawDia) {
             diasLabels.add(row[0].toString());
-            diasTotales.add(row[2] instanceof BigDecimal
-                    ? (BigDecimal) row[2]
-                    : new BigDecimal(row[2].toString()));
+            diasTotales.add(toBD(row[2]));
         }
+
+        List<VentaDetalleDTO> detalleVentas = toDetalleDTO(
+                reporteRepo.detalleVentas(fi, ff, idSuc, idCategoria, idVendedor));
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("totalGeneral",  totalGeneral);
@@ -80,13 +105,13 @@ public class ReporteService {
         result.put("porCategoria",  porCategoria);
         result.put("diasLabels",    diasLabels);
         result.put("diasTotales",   diasTotales);
+        result.put("detalleVentas", detalleVentas);
         return result;
     }
 
     // ─── Corte de Caja ────────────────────────────────────────────
     public Map<String, Object> corteDeCaja(LocalDate fecha, Integer idSucursal) {
 
-        // Ventas del día
         List<Venta> ventas = ventaRepo.findByPeriodoYSucursal(fecha, fecha, idSucursal);
         ventas = ventas.stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
 
@@ -101,7 +126,6 @@ public class ReporteService {
         long ventasAnuladas = ventaRepo.findByPeriodoYSucursal(fecha, fecha, idSucursal)
                 .stream().filter(v -> "Anulada".equals(v.getEstado())).count();
 
-        // Recibos del día (incluye pagos de fichas)
         List<ReciboCaja> recibos = reciboRepo.findAll().stream()
                 .filter(r -> fecha.equals(r.getFecha())
                           && r.getSucursal().getIdSucursal().equals(idSucursal))
@@ -111,7 +135,6 @@ public class ReporteService {
                 .map(ReciboCaja::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Desglose por forma de pago
         Map<String, BigDecimal> porFormaPago = new LinkedHashMap<>();
         recibos.forEach(r -> {
             String forma = r.getFormaPago() != null ? r.getFormaPago() : "Contado";

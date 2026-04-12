@@ -66,6 +66,8 @@ public class ProductoController {
     @GetMapping("/nuevo")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
     public String nuevo(Model model) {
+        Producto p = new Producto();
+        p.setTipoProducto(null);
         model.addAttribute("producto",   new Producto());
         model.addAttribute("categorias", productoService.listarCategorias());
         model.addAttribute("marcas",     productoService.listarMarcas());
