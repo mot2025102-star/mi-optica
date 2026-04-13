@@ -52,6 +52,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                 .requestMatchers("/login", "/login-error").permitAll()
+                .requestMatchers("/ordenes-lab/**").hasAnyRole("OPTOMETRISTA", "VENDEDOR", "ADMINISTRADOR")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -77,5 +78,6 @@ public class SecurityConfig {
             response.sendRedirect(request.getContextPath() + "/dashboard");
         };
     }
+    
 
 }

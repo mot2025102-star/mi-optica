@@ -56,10 +56,6 @@
             <span class="sidebar-item-icon">🧾</span>
             <span class="sidebar-item-text">Ventas</span>
         </a>
-
-        
-
-        
         
         <div class="sidebar-section-label"
              sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR','BODEGUERO')">Inventario</div>
@@ -86,8 +82,6 @@
             <span class="sidebar-item-text">Kardex</span>
         </a>
 
-        
-
         <div class="sidebar-section-label"
              sec:authorize="hasAnyRole('ADMINISTRADOR','OPTOMETRISTA','VENDEDOR')">Clínico</div>
 
@@ -97,6 +91,14 @@
            th:classappend="${activePage == 'fichas'} ? ' active' : ''">
             <span class="sidebar-item-icon">👁️</span>
             <span class="sidebar-item-text">Fichas Clínicas</span>
+        </a>
+
+        <a th:href="@{/ordenes-lab}"
+           sec:authorize="hasAnyRole('ADMINISTRADOR','OPTOMETRISTA','VENDEDOR')"
+           class="sidebar-item"
+           th:classappend="${activePage == 'ordenes-lab'} ? ' active' : ''">
+            <span class="sidebar-item-icon">🔬</span>
+            <span class="sidebar-item-text">Órdenes Lab</span>
         </a>
 
         <a th:href="@{/clientes}"
@@ -134,7 +136,7 @@
             <span class="sidebar-item-text">Saldos / Entregas</span>
         </a>
         
-
+        
         <div class="sidebar-section-label"
              sec:authorize="hasRole('ADMINISTRADOR')">Administración</div>
 

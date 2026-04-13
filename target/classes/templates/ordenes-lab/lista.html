@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Órdenes de Laboratorio')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">🔬 Órdenes de Laboratorio</div>
+            <div class="topbar-sub"
+                 th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}">
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/ordenes-lab/nueva}" class="btn btn-primary">➕ Nueva Orden</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Filtros -->
+        <div class="card mb-3">
+            <div class="card-body" style="padding:14px 20px">
+                <form id="frmFiltro" th:action="@{/ordenes-lab}" method="get"
+                      style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div>
+                            <label class="form-label">Desde</label>
+                            <input type="date" name="fi" class="form-control" th:value="${fi}">
+                        </div>
+                        <span class="text-gris" style="margin-top:20px">al</span>
+                        <div>
+                            <label class="form-label">Hasta</label>
+                            <input type="date" name="ff" class="form-control" th:value="${ff}">
+                        </div>
+                    </div>
+                    <div style="min-width:150px">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value=""           th:selected="${estadoFiltro==''}">Todos</option>
+                            <option value="Pendiente"  th:selected="${estadoFiltro=='Pendiente'}">⏳ Pendiente</option>
+                            <option value="Enviado"    th:selected="${estadoFiltro=='Enviado'}">📦 Enviado</option>
+                            <option value="Entregado"  th:selected="${estadoFiltro=='Entregado'}">✅ Entregado</option>
+                            <option value="Cancelado"  th:selected="${estadoFiltro=='Cancelado'}">❌ Cancelado</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end">
+                        <button type="submit" class="btn btn-primary">🔍</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title" th:text="'📋 ' + ${ordenes.size()} + ' orden(es)'"></div>
+                <input type="text" class="form-control" style="width:220px"
+                       placeholder="Filtro rápido..." oninput="filtrar(this.value)">
+            </div>
+            <div class="table-wrapper">
+                <table class="table" id="tblO">
+                    <thead>
+                        <tr>
+                            <th>N° Orden</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Creado por</th>
+                            <th sec:authorize="hasRole('ADMINISTRADOR')">Sucursal</th>
+                            <th>Entrega Est.</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${ordenes.isEmpty()}">
+                            <td colspan="8" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                                <div style="font-size:40px">🔬</div>
+                                <div style="margin-top:10px">Sin órdenes en el período seleccionado.</div>
+                                <a th:href="@{/ordenes-lab/nueva}" class="btn btn-primary btn-sm"
+                                   style="margin-top:12px">➕ Nueva Orden</a>
+                            </td>
+                        </tr>
+                        <tr th:each="o : ${ordenes}">
+                            <td class="text-turquesa fw-600" th:text="${o.numeroOrden}"></td>
+                            <td class="text-sm" th:text="${#temporals.format(o.fechaEmision,'dd/MM/yyyy')}"></td>
+                            <td class="text-sm" th:text="${o.cliente != null ? o.cliente.nombre : 'CF'}"></td>
+                            <td class="text-sm text-gris" th:text="${o.usuario.nombreCompleto}"></td>
+                            <td class="text-sm" sec:authorize="hasRole('ADMINISTRADOR')"
+                                th:text="${o.sucursal.nombre}"></td>
+                            <td class="text-sm"
+                                th:text="${o.fechaEntregaEstimada != null ? #temporals.format(o.fechaEntregaEstimada,'dd/MM/yyyy') : '—'}">
+                            </td>
+                            <td>
+                                <span th:class="${
+                                    o.estado == 'Entregado' ? 'badge badge-success' :
+                                    o.estado == 'Enviado'   ? 'badge badge-info'    :
+                                    o.estado == 'Cancelado' ? 'badge badge-danger'  :
+                                                              'badge badge-warning'}"
+                                      th:text="${o.estado}">
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-secondary"
+                                        th:data-id="${o.idOrden}"
+                                        th:data-num="${o.numeroOrden}"
+                                        onclick="verDetalle(this.dataset.id, this.dataset.num)">
+                                        👁️
+                                    </button>
+                                    <!-- Cambio de estado rápido -->
+                                    <select class="form-select form-select-sm"
+                                            style="width:130px"
+                                            th:data-id="${o.idOrden}"
+                                            onchange="cambiarEstado(this.dataset.id, this.value)"
+                                            th:value="${o.estado}">
+                                        <option value="Pendiente"  th:selected="${o.estado=='Pendiente'}">⏳ Pendiente</option>
+                                        <option value="Enviado"    th:selected="${o.estado=='Enviado'}">📦 Enviado</option>
+                                        <option value="Entregado"  th:selected="${o.estado=='Entregado'}">✅ Entregado</option>
+                                        <option value="Cancelado"  th:selected="${o.estado=='Cancelado'}">❌ Cancelado</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" id="modalDet">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="detTitle">🔬 Detalle de Orden</div>
+            <button class="modal-close"
+                    onclick="document.getElementById('modalDet').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" id="detBody">
+            <div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary"
+                    onclick="document.getElementById('modalDet').classList.remove('show')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrar(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#tblO tbody tr').forEach(tr =>
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none');
+}
+
+function setHoy() {
+    const h = new Date().toISOString().split('T')[0];
+    document.querySelector('#frmFiltro [name="fi"]').value = h;
+    document.querySelector('#frmFiltro [name="ff"]').value = h;
+    document.getElementById('frmFiltro').submit();
+}
+
+function setMes() {
+    const d  = new Date();
+    const fi = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
+    const ff = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().split('T')[0];
+    document.querySelector('#frmFiltro [name="fi"]').value = fi;
+    document.querySelector('#frmFiltro [name="ff"]').value = ff;
+    document.getElementById('frmFiltro').submit();
+}
+
+async function cambiarEstado(id, estado) {
+    const r = await fetch(`/ordenes-lab/estado/${id}?estado=${estado}`, { method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] || '' }
+    });
+    const d = await r.json();
+    if (!d.ok) alert('Error: ' + d.error);
+}
+
+async function verDetalle(id, num) {
+    document.getElementById('detTitle').textContent = '🔬 ' + num;
+    document.getElementById('detBody').innerHTML =
+        '<div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳ Cargando...</div>';
+    document.getElementById('modalDet').classList.add('show');
+
+    const r = await fetch('/ordenes-lab/detalle/' + id);
+    const d = await r.json();
+    const i = d.info;
+
+    const campo = (label, val) => val
+        ? `<div><div class="text-gris text-sm">${label}</div><div class="fw-600">${val}</div></div>`
+        : '';
+
+    let h = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px">
+        ${campo('Cliente', i.cliente)} ${campo('Creado por', i.usuario)}
+        ${campo('Sucursal', i.sucursal)} ${campo('Fecha', i.fecha)}
+        ${campo('Envío Lab', i.envioLab || '—')} ${campo('Entrega Est.', i.entregaEst || '—')}
+    </div>`;
+
+    // Datos clínicos
+    h += `<div class="card mb-3" style="padding:12px">
+        <div class="fw-600 mb-2">👁️ Datos Clínicos</div>
+        <table class="table table-sm">
+            <thead><tr><th>Ojo</th><th>Esfera</th><th>Cilindro</th><th>Eje</th>
+                        <th>Add</th><th>D.I.P</th><th>NDPOD</th><th>NDPOI</th><th>Altura</th></tr></thead>
+            <tbody>
+                <tr><td class="fw-600">OD</td>
+                    <td>${i.odEsfera}</td><td>${i.odCilindro}</td><td>${i.odEje}</td>
+                    <td>${i.odAdd}</td><td>${i.odDip}</td><td>${i.odNdpod}</td>
+                    <td>${i.odNdpoi}</td><td>${i.odAltura}</td></tr>
+                <tr><td class="fw-600">OI</td>
+                    <td>${i.oiEsfera}</td><td>${i.oiCilindro}</td><td>${i.oiEje}</td>
+                    <td>${i.oiAdd}</td><td>${i.oiDip}</td><td>${i.oiNdpod}</td>
+                    <td>${i.oiNdpoi}</td><td>${i.oiAltura}</td></tr>
+            </tbody>
+        </table>
+        <div style="display:flex;gap:24px;margin-top:8px;font-size:13px">
+            ${i.pantoscopico ? '<span>Pantoscópico: <b>'+i.pantoscopico+'°</b></span>' : ''}
+            ${i.vertex       ? '<span>Vertex: <b>'+i.vertex+' mm</b></span>' : ''}
+            ${i.panoramico   ? '<span>Panorámico: <b>'+i.panoramico+'°</b></span>' : ''}
+        </div>
+    </div>`;
+
+    // Productos
+    if (d.productos && d.productos.length > 0) {
+        h += `<div class="fw-600 mb-2">📦 Productos Solicitados</div>
+        <table class="table"><thead><tr>
+            <th>Código</th><th>Cant.</th><th>Descripción</th>
+            <th>Material</th><th>Tratamiento</th><th>Color/Tinte</th>
+        </tr></thead><tbody>`;
+        d.productos.forEach(p => {
+            h += `<tr><td class="text-turquesa fw-600">${p.codigo}</td>
+                <td>${p.cantidad}</td><td>${p.descripcion}</td>
+                <td>${p.material}</td><td>${p.tratamiento}</td><td>${p.colorTinte}</td></tr>`;
+        });
+        h += '</tbody></table>';
+    }
+
+    if (i.observaciones)
+        h += `<div class="text-gris text-sm mt-2">Observaciones: <span class="text-normal">${i.observaciones}</span></div>`;
+
+    document.getElementById('detBody').innerHTML = h;
+}
+</script>
+</body>
+</html>
