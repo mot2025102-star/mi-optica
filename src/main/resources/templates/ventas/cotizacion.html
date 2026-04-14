@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Cotización de Lentes')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">💰 Cotización de Lentes</div>
+            <div class="topbar-sub" th:text="${sucursal} + ' — Basada en ficha clínica del optometrista'"></div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/ventas/nueva}" class="btn btn-secondary">🧾 Ir a Venta</a>
+            <a th:href="@{/ventas}" class="btn btn-secondary">← Volver</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div id="alertaError" class="alert alert-danger" style="display:none">
+            ❌ <span id="alertaMsg"></span>
+        </div>
+
+        <!-- PASO 1: BUSCAR FICHA CLÍNICA -->
+        <div class="card mb-3">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                <div style="font-size:13px;font-weight:700;color:var(--turquesa)">🔍 Paso 1 — Buscar Ficha Clínica del Paciente</div>
+                <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Busca por nombre del cliente o número de ficha</div>
+            </div>
+            <div class="card-body">
+                <div class="form-row form-row-2">
+                    <div class="form-group" style="position:relative">
+                        <label class="form-label">Buscar ficha clínica</label>
+                        <div style="position:relative">
+                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)">🔍</span>
+                            <input type="text" id="busqFicha" class="form-control" style="padding-left:36px"
+                                   placeholder="Nombre del cliente o # de ficha..."
+                                   autocomplete="off"
+                                   oninput="buscarFicha(this.value)">
+                            <div id="autoFicha" style="position:absolute;top:100%;left:0;right:0;background:var(--gris-oscuro);border:1px solid var(--turquesa);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:220px;overflow-y:auto;display:none"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ficha seleccionada</label>
+                        <div id="fichaInfo" style="padding:9px 13px;background:rgba(255,255,255,0.04);border:1px solid var(--gris-borde);border-radius:8px;min-height:40px;font-size:13px;color:var(--gris-texto)">
+                            Ninguna seleccionada — busca una ficha arriba
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PASO 2: GRADUACIÓN DEL OPTOMETRISTA -->
+        <div class="card mb-3" id="seccionFicha" style="display:none">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06);display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👁️ Paso 2 — Graduación Recetada por el Optometrista</div>
+                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Esta es la receta que dejó el optometrista en la ficha clínica</div>
+                </div>
+                <div id="fichaNumero" style="font-size:22px;font-weight:700;color:var(--turquesa)"></div>
+            </div>
+            <div class="card-body">
+
+                <!-- Info del paciente -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px;padding:14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--gris-borde)">
+                    <div>
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:3px">Paciente</div>
+                        <div style="font-weight:700" id="dCliente">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:3px">Fecha consulta</div>
+                        <div id="dFecha">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:3px">Optometrista</div>
+                        <div id="dOptometrista">—</div>
+                    </div>
+                </div>
+
+                <!-- Tabla graduación -->
+                <div style="overflow-x:auto;margin-bottom:16px">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,0.04)">
+                                <th style="padding:10px 14px;text-align:left;color:var(--gris-texto);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--gris-borde)">Ojo</th>
+                                <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--gris-borde)">Esfera</th>
+                                <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--gris-borde)">Cilindro</th>
+                                <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--gris-borde)">Eje</th>
+                                <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--gris-borde)">Adición</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid var(--gris-borde)">
+                                <td style="padding:10px 14px;font-weight:700;color:var(--turquesa)">OD (Derecho)</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOdEsfera">—</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOdCilindro">—</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOdEje">—</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOdAdicion">—</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 14px;font-weight:700;color:var(--amarillo)">OI (Izquierdo)</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOiEsfera">—</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOiCilindro">—</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOiEje">—</td>
+                                <td style="padding:10px 14px;text-align:center;font-weight:600" id="dOiAdicion">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Detalle lentes / observaciones -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div>
+                        <div style="font-size:11px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:6px">📋 Material / detalle recomendado por optometrista</div>
+                        <div id="dDetalleLentes" style="padding:10px 14px;background:rgba(39,194,201,0.06);border:1px solid rgba(39,194,201,0.2);border-radius:8px;font-size:13px;min-height:40px;color:var(--texto)">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:6px">📝 Observaciones</div>
+                        <div id="dObservaciones" style="padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--gris-borde);border-radius:8px;font-size:13px;min-height:40px;color:var(--gris-texto)">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PASO 3: SELECCIÓN DE PRODUCTOS -->
+        <div class="card mb-3" id="seccionProductos" style="display:none">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:var(--turquesa)">📦 Paso 3 — Seleccionar Lentes y Productos para Cotizar</div>
+                        <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Selecciona los lentes del inventario según la graduación recetada</div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="agregarFila()">➕ Agregar producto</button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <!-- Filtro rápido -->
+                <div style="background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                    <span style="font-size:12px;font-weight:700;color:var(--amarillo)">⚡ Filtro rápido:</span>
+                    <select id="filtroTipo" class="form-select" style="width:auto;font-size:12px" onchange="filtrarProductos()">
+                        <option value="">Todos los tipos</option>
+                        <option value="LENTE">Solo lentes</option>
+                        <option value="ARMAZON">Solo armazones</option>
+                        <option value="GENERAL">Otros</option>
+                    </select>
+                    <input type="text" id="filtroTexto" class="form-control" style="width:220px;font-size:12px"
+                           placeholder="Buscar en catálogo..." oninput="filtrarProductos()">
+                    <span id="filtroConteo" class="text-gris text-sm"></span>
+                </div>
+
+                <!-- Cabecera tabla -->
+                <div style="display:grid;grid-template-columns:3fr 90px 110px 90px 110px 40px;gap:8px;font-size:11px;font-weight:700;color:var(--gris-texto);text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--gris-borde);margin-bottom:10px">
+                    <div>Producto</div><div>Cant.</div><div>Precio unit.</div><div>Desc.</div><div>Subtotal</div><div></div>
+                </div>
+                <div id="listaProds"></div>
+            </div>
+        </div>
+
+        <!-- PASO 4: RESUMEN -->
+        <div class="card mb-3" id="seccionResumen" style="display:none">
+            <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                <div style="font-size:13px;font-weight:700;color:var(--turquesa)">💰 Paso 4 — Resumen de Cotización</div>
+            </div>
+            <div class="card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+
+                    <div>
+                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📝 Notas / Comentarios</div>
+                        <textarea id="notasCotizacion" class="form-control" rows="4"
+                                  placeholder="Notas adicionales para el cliente (vigencia, condiciones, etc.)..."></textarea>
+                        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                            <button type="button" class="btn btn-primary" onclick="convertirAVenta()">
+                                🧾 Convertir en Venta
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="imprimirCotizacion()">
+                                🖨️ Imprimir Cotización
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">💰 Total</div>
+                        <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                                <span class="text-gris">Subtotal:</span>
+                                <span class="fw-600" id="resSubtotal">Q0.00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:var(--naranja)">
+                                <span>Descuento total:</span>
+                                <span class="fw-600" id="resDescuento">- Q0.00</span>
+                            </div>
+                            <div style="border-top:2px solid var(--turquesa);margin:10px 0"></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="font-size:15px;font-weight:700">TOTAL:</span>
+                                <span style="font-size:28px;font-weight:700;color:var(--turquesa)" id="resTotal">Q0.00</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:14px">
+                            <div style="font-size:11px;font-weight:700;color:var(--gris-texto);text-transform:uppercase;margin-bottom:8px">Detalle</div>
+                            <div id="resumenItems" style="font-size:12px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: imprimir -->
+<div class="modal-overlay" id="modalImprimir">
+    <div class="modal" style="max-width:700px">
+        <div class="modal-header">
+            <div class="modal-title">🖨️ Vista de Cotización</div>
+            <button class="btn btn-secondary btn-sm" onclick="cerrarModal('modalImprimir')">✕</button>
+        </div>
+        <div class="modal-body" id="areaCotizacion" style="padding:24px;font-size:13px"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir</button>
+            <button class="btn btn-secondary" onclick="cerrarModal('modalImprimir')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: convertir a venta -->
+<div class="modal-overlay" id="modalConvertir">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">🧾 Convertir Cotización en Venta</div>
+        </div>
+        <div class="modal-body" style="padding:20px">
+            <p class="text-gris" style="margin-bottom:16px">Se registrará la venta con los productos de esta cotización. La graduación quedará guardada en las observaciones.</p>
+            <div class="form-group">
+                <label class="form-label">Forma de pago</label>
+                <select id="formaPagoConv" class="form-select">
+                    <option>Contado</option>
+                    <option>Tarjeta</option>
+                    <option>Transferencia</option>
+                    <option>Cheque</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descuento global (Q)</label>
+                <input type="number" id="descGlobalConv" class="form-control" min="0" step="1" value="0">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="registrarVentaDesdeCotz()">💾 Registrar Venta</button>
+            <button class="btn btn-secondary" onclick="cerrarModal('modalConvertir')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: éxito venta -->
+<div class="modal-overlay" id="modalExito">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">✅ Venta Registrada</div>
+        </div>
+        <div class="modal-body" style="text-align:center;padding:30px">
+            <div style="font-size:48px;margin-bottom:12px">🧾</div>
+            <div style="font-size:22px;font-weight:700;color:var(--turquesa)" id="exitoFactura"></div>
+            <div style="color:var(--gris-texto);margin-top:8px">Factura generada exitosamente</div>
+            <div style="font-size:20px;font-weight:700;color:var(--verde);margin-top:16px" id="exitoTotal"></div>
+        </div>
+        <div class="modal-footer" style="justify-content:center;gap:12px">
+            <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary">🖨️ Imprimir Factura</a>
+            <a th:href="@{/ventas}" class="btn btn-primary">📋 Ver ventas</a>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const STOCK = /*[[${stockDisponible}]]*/ [];
+</script>
+
+<script>
+let fichaActual   = null;
+let filaIdx       = 0;
+let stockFiltrado = [...STOCK];
+
+// ── Búsqueda de ficha ──────────────────────────────────────────────
+let toFicha;
+function buscarFicha(q) {
+    clearTimeout(toFicha);
+    const box = document.getElementById('autoFicha');
+    if (q.length < 2) { box.style.display = 'none'; return; }
+    toFicha = setTimeout(async () => {
+        const r    = await fetch('/ventas/api/fichas/buscar?q=' + encodeURIComponent(q));
+        const data = await r.json();
+        if (!data.length) {
+            box.innerHTML = '<div style="padding:12px 14px;font-size:13px;color:var(--gris-texto)">No se encontraron fichas</div>';
+            box.style.display = 'block';
+            return;
+        }
+        box.innerHTML = data.map(f => `
+            <div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--gris-borde)"
+                 onmousedown="selFicha(${f.idFicha},'${f.cliente.replace(/'/g,"\\'")}','${f.fecha}','${f.optometrista.replace(/'/g,"\\'")}')">
+                <div class="fw-600">${f.cliente}</div>
+                <div class="text-gris text-sm">Ficha #${f.idFicha} — ${f.fecha} — ${f.optometrista}</div>
+            </div>`).join('');
+        box.style.display = 'block';
+    }, 300);
+}
+
+async function selFicha(id, nombre, fecha, optometrista) {
+    document.getElementById('busqFicha').value = nombre + ' — Ficha #' + id;
+    document.getElementById('autoFicha').style.display = 'none';
+    document.getElementById('fichaInfo').innerHTML =
+        `<span class="fw-600 text-turquesa">Ficha #${id}</span> — <span class="fw-600">${nombre}</span> <span class="text-gris text-sm">${fecha}</span>`;
+
+    const r    = await fetch('/ventas/api/ficha/' + id);
+    const data = await r.json();
+    fichaActual = data;
+
+    document.getElementById('fichaNumero').textContent   = 'Ficha #' + data.idFicha;
+    document.getElementById('dCliente').textContent      = data.cliente;
+    document.getElementById('dFecha').textContent        = data.fecha;
+    document.getElementById('dOptometrista').textContent = data.optometrista;
+    document.getElementById('dOdEsfera').textContent     = data.odEsfera;
+    document.getElementById('dOdCilindro').textContent   = data.odCilindro;
+    document.getElementById('dOdEje').textContent        = data.odEje;
+    document.getElementById('dOdAdicion').textContent    = data.odAdicion;
+    document.getElementById('dOiEsfera').textContent     = data.oiEsfera;
+    document.getElementById('dOiCilindro').textContent   = data.oiCilindro;
+    document.getElementById('dOiEje').textContent        = data.oiEje;
+    document.getElementById('dOiAdicion').textContent    = data.oiAdicion;
+    document.getElementById('dDetalleLentes').textContent = data.detalleLentes || '(sin detalle)';
+    document.getElementById('dObservaciones').textContent = data.observaciones || '(sin observaciones)';
+
+    document.getElementById('seccionFicha').style.display    = 'block';
+    document.getElementById('seccionProductos').style.display = 'block';
+    document.getElementById('seccionResumen').style.display  = 'block';
+
+    document.getElementById('listaProds').innerHTML = '';
+    filaIdx = 0;
+    filtrarProductos();
+    agregarFila();
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('#busqFicha') && !e.target.closest('#autoFicha'))
+        document.getElementById('autoFicha').style.display = 'none';
+});
+
+// ── Filtro de productos ────────────────────────────────────────────
+function filtrarProductos() {
+    const tipo  = document.getElementById('filtroTipo').value;
+    const texto = document.getElementById('filtroTexto').value.toLowerCase();
+
+    stockFiltrado = STOCK.filter(s => {
+        const p = s.producto;
+        const matchTipo  = !tipo  || (p.tipoProducto === tipo);
+        const matchTexto = !texto || (
+            (p.codigo  || '').toLowerCase().includes(texto) ||
+            (p.detalle || '').toLowerCase().includes(texto) ||
+            (p.materialLente  && p.materialLente.nombre.toLowerCase().includes(texto)) ||
+            (p.tratamientoLente && p.tratamientoLente.nombre.toLowerCase().includes(texto))
+        );
+        return matchTipo && matchTexto;
+    });
+
+    document.getElementById('filtroConteo').textContent =
+        stockFiltrado.length + ' de ' + STOCK.length + ' productos';
+
+    document.querySelectorAll('[data-prod-select]').forEach(sel => {
+        const val = sel.value;
+        sel.innerHTML = buildOpts();
+        sel.value = val;
+    });
+}
+
+function buildOpts() {
+    return '<option value="">Seleccionar producto...</option>' +
+        stockFiltrado.map(s => {
+            const p    = s.producto;
+            const mat  = p.materialLente    ? ' | ' + p.materialLente.nombre    : '';
+            const trat = p.tratamientoLente ? ' | ' + p.tratamientoLente.nombre : '';
+            const tipo = p.tipoProducto     ? '[' + p.tipoProducto + '] '       : '';
+            return `<option value="${p.idProducto}"
+                            data-precio="${s.precioVenta ?? 0}"
+                            data-stock="${s.existencia}">
+                        ${tipo}${p.codigo} — ${p.detalle}${mat}${trat} (Stock: ${s.existencia})
+                    </option>`;
+        }).join('');
+}
+
+// ── Filas de productos ─────────────────────────────────────────────
+function agregarFila() {
+    const idx = filaIdx++;
+    const div = document.createElement('div');
+    div.id = 'fila_' + idx;
+    div.style.cssText = 'display:grid;grid-template-columns:3fr 90px 110px 90px 110px 40px;gap:8px;align-items:center;margin-bottom:8px';
+    div.innerHTML = `
+        <select class="form-select" data-prod-select onchange="onProd(this,${idx})" required>
+            ${buildOpts()}
+        </select>
+        <input type="number" id="cant_${idx}" class="form-control"
+               min="1" step="1" value="1"
+               onkeypress="soloEnteros(event)"
+               oninput="limpiarEntero(this,1);calcFila(${idx})">
+        <input type="number" id="precio_${idx}" class="form-control"
+               min="0" step="0.01" value="" readonly
+               style="background:rgba(255,255,255,0.04);color:var(--gris-texto);cursor:not-allowed"
+               placeholder="0.00">
+        <input type="number" id="desc_${idx}" class="form-control"
+               min="0" step="1" value="0"
+               onkeypress="soloDecimales(event)"
+               oninput="if(parseFloat(this.value)<0)this.value=0;calcFila(${idx})"
+               onblur="if(this.value===''||isNaN(this.value))this.value=0;calcFila(${idx})"
+               placeholder="0.00">
+        <input type="number" id="sub_${idx}" class="form-control" readonly
+               style="background:rgba(39,194,201,0.08);color:var(--turquesa);font-weight:600" value="0.00">
+        <button type="button" class="btn btn-danger btn-sm"
+                onclick="document.getElementById('fila_${idx}').remove();calcTotal()">🗑</button>
+    `;
+    document.getElementById('listaProds').appendChild(div);
+}
+
+function onProd(sel, idx) {
+    const opt    = sel.options[sel.selectedIndex];
+    const precio = parseFloat(opt.dataset.precio || 0);
+    const stock  = parseFloat(opt.dataset.stock  || 0);
+    document.getElementById('precio_' + idx).value = precio > 0 ? precio.toFixed(2) : '';
+    document.getElementById('cant_'   + idx).max   = stock;
+    calcFila(idx);
+}
+
+function calcFila(idx) {
+    const cant   = parseFloat(document.getElementById('cant_'   + idx)?.value || 0);
+    const precio = parseFloat(document.getElementById('precio_' + idx)?.value || 0);
+    const desc   = parseFloat(document.getElementById('desc_'   + idx)?.value || 0);
+    const el     = document.getElementById('sub_' + idx);
+    if (el) el.value = Math.max(0, cant * precio - desc).toFixed(2);
+    calcTotal();
+}
+
+function calcTotal() {
+    let sub = 0, descTotal = 0;
+    document.querySelectorAll('[id^="sub_"]').forEach(i  => sub      += parseFloat(i.value || 0));
+    document.querySelectorAll('[id^="desc_"]').forEach(i => descTotal += parseFloat(i.value || 0));
+
+    document.getElementById('resSubtotal').textContent  = 'Q' + (sub + descTotal).toFixed(2);
+    document.getElementById('resDescuento').textContent = '- Q' + descTotal.toFixed(2);
+    document.getElementById('resTotal').textContent     = 'Q' + Math.max(0, sub).toFixed(2);
+
+    let html = '';
+    document.querySelectorAll('#listaProds > div').forEach(fila => {
+        const sel = fila.querySelector('select');
+        const idx = fila.id.split('_')[1];
+        if (!sel.value) return;
+        const opt = sel.options[sel.selectedIndex];
+        const cant = document.getElementById('cant_' + idx)?.value || 0;
+        const sub  = document.getElementById('sub_'  + idx)?.value || '0.00';
+        html += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--gris-borde);font-size:12px">
+                    <span>${cant}× ${opt.text.split('(')[0].trim()}</span>
+                    <span class="fw-600">Q${parseFloat(sub).toFixed(2)}</span>
+                 </div>`;
+    });
+    document.getElementById('resumenItems').innerHTML = html || '<span class="text-gris">Sin productos</span>';
+}
+
+// ── Imprimir ───────────────────────────────────────────────────────
+function imprimirCotizacion() {
+    if (!fichaActual) { mostrarError('Selecciona una ficha primero.'); return; }
+    let itemsHtml = '', totalAcum = 0;
+    document.querySelectorAll('#listaProds > div').forEach(fila => {
+        const sel = fila.querySelector('select');
+        const idx = fila.id.split('_')[1];
+        if (!sel.value) return;
+        const opt    = sel.options[sel.selectedIndex];
+        const cant   = document.getElementById('cant_'   + idx)?.value || 0;
+        const precio = document.getElementById('precio_' + idx)?.value || '0.00';
+        const desc   = document.getElementById('desc_'   + idx)?.value || '0.00';
+        const sub    = document.getElementById('sub_'    + idx)?.value || '0.00';
+        totalAcum   += parseFloat(sub);
+        itemsHtml   += `<tr>
+            <td style="padding:8px 12px;border:1px solid #ddd">${cant}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd">${opt.text.split('(')[0].trim()}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right">Q${parseFloat(precio).toFixed(2)}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right">Q${parseFloat(desc).toFixed(2)}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right;font-weight:700">Q${parseFloat(sub).toFixed(2)}</td>
+        </tr>`;
+    });
+    if (!itemsHtml) { mostrarError('Agrega al menos un producto antes de imprimir.'); return; }
+
+    const notas = document.getElementById('notasCotizacion').value;
+    const fecha  = new Date().toLocaleDateString('es-GT');
+
+    document.getElementById('areaCotizacion').innerHTML = `
+        <div style="font-family:Arial,sans-serif;color:#111">
+            <div style="display:flex;justify-content:space-between;margin-bottom:20px">
+                <div>
+                    <div style="font-size:22px;font-weight:700;color:#27c2c9">Mi Óptica</div>
+                    <div style="color:#666;font-size:12px">mi mejor visión</div>
+                </div>
+                <div style="text-align:right;font-size:12px;color:#666">
+                    <div style="font-size:18px;font-weight:700;color:#111">COTIZACIÓN</div>
+                    <div>Fecha: ${fecha}</div>
+                    <div>Ficha clínica #${fichaActual.idFicha}</div>
+                </div>
+            </div>
+            <div style="background:#f0fffe;border:1px solid #27c2c9;border-radius:8px;padding:14px;margin-bottom:16px">
+                <div style="font-weight:700;margin-bottom:8px">Datos del Paciente</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:12px">
+                    <div><strong>Paciente:</strong> ${fichaActual.cliente}</div>
+                    <div><strong>Optometrista:</strong> ${fichaActual.optometrista}</div>
+                    <div><strong>Fecha consulta:</strong> ${fichaActual.fecha}</div>
+                </div>
+            </div>
+            <div style="margin-bottom:16px">
+                <div style="font-weight:700;margin-bottom:8px">Graduación Recetada</div>
+                <table style="width:100%;border-collapse:collapse;font-size:12px">
+                    <thead><tr style="background:#f5f5f5">
+                        <th style="padding:8px 12px;border:1px solid #ddd;text-align:left">Ojo</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd;text-align:center">Esfera</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd;text-align:center">Cilindro</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd;text-align:center">Eje</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd;text-align:center">Adición</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:8px 12px;border:1px solid #ddd;font-weight:700">OD (Derecho)</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.odEsfera}</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.odCilindro}</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.odEje}</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.odAdicion}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px;border:1px solid #ddd;font-weight:700">OI (Izquierdo)</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.oiEsfera}</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.oiCilindro}</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.oiEje}</td>
+                            <td style="padding:8px 12px;border:1px solid #ddd;text-align:center">${fichaActual.oiAdicion}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                ${fichaActual.detalleLentes ? '<div style="margin-top:8px;font-size:12px;color:#555"><strong>Detalle recetado:</strong> ' + fichaActual.detalleLentes + '</div>' : ''}
+            </div>
+            <div style="margin-bottom:16px">
+                <div style="font-weight:700;margin-bottom:8px">Productos Cotizados</div>
+                <table style="width:100%;border-collapse:collapse;font-size:12px">
+                    <thead><tr style="background:#f5f5f5">
+                        <th style="padding:8px 12px;border:1px solid #ddd">Cant.</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd;text-align:left">Descripción</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd">Precio unit.</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd">Descuento</th>
+                        <th style="padding:8px 12px;border:1px solid #ddd">Subtotal</th>
+                    </tr></thead>
+                    <tbody>${itemsHtml}</tbody>
+                    <tfoot><tr style="background:#f0fffe">
+                        <td colspan="4" style="padding:10px 12px;border:1px solid #ddd;text-align:right;font-weight:700">TOTAL:</td>
+                        <td style="padding:10px 12px;border:1px solid #ddd;text-align:right;font-weight:700;font-size:16px;color:#27c2c9">Q${totalAcum.toFixed(2)}</td>
+                    </tr></tfoot>
+                </table>
+            </div>
+            ${notas ? '<div style="background:#fffbe6;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;font-size:12px"><strong>Notas:</strong> ' + notas + '</div>' : ''}
+            <div style="margin-top:20px;font-size:11px;color:#999;text-align:center">
+                Esta cotización es válida por 15 días. • Mi Óptica
+            </div>
+        </div>`;
+    document.getElementById('modalImprimir').classList.add('show');
+}
+
+// ── Convertir a venta ──────────────────────────────────────────────
+function convertirAVenta() {
+    if (!fichaActual) { mostrarError('Selecciona una ficha primero.'); return; }
+    let tieneProductos = false;
+    document.querySelectorAll('#listaProds > div').forEach(f => {
+        if (f.querySelector('select').value) tieneProductos = true;
+    });
+    if (!tieneProductos) { mostrarError('Agrega al menos un producto antes de convertir.'); return; }
+    document.getElementById('modalConvertir').classList.add('show');
+}
+
+async function registrarVentaDesdeCotz() {
+    const items = [];
+    let hayError = false;
+    document.querySelectorAll('#listaProds > div').forEach(fila => {
+        if (hayError) return;
+        const sel  = fila.querySelector('select');
+        const idx  = fila.id.split('_')[1];
+        if (!sel.value) return;
+        const cant   = parseFloat(document.getElementById('cant_'   + idx)?.value || 0);
+        const precio = parseFloat(document.getElementById('precio_' + idx)?.value || 0);
+        const desc   = parseFloat(document.getElementById('desc_'   + idx)?.value || 0);
+        const sub    = parseFloat(document.getElementById('sub_'    + idx)?.value || 0);
+        const opt    = sel.options[sel.selectedIndex];
+        const stock  = parseFloat(opt.dataset.stock || 0);
+        if (cant <= 0) return;
+        if (precio <= 0) { mostrarError('El producto "' + opt.text.split('(')[0].trim() + '" no tiene precio.'); hayError = true; return; }
+        if (cant > stock) { mostrarError('Stock insuficiente para "' + opt.text.split('(')[0].trim() + '".'); hayError = true; return; }
+        items.push({ idProducto: parseInt(sel.value), cantidad: cant, precioUnitario: precio, descuento: desc, subtotal: sub });
+    });
+    if (hayError || !items.length) return;
+
+    const notaGrad  = `Ficha #${fichaActual.idFicha} | OD: ${fichaActual.odEsfera}/${fichaActual.odCilindro}x${fichaActual.odEje} | OI: ${fichaActual.oiEsfera}/${fichaActual.oiCilindro}x${fichaActual.oiEje}`;
+    const notasExtra = document.getElementById('notasCotizacion').value;
+    const payload = {
+        idCliente:       fichaActual.idCliente,
+        formaPago:       document.getElementById('formaPagoConv').value,
+        descuentoGlobal: parseFloat(document.getElementById('descGlobalConv').value || 0),
+        observacion:     notaGrad + (notasExtra ? '\n' + notasExtra : ''),
+        items
+    };
+
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+    const res  = await fetch('/ventas/registrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+        body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    cerrarModal('modalConvertir');
+    if (data.ok) {
+        document.getElementById('exitoFactura').textContent = data.factura;
+        document.getElementById('exitoTotal').textContent   = 'Q' + parseFloat(data.total).toFixed(2);
+        document.getElementById('exitoPdfLink').href        = '/ventas/factura/' + data.idVenta;
+        document.getElementById('modalExito').classList.add('show');
+        document.getElementById('alertaError').style.display = 'none';
+    } else {
+        mostrarError(data.error);
+    }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+function soloEnteros(e)  { if (!/[0-9]/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault(); }
+function soloDecimales(e){ if (!/[0-9.]/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault(); }
+function limpiarEntero(el, min) { el.value = el.value.replace(/[^0-9]/g,''); if (el.value===''||parseInt(el.value)<min) el.value=min; }
+function mostrarError(msg) {
+    const al = document.getElementById('alertaError');
+    document.getElementById('alertaMsg').textContent = msg;
+    al.style.display = 'flex';
+    al.scrollIntoView({ behavior: 'smooth' });
+}
+function cerrarModal(id) { document.getElementById(id).classList.remove('show'); }
+
+filtrarProductos();
+</script>
+</body>
+</html>
