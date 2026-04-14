@@ -3,6 +3,7 @@ package com.mioptica.controller;
 import com.mioptica.dto.VentaRequest;
 import com.mioptica.model.Inventario;
 import com.mioptica.model.Venta;
+import com.mioptica.repository.FichaClinicaRepository;
 import com.mioptica.repository.InventarioRepository;
 import com.mioptica.repository.UsuarioRepository;
 import com.mioptica.service.VentaService;
@@ -25,9 +26,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class VentaController {
 
-    private final VentaService         ventaService;
-    private final InventarioRepository inventarioRepo;
-    private final UsuarioRepository    usuarioRepo;
+    private final VentaService            ventaService;
+    private final InventarioRepository    inventarioRepo;
+    private final UsuarioRepository       usuarioRepo;
+    private final FichaClinicaRepository  fichaRepo;
 
     // ─── LISTA + FILTRO POR FECHA ─────────────────────────────────
     @GetMapping
@@ -49,7 +51,6 @@ public class VentaController {
                 ? usuario.getSucursal().getIdSucursal()
                 : null;
 
-        // Si no tiene sucursal asignada, ver todo
         if (idSuc == null) esAdmin = true;
 
         var ventas = ventaService.listarPorPeriodo(fi, ff, idSuc, esAdmin);
@@ -96,7 +97,74 @@ public class VentaController {
         return "ventas/nueva";
     }
 
-    // ─── REGISTRAR VENTA (recibe JSON del frontend) ───────────────
+    // ─── COTIZACIÓN ───────────────────────────────────────────────
+    @GetMapping("/cotizacion")
+    public String cotizacion(@AuthenticationPrincipal UserDetails ud, Model model) {
+        var usuario  = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
+        Integer idSuc = usuario.getSucursal() != null
+                ? usuario.getSucursal().getIdSucursal() : null;
+
+        List<Inventario> stock = idSuc != null
+                ? inventarioRepo.findConStockBySucursal(idSuc)
+                : inventarioRepo.findTodosConProductoActivo();
+
+        model.addAttribute("stockDisponible", stock);
+        model.addAttribute("sucursal",        usuario.getSucursal() != null
+                ? usuario.getSucursal().getNombre() : "Sin sucursal");
+        model.addAttribute("activePage",      "cotizacion");
+        return "ventas/cotizacion";
+    }
+
+    // ─── API: datos de ficha para cotización ──────────────────────
+    @GetMapping("/api/ficha/{idFicha}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getFichaParaCotizacion(@PathVariable Integer idFicha) {
+        return fichaRepo.findById(idFicha)
+                .map(f -> {
+                    Map<String, Object> data = new java.util.LinkedHashMap<>();
+                    data.put("idFicha",       f.getIdFicha());
+                    data.put("cliente",       f.getCliente().getNombre());
+                    data.put("idCliente",     f.getCliente().getIdCliente());
+                    data.put("fecha",         f.getFecha().toString());
+                    data.put("optometrista",  f.getOptometrista() != null
+                            ? f.getOptometrista().getNombreCompleto() : "—");
+                    data.put("odEsfera",      f.getOdEsfera()   != null ? f.getOdEsfera().toPlainString()   : "—");
+                    data.put("odCilindro",    f.getOdCilindro() != null ? f.getOdCilindro().toPlainString() : "—");
+                    data.put("odEje",         f.getOdEje()      != null ? f.getOdEje().toString()           : "—");
+                    data.put("odAdicion",     f.getOdAdicion()  != null ? f.getOdAdicion().toPlainString()  : "—");
+                    data.put("oiEsfera",      f.getOiEsfera()   != null ? f.getOiEsfera().toPlainString()   : "—");
+                    data.put("oiCilindro",    f.getOiCilindro() != null ? f.getOiCilindro().toPlainString() : "—");
+                    data.put("oiEje",         f.getOiEje()      != null ? f.getOiEje().toString()           : "—");
+                    data.put("oiAdicion",     f.getOiAdicion()  != null ? f.getOiAdicion().toPlainString()  : "—");
+                    data.put("detalleLentes", f.getDetalleLentes() != null ? f.getDetalleLentes() : "");
+                    data.put("observaciones", f.getObservaciones() != null ? f.getObservaciones() : "");
+                    return ResponseEntity.ok(data);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ─── API: buscar fichas por nombre ────────────────────────────
+    @GetMapping("/api/fichas/buscar")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> buscarFichas(@RequestParam String q) {
+        var fichas = fichaRepo.findAll().stream()
+                .filter(f -> f.getCliente().getNombre().toLowerCase().contains(q.toLowerCase())
+                          || String.valueOf(f.getIdFicha()).contains(q))
+                .limit(10)
+                .map(f -> {
+                    Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("idFicha",      f.getIdFicha());
+                    m.put("cliente",      f.getCliente().getNombre());
+                    m.put("fecha",        f.getFecha().toString());
+                    m.put("optometrista", f.getOptometrista() != null
+                            ? f.getOptometrista().getNombreCompleto() : "—");
+                    return m;
+                })
+                .toList();
+        return ResponseEntity.ok(fichas);
+    }
+
+    // ─── REGISTRAR VENTA ──────────────────────────────────────────
     @PostMapping("/registrar")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registrar(
@@ -110,27 +178,22 @@ public class VentaController {
 
             if (idSuc == null) {
                 return ResponseEntity.badRequest().body(Map.of(
-                        "ok",    false,
-                        "error", "El usuario no tiene sucursal asignada."
-                ));
+                        "ok", false, "error", "El usuario no tiene sucursal asignada."));
             }
 
             Venta venta = ventaService.registrar(req, idSuc, usuario.getIdUsuario());
             return ResponseEntity.ok(Map.of(
-                    "ok",      true,
+                    "ok", true,
                     "factura", venta.getNumeroFactura(),
                     "idVenta", venta.getIdVenta(),
                     "total",   venta.getTotal()
             ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "ok",    false,
-                    "error", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
         }
     }
 
-    // ─── DETALLE (para modal) ─────────────────────────────────────
+    // ─── DETALLE (modal) ──────────────────────────────────────────
     @GetMapping("/detalle/{id}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> detalle(@PathVariable Integer id) {
@@ -157,7 +220,6 @@ public class VentaController {
                     info.put("total",       v.getTotal());
                     info.put("estado",      v.getEstado());
                     info.put("observacion", v.getObservacion() != null ? v.getObservacion() : "");
-
                     return ResponseEntity.ok(Map.<String, Object>of("info", info, "items", items));
                 })
                 .orElse(ResponseEntity.notFound().build());
