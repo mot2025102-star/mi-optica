@@ -57,6 +57,14 @@
             <span class="sidebar-item-text">Ventas</span>
         </a>
 
+        <a th:href="@{/ventas/cotizacion}"
+           sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR')"
+           class="sidebar-item"
+           th:classappend="${activePage == 'cotizacion'} ? ' active' : ''">
+            <span class="sidebar-item-icon">💰</span>
+            <span class="sidebar-item-text">Cotización</span>
+        </a>
+
         
 
         
