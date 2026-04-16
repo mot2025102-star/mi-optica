@@ -1,7 +1,6 @@
 package com.mioptica.repository;
 
 import com.mioptica.model.Venta;
-import com.mioptica.model.ReciboCaja;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -79,4 +78,24 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
     Long countPeriodo(@Param("fi") LocalDate fi,
                       @Param("ff") LocalDate ff,
                       @Param("idSuc") Integer idSuc);
+
+    // ── Detalle de ventas (tab Detalle) ────────────────────────────
+    @Query("SELECT v.numeroFactura, v.fecha, v.usuario.nombreCompleto, " +
+           "COALESCE(d.producto.categoria.nombre,'Sin categoría'), " +
+           "d.producto.detalle, SUM(d.cantidad), SUM(d.subtotal), v.estado " +
+           "FROM DetalleVenta d JOIN d.venta v " +
+           "WHERE v.fecha BETWEEN :fi AND :ff " +
+           "AND v.estado != 'Anulada' " +
+           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
+           "AND (:idCat = 0 OR d.producto.categoria.idCategoria = :idCat) " +
+           "AND (:idVend = 0 OR v.usuario.idUsuario = :idVend) " +
+           "GROUP BY v.idVenta, v.numeroFactura, v.fecha, " +
+           "v.usuario.nombreCompleto, d.producto.categoria.nombre, " +
+           "d.producto.detalle, v.estado " +
+           "ORDER BY v.fecha DESC, v.idVenta DESC")
+    List<Object[]> detalleVentas(@Param("fi") LocalDate fi,
+                                 @Param("ff") LocalDate ff,
+                                 @Param("idSuc") Integer idSuc,
+                                 @Param("idCat") Integer idCat,
+                                 @Param("idVend") Integer idVend);
 }

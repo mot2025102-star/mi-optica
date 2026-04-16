@@ -26,9 +26,19 @@
         <!-- Form oculto con todos los hiddens -->
         <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"
               onsubmit="return sincronizarYValidar()">
+            <input type="hidden" name="existencia_1" id="hExistencia_1" value="0">
+            <input type="hidden" name="costo_1"      id="hCosto_1"      value="0">
+            <input type="hidden" name="precio_1"     id="hPrecio_1"     value="0">
+            <input type="hidden" name="existencia_2" id="hExistencia_2" value="0">
+            <input type="hidden" name="costo_2"      id="hCosto_2"      value="0">
+            <input type="hidden" name="precio_2"     id="hPrecio_2"     value="0">
+              <!-- Agrega esto dentro del form id="formPrincipal" -->
+            <input type="hidden" id="sucActiva_1" name="sucActiva_1" value="0">
+            <input type="hidden" id="sucActiva_2" name="sucActiva_2" value="0">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <input type="hidden" name="idProducto"                     th:value="${producto.idProducto}"/>
-            <input type="hidden" id="hTipo"      name="tipoProducto"   th:value="${producto.tipoProducto}"/>
+                <!-- DESPUÉS -->
+            <input type="hidden" id="hTipo" name="tipoProducto" th:value="${producto.tipoProducto != null and producto.tipoProducto != 'GENERAL'} ? ${producto.tipoProducto} : ''"/>
             <input type="hidden" id="hCodigo"    name="codigo"         th:value="${producto.codigo}"/>
             <input type="hidden" id="hDetalle"   name="detalle"        th:value="${producto.detalle}"/>
             <input type="hidden" id="hDesc"      name="descripcion"    th:value="${producto.descripcion}"/>
@@ -146,9 +156,9 @@
                         </label>
                         <div th:id="'divA'+${s.idSucursal}" style="display:none">
                             <div class="form-row form-row-3">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:name="'existencia_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:name="'costo_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:name="'precio_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number"  class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number"  class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
                             </div>
                         </div>
                     </div>
@@ -236,9 +246,9 @@
                         </label>
                         <div th:id="'divL'+${s.idSucursal}" style="display:none">
                             <div class="form-row form-row-3">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:name="'existencia_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:name="'costo_'+${s.idSucursal}" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:name="'precio_'+${s.idSucursal}" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
                             </div>
                         </div>
                     </div>
@@ -318,9 +328,9 @@
                         </label>
                         <div th:id="'divO'+${s.idSucursal}" style="display:none">
                             <div class="form-row form-row-3">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:name="'existencia_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:name="'costo_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:name="'precio_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
                             </div>
                         </div>
                     </div>
@@ -358,8 +368,13 @@ const CAMPOS = {
     ACCESORIO:{ codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO', color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO', categoria:null, modelo:null,       tipoL:null, matL:null, tratL:null },
 };
  
+// DESPUÉS
 document.addEventListener('DOMContentLoaded', () => {
-    if (tipoInicial && tipoInicial !== '') seleccionarTipo(tipoInicial);
+    if (tipoInicial && tipoInicial !== '' && tipoInicial !== 'GENERAL') {
+        seleccionarTipo(tipoInicial);
+    } else {
+        document.getElementById('panelTipos').style.display = 'block';
+    }
 });
  
 function seleccionarTipo(tipo) {
@@ -392,6 +407,7 @@ function cambiarTipo() {
 }
  
 function sincronizarYValidar() {
+    
     const tipo   = document.getElementById('hTipo').value;
     const alerta = document.getElementById('alertaValidacion');
  
@@ -422,6 +438,25 @@ function sincronizarYValidar() {
     document.getElementById('hTratL').value     = c.tratL    ? (document.getElementById(c.tratL)?.value    || '') : '';
  
     alerta.style.display = 'none';
+        // Copiar valores de stock del panel activo a los hiddens
+    [1, 2].forEach(sid => {
+        const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
+        const pre = prefijos[tipo] || 'O';
+        const divId = 'div' + pre + sid;
+        const div = document.getElementById(divId);
+        if (div) {
+            const exEl = div.querySelector('input[type="number"]:nth-child(1)');
+            const coEl = div.querySelector('.form-row input:nth-child(1)');
+            
+            // Buscar por posición dentro del div
+            const nums = div.querySelectorAll('input[type="number"]');
+            if (nums.length >= 3) {
+                document.getElementById('hExistencia_' + sid).value = nums[0].value || 0;
+                document.getElementById('hCosto_' + sid).value      = nums[1].value || 0;
+                document.getElementById('hPrecio_' + sid).value     = nums[2].value || 0;
+            }
+        }
+    });
     return true;
 }
  
@@ -448,7 +483,19 @@ async function consultarPrecio() {
 }
  
 function toggleStock(chk, divId) {
-    document.getElementById(divId).style.display = chk.checked ? 'block' : 'none';
+    const div = document.getElementById(divId);
+    div.style.display = chk.checked ? 'block' : 'none';
+    
+    // Mover inputs fuera del div oculto al form directamente
+    const sid = chk.id.replace(/chk[ALO]/, '');
+    const hidden = document.getElementById('sucActiva_' + sid);
+    if (hidden) hidden.value = chk.checked ? '1' : '0';
+    
+    // Forzar que los inputs se incluyan en el submit
+    const inputs = div.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.disabled = false; // Asegurarse que nunca estén disabled
+    });
 }
  
 async function agregarCategoria(selectId) {

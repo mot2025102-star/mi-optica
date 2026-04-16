@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head('Nueva Orden de Lab')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">🔬 Nueva Orden de Laboratorio</div>
+            <div class="topbar-sub">Complete todos los datos clínicos</div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/ordenes-lab}" class="btn btn-secondary">← Volver</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div id="alertaError" class="alert alert-danger" style="display:none"></div>
+
+        <!-- Datos del Cliente -->
+        <div class="card mb-3">
+            <div class="card-header"><div class="card-title">👤 Datos del Cliente</div></div>
+            <div class="card-body" style="padding:16px 20px">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+                    <div>
+                        <label class="form-label">Cliente</label>
+                        <select id="idCliente" class="form-select">
+                            <option value="">— Consumidor Final (CF) —</option>
+                            <option th:each="c : ${clientes}"
+                                    th:value="${c.idCliente}"
+                                    th:text="${c.nombre} + (${c.nit != null} ? ' | ' + ${c.nit} : '')">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datos Clínicos -->
+        <div class="card mb-3">
+            <div class="card-header"><div class="card-title">👁️ Datos Clínicos</div></div>
+            <div class="card-body" style="padding:16px 20px;overflow-x:auto">
+                <table class="table table-sm" style="min-width:700px">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">Ojo</th>
+                            <th>Esfera</th><th>Cilindro</th><th>Eje</th><th>Add</th>
+                            <th>D.I.P</th><th>NDPOD</th><th>NDPOI</th><th>Altura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-600 text-turquesa">OD</td>
+                            <td><input id="odEsfera"   class="form-control form-control-sm" placeholder="0.00"></td>
+                            <td><input id="odCilindro" class="form-control form-control-sm" placeholder="0.00"></td>
+                            <td><input id="odEje"      class="form-control form-control-sm" placeholder="0"></td>
+                            <td><input id="odAdd"      class="form-control form-control-sm" placeholder="0.00"></td>
+                            <td><input id="odDip"      class="form-control form-control-sm" placeholder="0.0"></td>
+                            <td><input id="odNdpod"    class="form-control form-control-sm" placeholder="0.0"></td>
+                            <td><input id="odNdpoi"    class="form-control form-control-sm" placeholder="0.0"></td>
+                            <td><input id="odAltura"   class="form-control form-control-sm" placeholder="0.0"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-600 text-turquesa">OI</td>
+                            <td><input id="oiEsfera"   class="form-control form-control-sm" placeholder="0.00"></td>
+                            <td><input id="oiCilindro" class="form-control form-control-sm" placeholder="0.00"></td>
+                            <td><input id="oiEje"      class="form-control form-control-sm" placeholder="0"></td>
+                            <td><input id="oiAdd"      class="form-control form-control-sm" placeholder="0.00"></td>
+                            <td><input id="oiDip"      class="form-control form-control-sm" placeholder="0.0"></td>
+                            <td><input id="oiNdpod"    class="form-control form-control-sm" placeholder="0.0"></td>
+                            <td><input id="oiNdpoi"    class="form-control form-control-sm" placeholder="0.0"></td>
+                            <td><input id="oiAltura"   class="form-control form-control-sm" placeholder="0.0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <label class="form-label mb-0">Pantoscópico</label>
+                        <input id="pantoscopico" class="form-control form-control-sm" style="width:80px" placeholder="°">
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <label class="form-label mb-0">Vertex</label>
+                        <input id="vertex" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <label class="form-label mb-0">Panorámico</label>
+                        <input id="panoramico" class="form-control form-control-sm" style="width:80px" placeholder="°">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos Solicitados -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <div class="card-title">📦 Productos Solicitados</div>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFila()">➕ Agregar fila</button>
+            </div>
+            <div class="card-body" style="padding:0;overflow-x:auto">
+                <table class="table" id="tblProductos">
+                    <thead>
+                        <tr>
+                            <th>Código</th><th>Cantidad</th><th>Descripción</th>
+                            <th>Material</th><th>Tratamiento</th><th>Color/Tinte</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyProductos">
+                        <!-- filas dinámicas -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Proceso y Entrega -->
+        <div class="card mb-3">
+            <div class="card-header"><div class="card-title">🚚 Proceso y Entrega</div></div>
+            <div class="card-body" style="padding:16px 20px">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+                    <div>
+                        <label class="form-label">Fecha Envío al Laboratorio</label>
+                        <input type="date" id="fechaEnvioLab" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">Fecha Estimada de Entrega</label>
+                        <input type="date" id="fechaEntregaEst" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">Observaciones</label>
+                        <textarea id="observaciones" class="form-control" rows="2"
+                                  placeholder="Instrucciones especiales..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+            <a th:href="@{/ordenes-lab}" class="btn btn-secondary">Cancelar</a>
+            <button class="btn btn-primary" onclick="guardarOrden()">💾 Guardar Orden</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
+    const CSRF_HEADER = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
+    /*]]>*/
+
+    // ── Tabla de productos dinámica ────────────────────────────────
+    let filaIdx = 0;
+
+    function agregarFila() {
+        const tr = document.createElement('tr');
+        tr.id = 'fila-' + filaIdx;
+        tr.innerHTML = `
+            <td><input class="form-control form-control-sm p-codigo" placeholder="Ej: LN-001"></td>
+            <td><input type="number" min="1" value="1" class="form-control form-control-sm p-cantidad" style="width:70px"></td>
+            <td><input class="form-control form-control-sm p-descripcion" placeholder="Descripción del lente"></td>
+            <td><input class="form-control form-control-sm p-material" placeholder="CR-39, Policarbonato..."></td>
+            <td><input class="form-control form-control-sm p-tratamiento" placeholder="AR, UV, Fotocromático..."></td>
+            <td><input class="form-control form-control-sm p-color" placeholder="Transparente, Gris..."></td>
+            <td><button class="btn btn-sm btn-danger" onclick="quitarFila(${filaIdx})">🗑️</button></td>
+        `;
+        document.getElementById('bodyProductos').appendChild(tr);
+        filaIdx++;
+    }
+
+    function quitarFila(idx) {
+        document.getElementById('fila-' + idx)?.remove();
+    }
+
+    // ── Guardar orden ──────────────────────────────────────────────
+    async function guardarOrden() {
+        const v = id => document.getElementById(id)?.value?.trim() || null;
+
+        // Recolectar productos
+        const productos = [];
+        document.querySelectorAll('#bodyProductos tr').forEach(tr => {
+            productos.push({
+                codigo:      tr.querySelector('.p-codigo')?.value?.trim()    || '',
+                cantidad:    parseInt(tr.querySelector('.p-cantidad')?.value) || 1,
+                descripcion: tr.querySelector('.p-descripcion')?.value?.trim() || '',
+                material:    tr.querySelector('.p-material')?.value?.trim()   || '',
+                tratamiento: tr.querySelector('.p-tratamiento')?.value?.trim()|| '',
+                colorTinte:  tr.querySelector('.p-color')?.value?.trim()      || ''
+            });
+        });
+
+        const payload = {
+            idCliente:             parseInt(v('idCliente')) || null,
+            odEsfera:   v('odEsfera'),   odCilindro: v('odCilindro'),
+            odEje:      v('odEje'),      odAdd:      v('odAdd'),
+            odDip:      v('odDip'),      odNdpod:    v('odNdpod'),
+            odNdpoi:    v('odNdpoi'),    odAltura:   v('odAltura'),
+            oiEsfera:   v('oiEsfera'),   oiCilindro: v('oiCilindro'),
+            oiEje:      v('oiEje'),      oiAdd:      v('oiAdd'),
+            oiDip:      v('oiDip'),      oiNdpod:    v('oiNdpod'),
+            oiNdpoi:    v('oiNdpoi'),    oiAltura:   v('oiAltura'),
+            pantoscopico: v('pantoscopico'),
+            vertex:       v('vertex'),
+            panoramico:   v('panoramico'),
+            fechaEnvioLab:          v('fechaEnvioLab')  || null,
+            fechaEntregaEstimada:   v('fechaEntregaEst') || null,
+            observaciones:          v('observaciones'),
+            productos
+        };
+
+        try {
+            const resp = await fetch('/ordenes-lab/registrar', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: CSRF_TOKEN },
+                body:    JSON.stringify(payload)
+            });
+            const data = await resp.json();
+            if (data.ok) {
+                window.location.href = '/ordenes-lab?nuevo=' + data.numero;
+            } else {
+                mostrarError(data.error);
+            }
+        } catch (e) {
+            mostrarError('Error de conexión: ' + e.message);
+        }
+    }
+
+    function mostrarError(msg) {
+        const el = document.getElementById('alertaError');
+        el.textContent = '❌ ' + msg;
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Agregar una fila vacía al cargar
+    agregarFila();
+</script>
+</body>
+</html>

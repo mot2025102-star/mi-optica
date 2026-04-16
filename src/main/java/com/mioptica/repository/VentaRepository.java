@@ -1,5 +1,6 @@
 package com.mioptica.repository;
 
+import com.mioptica.model.Inventario;
 import com.mioptica.model.Venta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

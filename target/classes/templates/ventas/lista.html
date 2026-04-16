@@ -130,7 +130,9 @@
                             <td>
                                 <div class="d-flex gap-1">
                                     <button class="btn btn-sm btn-secondary"
-                                        th:onclick="'verDetalle(' + ${v.idVenta} + ',\'' + ${v.numeroFactura} + '\')'">
+                                        th:data-id="${v.idVenta}"
+                                        th:data-num="${v.numeroFactura}"
+                                        onclick="verDetalle(this.dataset.id, this.dataset.num)">
                                     👁️
                                     </button>
                                     <a th:href="@{/ventas/factura/{id}(id=${v.idVenta})}"

@@ -17,6 +17,10 @@
         </div>
         <div class="topbar-actions">
             <a th:href="@{/corte-caja}" class="btn btn-secondary">🏧 Corte de Caja</a>
+            <a th:href="@{/reportes/exportar/excel(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
+               class="btn btn-secondary">📥 Excel</a>
+            <a th:href="@{/reportes/exportar/pdf(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
+               class="btn btn-secondary">📄 PDF</a>
             <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
         </div>
     </div>
@@ -50,6 +54,32 @@
                                     th:value="${s.idSucursal}"
                                     th:text="${s.nombre}"
                                     th:selected="${idSucursal == s.idSucursal}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por categoría -->
+                    <div style="min-width:160px">
+                        <label class="form-label">Categoría</label>
+                        <select name="idCategoria" class="form-select">
+                            <option value="0" th:selected="${idCategoria==0}">Todas</option>
+                            <option th:each="c : ${categorias}"
+                                    th:value="${c.idCategoria}"
+                                    th:text="${c.nombre}"
+                                    th:selected="${idCategoria == c.idCategoria}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por vendedor -->
+                    <div style="min-width:160px">
+                        <label class="form-label">Vendedor</label>
+                        <select name="idVendedor" class="form-select">
+                            <option value="0" th:selected="${idVendedor==0}">Todos</option>
+                            <option th:each="v : ${vendedores}"
+                                    th:value="${v.idUsuario}"
+                                    th:text="${v.nombreCompleto}"
+                                    th:selected="${idVendedor == v.idUsuario}">
                             </option>
                         </select>
                     </div>
@@ -105,17 +135,21 @@
 
         <!-- Tabs -->
         <div style="display:flex;gap:4px;margin-bottom:16px" class="no-print">
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},tab='productos')}"
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='productos')}"
                th:class="${tab=='productos'} ? 'btn btn-primary' : 'btn btn-secondary'">
                 📦 Por producto
             </a>
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},tab='vendedor')}"
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='vendedor')}"
                th:class="${tab=='vendedor'} ? 'btn btn-primary' : 'btn btn-secondary'">
                 🛍️ Por vendedor
             </a>
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},tab='categoria')}"
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='categoria')}"
                th:class="${tab=='categoria'} ? 'btn btn-primary' : 'btn btn-secondary'">
                 🏷️ Por categoría
+            </a>
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='detalle')}"
+               th:class="${tab=='detalle'} ? 'btn btn-primary' : 'btn btn-secondary'">
+                📋 Detalle
             </a>
         </div>
 
@@ -145,9 +179,7 @@
                             <tr th:each="f, i : ${datos.porProducto}">
                                 <td class="text-gris text-sm" th:text="${i.index + 1}"></td>
                                 <td class="fw-600" th:text="${f.etiqueta}"></td>
-                                <td style="text-align:center"
-                                    th:text="${f.cantidad}">
-                                </td>
+                                <td style="text-align:center" th:text="${f.cantidad}"></td>
                                 <td style="text-align:right" class="fw-600 text-verde"
                                     th:text="'Q' + ${#numbers.formatDecimal(f.total,1,'COMMA',2,'POINT')}">
                                 </td>
@@ -267,10 +299,61 @@
             </div>
         </div>
 
+        <!-- ── Tab Detalle ── -->
+        <div th:if="${tab == 'detalle'}">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📋 Detalle de ventas</div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>N° Factura</th>
+                                <th>Fecha</th>
+                                <th>Vendedor</th>
+                                <th>Categoría</th>
+                                <th>Producto / Modelo</th>
+                                <th style="text-align:center">Cant.</th>
+                                <th style="text-align:right">Total Q</th>
+                                <th>Forma pago</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${datos.detalleVentas == null or datos.detalleVentas.isEmpty()}">
+                                <td colspan="8" style="text-align:center;padding:40px;color:var(--gris-texto)">
+                                    Sin ventas en el período.
+                                </td>
+                            </tr>
+                            <tr th:each="d : ${datos.detalleVentas}">
+                                <td class="fw-600 text-turquesa" th:text="${d.numeroFactura}"></td>
+                                <td class="text-sm" th:text="${#temporals.format(d.fecha,'dd/MM/yyyy')}"></td>
+                                <td th:text="${d.vendedor}"></td>
+                                <td>
+                                    <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(39,194,201,0.12);color:var(--turquesa)"
+                                          th:text="${d.categoria}">
+                                    </span>
+                                </td>
+                                <td class="fw-600" th:text="${d.producto}"></td>
+                                <td style="text-align:center" th:text="${d.cantidad}"></td>
+                                <td style="text-align:right" class="text-verde fw-600"
+                                    th:text="'Q' + ${#numbers.formatDecimal(d.precioVenta,1,'COMMA',2,'POINT')}">
+                                </td>
+                                <td>
+                                    <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(251,191,36,0.12);color:var(--amarillo)"
+                                          th:text="${d.formaPago}">
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- Chart.js desde CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script th:inline="javascript">
