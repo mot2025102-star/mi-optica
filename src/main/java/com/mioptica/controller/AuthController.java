@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController { 
 
     private final UsuarioRepository usuarioRepo;
     private final InventarioRepository inventarioRepo;
