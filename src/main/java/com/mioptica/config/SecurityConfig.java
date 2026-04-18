@@ -2,6 +2,7 @@ package com.mioptica.config;
 
 import com.mioptica.security.UsuarioDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 import java.util.List;
 
@@ -24,7 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Ahora sí estamos usando esta variable para quitar la advertencia amarilla
     private final UsuarioDetailsService usuarioDetailsService;
 
     @Bean
@@ -41,14 +42,31 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(usuarioDetailsService); // Se usa la variable aquí
+        authProvider.setUserDetailsService(usuarioDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return new ProviderManager(List.of(authProvider));
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {   //quién puede entrar a qué URL
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        /*
+         * CSRF con cookie en vez de sesión HTTP.
+         * Así cuando el logout destruye la sesión, el CSRF token
+         * sigue disponible en la cookie y el formulario de login
+         * puede submittear correctamente con el nuevo token.
+         */
+        CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+
         http
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(csrfRepo)
+                .csrfTokenRequestHandler(requestHandler)
+            )
+            .headers(headers -> headers
+                .cacheControl(cache -> {})
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                 .requestMatchers("/login", "/login-error").permitAll()
@@ -66,6 +84,10 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
             );
 
@@ -78,6 +100,4 @@ public class SecurityConfig {
             response.sendRedirect(request.getContextPath() + "/dashboard");
         };
     }
-    
-
 }
