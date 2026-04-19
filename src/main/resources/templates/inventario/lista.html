@@ -172,7 +172,7 @@
                                             th:data-precio="${inv.precioVenta ?: 0}"
                                             th:data-nombre="${inv.producto.detalle}"
                                             onclick="abrirAjusteBtn(this)">
-                                        🔧
+                                        
                                     </button>
                                     <!-- Traslado rápido -->
                                     <a th:href="@{/traslados(pid=${inv.producto.idProducto},ori=${inv.sucursal.idSucursal})}"
