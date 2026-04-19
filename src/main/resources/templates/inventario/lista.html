@@ -10,21 +10,21 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">📊 Inventario</div>
+            <div class="topbar-title"> Inventario</div>
             <div class="topbar-sub"
                  th:text="${esAdmin} ? 'Todas las sucursales' : 'Tu sucursal'">
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/kardex}" class="btn btn-secondary">📈 Ver Kardex</a>
-            <a th:href="@{/traslados}" class="btn btn-secondary">🔄 Traslados</a>
+            <a th:href="@{/kardex}" class="btn btn-secondary"> Ver Kardex</a>
+            <a th:href="@{/traslados}" class="btn btn-secondary"> Traslados</a>
         </div>
     </div>
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success">✅ <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"> ❌ <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats clicables -->
         <div class="stats-grid">
@@ -54,7 +54,7 @@
             </div>
             <div class="stat-card" style="cursor:pointer"
                  th:onclick="'window.location=\'/inventario\''">
-                <div class="stat-icon turquesa">📦</div>
+                <div class="stat-icon turquesa"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${items.size()}">0</div>
                     <div class="stat-label">Total registros</div>
@@ -64,7 +64,7 @@
 
         <!-- Alerta si viene filtrado por producto -->
         <div th:if="${pid > 0}" class="alert alert-info">
-            📦 Mostrando solo el producto seleccionado.
+             Mostrando solo el producto seleccionado.
             <a th:href="@{/inventario}" style="color:var(--turquesa);font-weight:600">✖ Quitar filtro</a>
         </div>
 
@@ -72,7 +72,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title"
-                     th:text="'📋 ' + ${items.size()} + ' registro(s)'">
+                     th:text="' ' + ${items.size()} + ' registro(s)'">
                 </div>
                 <div class="d-flex gap-1">
                     <input type="text" class="form-control" style="width:200px"
@@ -104,7 +104,7 @@
                     <tbody>
                         <tr th:if="${items.isEmpty()}">
                             <td colspan="8" style="text-align:center;padding:50px;color:var(--gris-texto)">
-                                <div style="font-size:40px">📦</div>
+                                <div style="font-size:40px"></div>
                                 <div style="margin-top:10px">Sin registros de inventario.</div>
                             </td>
                         </tr>
@@ -160,7 +160,7 @@
                                             th:data-id="${inv.producto.idProducto}"
                                             th:data-nombre="${inv.producto.detalle}"
                                             onclick="verKardexBtn(this)">
-                                        📈
+                                        
                                     </button>
                                     <!-- Ajuste manual (solo Admin) -->
                                     <button sec:authorize="hasRole('ADMINISTRADOR')"
@@ -176,7 +176,7 @@
                                     </button>
                                     <!-- Traslado rápido -->
                                     <a th:href="@{/traslados(pid=${inv.producto.idProducto},ori=${inv.sucursal.idSucursal})}"
-                                       class="btn btn-sm btn-secondary" title="Trasladar">🔄</a>
+                                       class="btn btn-sm btn-secondary" title="Trasladar"></a>
                                 </div>
                             </td>
                         </tr>
@@ -191,7 +191,7 @@
 <div class="modal-overlay" id="modalAjuste">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">🔧 Ajuste Manual de Stock</div>
+            <div class="modal-title"> Ajuste Manual de Stock</div>
             <button class="modal-close" onclick="document.getElementById('modalAjuste').classList.remove('show')">✕</button>
         </div>
         <form th:action="@{/inventario/ajustar}" method="post">
@@ -236,7 +236,7 @@
                         onclick="document.getElementById('modalAjuste').classList.remove('show')">
                     Cancelar
                 </button>
-                <button type="submit" class="btn btn-primary">💾 Aplicar Ajuste</button>
+                <button type="submit" class="btn btn-primary"> Aplicar Ajuste</button>
             </div>
         </form>
     </div>
@@ -246,11 +246,11 @@
 <div class="modal-overlay" id="modalKardex">
     <div class="modal modal-lg">
         <div class="modal-header">
-            <div class="modal-title" id="kardexTitle">📈 Kardex</div>
+            <div class="modal-title" id="kardexTitle"> Kardex</div>
             <button class="modal-close" onclick="document.getElementById('modalKardex').classList.remove('show')">✕</button>
         </div>
         <div class="modal-body" id="kardexBody">
-            <div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳</div>
+            <div style="text-align:center;padding:30px;color:var(--gris-texto)"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="document.getElementById('modalKardex').classList.remove('show')">Cerrar</button>
@@ -286,9 +286,9 @@ function abrirAjuste(idProd, idSuc, exist, costo, precio, nombre) {
 }
 
 async function verKardex(idProd, nombre) {
-    document.getElementById('kardexTitle').textContent = '📈 ' + nombre;
+    document.getElementById('kardexTitle').textContent = ' ' + nombre;
     document.getElementById('kardexBody').innerHTML =
-        '<div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳ Cargando...</div>';
+        '<div style="text-align:center;padding:30px;color:var(--gris-texto)"> Cargando...</div>';
     document.getElementById('modalKardex').classList.add('show');
 
     const r = await fetch('/inventario/kardex/' + idProd);
@@ -301,11 +301,11 @@ async function verKardex(idProd, nombre) {
     }
 
     const TIPOS = {
-        'Entrada':         { icon:'📥', cls:'badge-success'  },
-        'Salida':          { icon:'📤', cls:'badge-danger'   },
-        'Traslado_Entrada':{ icon:'⬅️', cls:'badge-info'     },
-        'Traslado_Salida': { icon:'➡️', cls:'badge-warning'  },
-        'Ajuste':          { icon:'🔧', cls:'badge-secondary'},
+        'Entrada':         { icon:'', cls:'badge-success'  },
+        'Salida':          { icon:'', cls:'badge-danger'   },
+        'Traslado_Entrada':{ icon:'', cls:'badge-info'     },
+        'Traslado_Salida': { icon:'', cls:'badge-warning'  },
+        'Ajuste':          { icon:'', cls:'badge-secondary'},
     };
 
     let h = '<div class="table-wrapper"><table class="table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Sucursal</th><th>Ref.</th><th style="text-align:center">Cant.</th><th style="text-align:center">Ant.</th><th style="text-align:center">Nueva</th></tr></thead><tbody>';

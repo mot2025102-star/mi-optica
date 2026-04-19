@@ -3,22 +3,21 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<!-- ─── FRAGMENTO: HEAD ─────────────────────────────────────── -->
 <head th:fragment="head(titulo)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${titulo} + ' — Mi Óptica'">Mi Óptica</title>
-    <meta name="_csrf"        th:content="${_csrf.token}">
+    <title th:text="${titulo + ' — Mi Óptica'}">Mi Óptica</title>
+    <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E👁️%3C/text%3E%3C/svg%3E">
 </head>
 
-<!-- ─── FRAGMENTO: SIDEBAR ──────────────────────────────────── -->
 <div th:fragment="sidebar" class="sidebar">
 
     <div class="sidebar-logo">
-        <div class="sidebar-logo-icon">👁️</div>
+        <div class="sidebar-logo-icon"></div>
         <div class="sidebar-logo-text">
             <div class="sidebar-logo-title">Mi Óptica</div>
             <div class="sidebar-logo-sub">mi mejor visión</div>
@@ -40,10 +39,10 @@
 
         <div class="sidebar-section-label">General</div>
 
-        <a th:href="@{/dashboard}" class="sidebar-item" 
+        <a th:href="@{/dashboard}" class="sidebar-item"
            th:classappend="${activePage == 'dashboard'} ? ' active' : ''">
-            <span class="sidebar-item-icon" >🏠</span>
-            <span class="sidebar-item-text" >Dashboard</span>
+            <span class="sidebar-item-icon"></span>
+            <span class="sidebar-item-text">Dashboard</span>
         </a>
 
         <div class="sidebar-section-label"
@@ -53,7 +52,7 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'ventas'} ? ' active' : ''">
-            <span class="sidebar-item-icon">🧾</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Ventas</span>
         </a>
 
@@ -61,28 +60,24 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'cotizacion'} ? ' active' : ''">
-            <span class="sidebar-item-icon">💰</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Cotización</span>
         </a>
 
-        
-
-        
-        
         <div class="sidebar-section-label"
              sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR','BODEGUERO')">Inventario</div>
 
         <a th:href="@{/productos}" class="sidebar-item"
            th:classappend="${activePage == 'productos'} ? ' active' : ''">
-            <span class="sidebar-item-icon">📦</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Productos</span>
         </a>
 
         <a th:href="@{/inventario}"
-           sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO','CONTADOR', 'VENDEDOR')"
+           sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO','CONTADOR','VENDEDOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'inventario'} ? ' active' : ''">
-            <span class="sidebar-item-icon">📊</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Inventario</span>
         </a>
 
@@ -90,7 +85,7 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','CONTADOR','BODEGUERO','VENDEDOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'kardex'} ? ' active' : ''">
-            <span class="sidebar-item-icon">📈</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Kardex</span>
         </a>
 
@@ -101,7 +96,7 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','OPTOMETRISTA','VENDEDOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'fichas'} ? ' active' : ''">
-            <span class="sidebar-item-icon">👁️</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Fichas Clínicas</span>
         </a>
 
@@ -109,7 +104,7 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','OPTOMETRISTA','VENDEDOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'ordenes-lab'} ? ' active' : ''">
-            <span class="sidebar-item-icon">🔬</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Órdenes Lab</span>
         </a>
 
@@ -117,18 +112,18 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR','CONTADOR','OPTOMETRISTA')"
            class="sidebar-item"
            th:classappend="${activePage == 'clientes'} ? ' active' : ''">
-            <span class="sidebar-item-icon">👥</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Clientes</span>
         </a>
 
         <div class="sidebar-section-label"
-            sec:authorize="hasAnyRole('ADMINISTRADOR','CONTADOR')">Reportes</div>
+             sec:authorize="hasAnyRole('ADMINISTRADOR','CONTADOR')">Reportes</div>
 
         <a th:href="@{/reportes}"
            sec:authorize="hasAnyRole('ADMINISTRADOR','CONTADOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'reportes'} ? ' active' : ''">
-            <span class="sidebar-item-icon">📋</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Reportes</span>
         </a>
 
@@ -136,7 +131,7 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','CONTADOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'corte-caja'} ? ' active' : ''">
-            <span class="sidebar-item-icon">🏧</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Corte de Caja</span>
         </a>
 
@@ -144,11 +139,10 @@
            sec:authorize="hasAnyRole('ADMINISTRADOR','VENDEDOR','CONTADOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'saldos'} ? ' active' : ''">
-            <span class="sidebar-item-icon">💳</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Saldos / Entregas</span>
         </a>
-        
-        
+
         <div class="sidebar-section-label"
              sec:authorize="hasRole('ADMINISTRADOR')">Administración</div>
 
@@ -156,7 +150,7 @@
            sec:authorize="hasRole('ADMINISTRADOR')"
            class="sidebar-item"
            th:classappend="${activePage == 'usuarios'} ? ' active' : ''">
-            <span class="sidebar-item-icon">👤</span>
+            <span class="sidebar-item-icon"></span>
             <span class="sidebar-item-text">Usuarios</span>
         </a>
 
@@ -169,7 +163,7 @@
                     style="width:100%;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--gris-texto);font-size:12px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .12s ease;font-family:var(--font)"
                     onmouseover="this.style.background='rgba(234,84,85,0.1)';this.style.color='#EA5455'"
                     onmouseout="this.style.background='none';this.style.color='var(--gris-texto)'">
-                <span>🚪</span>
+                <span></span>
                 <span>Cerrar sesión</span>
             </button>
         </form>

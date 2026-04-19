@@ -11,7 +11,7 @@
 
     <div class="topbar">
         <div>
-            <div class="topbar-title">💳 Saldos y Entregas Pendientes</div>
+            <div class="topbar-title"> Saldos y Entregas Pendientes</div>
             <div class="topbar-sub"
                  th:text="${esAdmin} ? 'Todas las sucursales' : 'Tu sucursal'">
             </div>
@@ -20,13 +20,13 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success">✅ <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"> ❌ <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon rojo">💰</div>
+                <div class="stat-icon rojo"></div>
                 <div class="stat-info">
                     <div class="stat-value"
                          th:text="'Q' + ${#numbers.formatDecimal(totalDeuda,1,'COMMA',2,'POINT')}">
@@ -35,7 +35,7 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo">📋</div>
+                <div class="stat-icon amarillo"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${saldos.size()}">0</div>
                     <div class="stat-label">Clientes con saldo</div>
@@ -61,7 +61,7 @@
         <div style="display:flex;gap:4px;margin-bottom:16px">
             <a th:href="@{/saldos(tab='saldos')}"
                th:class="${tab=='saldos'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                💰 Saldos Pendientes
+                 Saldos Pendientes
                 <span th:if="${saldos.size() > 0}"
                       style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.2);font-size:11px;font-weight:700;margin-left:6px"
                       th:text="${saldos.size()}">
@@ -69,7 +69,7 @@
             </a>
             <a th:href="@{/saldos(tab='entregas')}"
                th:class="${tab=='entregas'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                📦 Entregas Pendientes
+                 Entregas Pendientes
                 <span th:if="${entregas.size() > 0}"
                       style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.2);font-size:11px;font-weight:700;margin-left:6px"
                       th:text="${entregas.size()}">
@@ -82,7 +82,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title"
-                         th:text="'💰 ' + ${saldos.size()} + ' cliente(s) con saldo pendiente'">
+                         th:text="' ' + ${saldos.size()} + ' cliente(s) con saldo pendiente'">
                     </div>
                     <input type="text" class="form-control" style="width:200px"
                            placeholder="Filtro rápido..." oninput="filtrar('tblS',this.value)">
@@ -106,7 +106,7 @@
                         <tbody>
                             <tr th:if="${saldos.isEmpty()}">
                                 <td colspan="9" style="text-align:center;padding:50px;color:var(--gris-texto)">
-                                    <div style="font-size:40px">✅</div>
+                                    <div style="font-size:40px"></div>
                                     <div style="margin-top:10px;color:var(--verde);font-weight:600">
                                         ¡Sin saldos pendientes!
                                     </div>
@@ -174,7 +174,7 @@
                                 <td>
                                     <button class="btn btn-primary btn-sm"
                                             th:onclick="'abrirPago(' + ${f.idFicha} + ',' + ${f.saldo} + ',\'' + ${f.cliente.nombre} + '\')'">
-                                        💵 Pagar
+                                         Pagar
                                     </button>
                                 </td>
                             </tr>
@@ -199,7 +199,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title"
-                         th:text="'📦 ' + ${entregas.size()} + ' entrega(s) pendiente(s)'">
+                         th:text="' ' + ${entregas.size()} + ' entrega(s) pendiente(s)'">
                     </div>
                     <input type="text" class="form-control" style="width:200px"
                            placeholder="Filtro rápido..." oninput="filtrar('tblE',this.value)">
@@ -232,7 +232,7 @@
                         <tbody>
                             <tr th:if="${entregas.isEmpty()}">
                                 <td colspan="8" style="text-align:center;padding:50px;color:var(--gris-texto)">
-                                    <div style="font-size:40px">✅</div>
+                                    <div style="font-size:40px"></div>
                                     <div style="margin-top:10px;color:var(--verde);font-weight:600">
                                         ¡Sin entregas pendientes!
                                     </div>
@@ -318,7 +318,7 @@
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                             <button type="submit" class="btn btn-sm btn-success"
                                                     title="Marcar como entregado">
-                                                ✅
+                                                
                                             </button>
                                         </form>
 
@@ -326,7 +326,7 @@
                                         <button th:if="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                                                 class="btn btn-sm btn-primary"
                                                 th:onclick="'abrirPago(' + ${f.idFicha} + ',' + ${f.saldo} + ',\'' + ${f.cliente.nombre} + '\')'">
-                                            💵
+                                            
                                         </button>
                                     </div>
                                 </td>
@@ -344,7 +344,7 @@
 <div class="modal-overlay" id="modalPago">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">💵 Registrar Pago</div>
+            <div class="modal-title"> Registrar Pago</div>
             <button class="modal-close"
                     onclick="document.getElementById('modalPago').classList.remove('show')">✕</button>
         </div>
@@ -390,7 +390,7 @@
                     onclick="document.getElementById('modalPago').classList.remove('show')">
                 Cancelar
             </button>
-            <button class="btn btn-primary" onclick="registrarPago()">💾 Registrar Pago</button>
+            <button class="btn btn-primary" onclick="registrarPago()"> Registrar Pago</button>
         </div>
     </div>
 </div>
@@ -453,7 +453,7 @@ function mostrarAlerta(msg, ok) {
     el.style.background  = ok ? 'rgba(40,167,69,0.15)'  : 'rgba(220,53,69,0.15)';
     el.style.border      = ok ? '1px solid rgba(40,167,69,0.3)' : '1px solid rgba(220,53,69,0.3)';
     el.style.color       = ok ? 'var(--verde)' : '#ff6b7a';
-    el.textContent       = (ok ? '✅ ' : '❌ ') + msg;
+    el.textContent       = (ok ? ' ' : ' ') + msg;
 }
 </script>
 

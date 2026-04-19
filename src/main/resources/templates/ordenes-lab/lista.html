@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/ordenes-lab/nueva}" class="btn btn-primary">➕ Nueva Orden</a>
+            <a th:href="@{/ordenes-lab/nueva}" class="btn btn-primary"> Nueva Orden</a>
         </div>
     </div>
 
@@ -42,14 +42,14 @@
                         <label class="form-label">Estado</label>
                         <select name="estado" class="form-select">
                             <option value=""           th:selected="${estadoFiltro==''}">Todos</option>
-                            <option value="Pendiente"  th:selected="${estadoFiltro=='Pendiente'}">⏳ Pendiente</option>
-                            <option value="Enviado"    th:selected="${estadoFiltro=='Enviado'}">📦 Enviado</option>
-                            <option value="Entregado"  th:selected="${estadoFiltro=='Entregado'}">✅ Entregado</option>
-                            <option value="Cancelado"  th:selected="${estadoFiltro=='Cancelado'}">❌ Cancelado</option>
+                            <option value="Pendiente"  th:selected="${estadoFiltro=='Pendiente'}"> Pendiente</option>
+                            <option value="Enviado"    th:selected="${estadoFiltro=='Enviado'}"> Enviado</option>
+                            <option value="Entregado"  th:selected="${estadoFiltro=='Entregado'}"> Entregado</option>
+                            <option value="Cancelado"  th:selected="${estadoFiltro=='Cancelado'}"> Cancelado</option>
                         </select>
                     </div>
                     <div style="display:flex;gap:8px;align-items:flex-end">
-                        <button type="submit" class="btn btn-primary">🔍</button>
+                        <button type="submit" class="btn btn-primary"></button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
                     </div>
@@ -60,7 +60,7 @@
         <!-- Tabla -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title" th:text="'📋 ' + ${ordenes.size()} + ' orden(es)'"></div>
+                <div class="card-title" th:text="' ' + ${ordenes.size()} + ' orden(es)'"></div>
                 <input type="text" class="form-control" style="width:220px"
                        placeholder="Filtro rápido..." oninput="filtrar(this.value)">
             </div>
@@ -81,10 +81,10 @@
                     <tbody>
                         <tr th:if="${ordenes.isEmpty()}">
                             <td colspan="8" style="text-align:center;padding:50px;color:var(--gris-texto)">
-                                <div style="font-size:40px">🔬</div>
+                                <div style="font-size:40px"></div>
                                 <div style="margin-top:10px">Sin órdenes en el período seleccionado.</div>
                                 <a th:href="@{/ordenes-lab/nueva}" class="btn btn-primary btn-sm"
-                                   style="margin-top:12px">➕ Nueva Orden</a>
+                                   style="margin-top:12px"> Nueva Orden</a>
                             </td>
                         </tr>
                         <tr th:each="o : ${ordenes}">
@@ -112,7 +112,7 @@
                                         th:data-id="${o.idOrden}"
                                         th:data-num="${o.numeroOrden}"
                                         onclick="verDetalle(this.dataset.id, this.dataset.num)">
-                                        👁️
+                                        
                                     </button>
                                     <!-- Cambio de estado rápido -->
                                     <select class="form-select form-select-sm"
@@ -120,10 +120,10 @@
                                             th:data-id="${o.idOrden}"
                                             onchange="cambiarEstado(this.dataset.id, this.value)"
                                             th:value="${o.estado}">
-                                        <option value="Pendiente"  th:selected="${o.estado=='Pendiente'}">⏳ Pendiente</option>
-                                        <option value="Enviado"    th:selected="${o.estado=='Enviado'}">📦 Enviado</option>
-                                        <option value="Entregado"  th:selected="${o.estado=='Entregado'}">✅ Entregado</option>
-                                        <option value="Cancelado"  th:selected="${o.estado=='Cancelado'}">❌ Cancelado</option>
+                                        <option value="Pendiente"  th:selected="${o.estado=='Pendiente'}"> Pendiente</option>
+                                        <option value="Enviado"    th:selected="${o.estado=='Enviado'}"> Enviado</option>
+                                        <option value="Entregado"  th:selected="${o.estado=='Entregado'}"> Entregado</option>
+                                        <option value="Cancelado"  th:selected="${o.estado=='Cancelado'}"> Cancelado</option>
                                     </select>
                                 </div>
                             </td>
@@ -139,12 +139,12 @@
 <div class="modal-overlay" id="modalDet">
     <div class="modal modal-lg">
         <div class="modal-header">
-            <div class="modal-title" id="detTitle">🔬 Detalle de Orden</div>
+            <div class="modal-title" id="detTitle"> Detalle de Orden</div>
             <button class="modal-close"
                     onclick="document.getElementById('modalDet').classList.remove('show')">✕</button>
         </div>
         <div class="modal-body" id="detBody">
-            <div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳</div>
+            <div style="text-align:center;padding:30px;color:var(--gris-texto)"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary"
@@ -185,9 +185,9 @@ async function cambiarEstado(id, estado) {
 }
 
 async function verDetalle(id, num) {
-    document.getElementById('detTitle').textContent = '🔬 ' + num;
+    document.getElementById('detTitle').textContent = ' ' + num;
     document.getElementById('detBody').innerHTML =
-        '<div style="text-align:center;padding:30px;color:var(--gris-texto)">⏳ Cargando...</div>';
+        '<div style="text-align:center;padding:30px;color:var(--gris-texto)"> Cargando...</div>';
     document.getElementById('modalDet').classList.add('show');
 
     const r = await fetch('/ordenes-lab/detalle/' + id);
@@ -206,7 +206,7 @@ async function verDetalle(id, num) {
 
     // Datos clínicos
     h += `<div class="card mb-3" style="padding:12px">
-        <div class="fw-600 mb-2">👁️ Datos Clínicos</div>
+        <div class="fw-600 mb-2"> Datos Clínicos</div>
         <table class="table table-sm">
             <thead><tr><th>Ojo</th><th>Esfera</th><th>Cilindro</th><th>Eje</th>
                         <th>Add</th><th>D.I.P</th><th>NDPOD</th><th>NDPOI</th><th>Altura</th></tr></thead>
@@ -230,7 +230,7 @@ async function verDetalle(id, num) {
 
     // Productos
     if (d.productos && d.productos.length > 0) {
-        h += `<div class="fw-600 mb-2">📦 Productos Solicitados</div>
+        h += `<div class="fw-600 mb-2"> Productos Solicitados</div>
         <table class="table"><thead><tr>
             <th>Código</th><th>Cant.</th><th>Descripción</th>
             <th>Material</th><th>Tratamiento</th><th>Color/Tinte</th>

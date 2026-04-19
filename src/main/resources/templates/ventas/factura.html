@@ -2,160 +2,264 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="'Factura ' + ${venta.numeroFactura}">Factura</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${'Factura ' + venta.numeroFactura}">Factura</title>
     <style>
-        *  { margin:0;padding:0;box-sizing:border-box }
-        body { font-family:Arial,sans-serif;background:#f5f5f5;color:#111;font-size:13px }
-        .page { max-width:720px;margin:20px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1) }
-        .header { background:#0a0a0a;color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center }
-        .logo-box { width:52px;height:52px;background:#27C2C9;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px }
-        .factura-num .num { font-size:20px;font-weight:700;color:#27C2C9 }
-        .body { padding:28px 32px }
-        .sec-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#27C2C9;border-bottom:2px solid #27C2C9;padding-bottom:5px;margin-bottom:10px }
-        .info-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px }
-        .info-item label { display:block;font-size:10px;color:#888;text-transform:uppercase;margin-bottom:2px }
-        .info-item span  { font-weight:600 }
-        table  { width:100%;border-collapse:collapse;font-size:12px }
-        th     { padding:8px 10px;background:#f8f8f8;border-bottom:2px solid #27C2C9;font-size:11px;font-weight:700;text-transform:uppercase;color:#555 }
-        td     { padding:8px 10px;border-bottom:1px solid #f0f0f0 }
-        .r     { text-align:right }
-        .tot   { display:flex;justify-content:space-between;gap:40px;font-size:13px;padding:4px 0 }
-        .tot.main { font-size:17px;font-weight:700;color:#27C2C9;border-top:2px solid #27C2C9;padding-top:10px;margin-top:6px }
-        .badge { display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700 }
-        .pagada  { background:#e6f9ee;color:#28a745 }
-        .anulada { background:#ffeef0;color:#dc3545 }
-        .footer  { background:#f8f8f8;border-top:1px solid #eee;padding:12px 32px;display:flex;justify-content:space-between;font-size:11px;color:#888 }
-        .btns    { padding:16px;text-align:center;display:flex;gap:12px;justify-content:center }
-        .btn     { padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:6px }
-        .bp      { background:#27C2C9;color:#000 }
-        .bs      { background:#f0f0f0;color:#333 }
-        @media print { body { background:#fff } .page { box-shadow:none;max-width:100%;margin:0;border-radius:0 } .btns { display:none } }
+        :root{
+            --paper:#ffffff;
+            --ink:#111111;
+            --muted:#6b7280;
+            --line:#d6d6d6;
+            --accent:#d4b27a;
+            --accent-dark:#8f6c3b;
+        }
+
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            font-family:"Courier New", monospace;
+            background:#efefef;
+            color:var(--ink);
+            padding:20px;
+        }
+
+        .sheet{
+            width:80mm;
+            max-width:80mm;
+            margin:0 auto;
+            background:var(--paper);
+            padding:10px 10px 16px;
+            box-shadow:0 8px 30px rgba(0,0,0,.12);
+        }
+
+        .center{text-align:center}
+        .muted{color:var(--muted)}
+        .tiny{font-size:10px}
+        .small{font-size:11px}
+        .normal{font-size:12px}
+        .strong{font-weight:700}
+
+        .brand{
+            border-bottom:1px dashed var(--line);
+            padding-bottom:8px;
+            margin-bottom:10px;
+        }
+
+        .brand h1{
+            font-size:16px;
+            letter-spacing:.08em;
+            margin-bottom:4px;
+        }
+
+        .badge{
+            display:inline-block;
+            padding:2px 8px;
+            border:1px solid var(--accent);
+            color:var(--accent-dark);
+            font-size:10px;
+            margin-top:4px;
+        }
+
+        .meta,
+        .totals,
+        .footer-note{
+            margin-top:10px;
+            border-top:1px dashed var(--line);
+            padding-top:8px;
+        }
+
+        .row{
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:4px;
+            align-items:flex-start;
+        }
+
+        .row .label{
+            color:var(--muted);
+        }
+
+        .items{
+            margin-top:10px;
+            border-top:1px dashed var(--line);
+            border-bottom:1px dashed var(--line);
+            padding:8px 0;
+        }
+
+        .item{
+            padding:6px 0;
+            border-bottom:1px dotted #ececec;
+        }
+
+        .item:last-child{
+            border-bottom:none;
+        }
+
+        .item-name{
+            font-size:12px;
+            font-weight:700;
+            margin-bottom:2px;
+            word-break:break-word;
+        }
+
+        .item-code{
+            font-size:10px;
+            color:var(--muted);
+            margin-bottom:3px;
+        }
+
+        .item-grid{
+            display:grid;
+            grid-template-columns:1fr auto auto auto;
+            gap:6px;
+            font-size:11px;
+            align-items:center;
+        }
+
+        .item-grid span{
+            text-align:right;
+        }
+
+        .item-grid span:first-child{
+            text-align:left;
+        }
+
+        .grand-total{
+            font-size:15px;
+            font-weight:700;
+        }
+
+        .status{
+            display:inline-block;
+            margin-top:6px;
+            padding:2px 8px;
+            border:1px solid #111;
+            font-size:10px;
+        }
+
+        .actions{
+            width:80mm;
+            max-width:80mm;
+            margin:12px auto 0;
+            display:flex;
+            justify-content:center;
+        }
+
+        .print-btn{
+            border:none;
+            background:#111;
+            color:#fff;
+            padding:10px 14px;
+            cursor:pointer;
+            font-size:12px;
+        }
+
+        @page{
+            size:80mm auto;
+            margin:4mm;
+        }
+
+        @media print{
+            body{
+                background:#fff;
+                padding:0;
+            }
+            .sheet{
+                box-shadow:none;
+                margin:0;
+                width:auto;
+                max-width:none;
+            }
+            .actions{
+                display:none;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="page">
 
-    <!-- Header -->
-    <div class="header">
-        <div style="display:flex;align-items:center;gap:14px">
-            <div class="logo-box">👁️</div>
-            <div>
-                <div style="font-size:22px;font-weight:700">Mi Óptica</div>
-                <div style="font-size:11px;color:#27C2C9;text-transform:uppercase;letter-spacing:1px">mi mejor visión</div>
-            </div>
+<div class="sheet">
+    <div class="brand center">
+        <h1>MI ÓPTICA</h1>
+        <div class="small">Factura / Recibo de Venta</div>
+        <div class="badge" th:text="${venta.estado}">Pagada</div>
+    </div>
+
+    <div class="meta normal">
+        <div class="row">
+            <span class="label">Factura</span>
+            <span class="strong" th:text="${venta.numeroFactura}">FAC-0001</span>
         </div>
-        <div style="text-align:right">
-            <div class="factura-num">
-                <div class="num" th:text="${venta.numeroFactura}"></div>
+        <div class="row">
+            <span class="label">Fecha</span>
+            <span th:text="${#temporals.format(venta.fecha,'dd/MM/yyyy')}">18/04/2026</span>
+        </div>
+        <div class="row">
+            <span class="label">Sucursal</span>
+            <span th:text="${venta.sucursal.nombre}">Sucursal Central</span>
+        </div>
+        <div class="row">
+            <span class="label">Vendedor</span>
+            <span th:text="${venta.usuario.nombreCompleto}">Usuario</span>
+        </div>
+        <div class="row">
+            <span class="label">Cliente</span>
+            <span th:text="${venta.cliente != null ? venta.cliente.nombre : 'Consumidor final'}">Consumidor final</span>
+        </div>
+        <div class="row">
+            <span class="label">NIT</span>
+            <span th:text="${venta.cliente != null and venta.cliente.nit != null and !#strings.isEmpty(venta.cliente.nit) ? venta.cliente.nit : 'CF'}">CF</span>
+        </div>
+    </div>
+
+    <div class="items">
+        <div class="item" th:each="detalle : ${venta.detalles}">
+            <div class="item-name" th:text="${detalle.producto.detalle}">Producto</div>
+            <div class="item-code" th:text="${'Código: ' + detalle.producto.codigo}">Código</div>
+            <div class="item-grid">
+                <span>Cant.</span>
+                <span>P/U</span>
+                <span>Desc.</span>
+                <span>Subt.</span>
             </div>
-            <div style="font-size:12px;color:#999;margin-top:4px"
-                 th:text="${#temporals.format(venta.fecha,'dd/MM/yyyy')}">
-            </div>
-            <div style="margin-top:8px">
-                <span th:class="${venta.estado == 'Pagada'} ? 'badge pagada' : 'badge anulada'"
-                      th:text="${venta.estado}">
-                </span>
+            <div class="item-grid" style="margin-top:2px;">
+                <span th:text="${#numbers.formatDecimal(detalle.cantidad,1,'COMMA',2,'POINT')}">1.00</span>
+                <span th:text="${'Q ' + #numbers.formatDecimal(detalle.precioUnitario,1,'COMMA',2,'POINT')}">Q 0.00</span>
+                <span th:text="${'Q ' + #numbers.formatDecimal(detalle.descuento,1,'COMMA',2,'POINT')}">Q 0.00</span>
+                <span th:text="${'Q ' + #numbers.formatDecimal(detalle.subtotal,1,'COMMA',2,'POINT')}">Q 0.00</span>
             </div>
         </div>
     </div>
 
-    <div class="body">
-
-        <!-- Info emisor y cliente -->
-        <div class="info-grid">
-            <div>
-                <div class="sec-title">Emisor</div>
-                <div class="info-item">
-                    <label>Sucursal</label>
-                    <span th:text="${venta.sucursal.nombre}"></span>
-                </div>
-                <div class="info-item" style="margin-top:6px">
-                    <label>Vendedor</label>
-                    <span th:text="${venta.usuario.nombreCompleto}"></span>
-                </div>
-            </div>
-            <div>
-                <div class="sec-title">Cliente</div>
-                <div class="info-item">
-                    <label>Nombre</label>
-                    <span th:text="${venta.cliente != null ? venta.cliente.nombre : 'Consumidor Final'}"></span>
-                </div>
-                <div class="info-item" style="margin-top:6px">
-                    <label>NIT</label>
-                    <span th:text="${venta.cliente != null ? (venta.cliente.nit ?: 'CF') : 'CF'}"></span>
-                </div>
-            </div>
+    <div class="totals normal">
+        <div class="row">
+            <span class="label">Subtotal</span>
+            <span th:text="${'Q ' + #numbers.formatDecimal(venta.subtotal,1,'COMMA',2,'POINT')}">Q 0.00</span>
         </div>
-
-        <!-- Detalle productos -->
-        <div class="sec-title" style="margin-bottom:10px">Detalle de Productos</div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width:80px">Código</th>
-                    <th>Descripción</th>
-                    <th class="r" style="width:60px">Cant.</th>
-                    <th class="r" style="width:90px">Precio</th>
-                    <th class="r" style="width:80px">Desc.</th>
-                    <th class="r" style="width:90px">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="d : ${venta.detalles}">
-                    <td style="color:#27C2C9;font-weight:600" th:text="${d.producto.codigo}"></td>
-                    <td th:text="${d.producto.detalle}"></td>
-                    <td class="r" th:text="${#numbers.formatDecimal(d.cantidad,1,'COMMA',0,'POINT')}"></td>
-                    <td class="r" th:text="'Q' + ${#numbers.formatDecimal(d.precioUnitario,1,'COMMA',2,'POINT')}"></td>
-                    <td class="r" th:text="${d.descuento != null and d.descuento > 0} ? 'Q' + ${#numbers.formatDecimal(d.descuento,1,'COMMA',2,'POINT')} : '—'"></td>
-                    <td class="r" style="font-weight:600" th:text="'Q' + ${#numbers.formatDecimal(d.subtotal,1,'COMMA',2,'POINT')}"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Totales -->
-        <div style="display:flex;flex-direction:column;align-items:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-            <div class="tot">
-                <span style="color:#888">Subtotal:</span>
-                <span>Q<span th:text="${#numbers.formatDecimal(venta.subtotal,1,'COMMA',2,'POINT')}"></span></span>
-            </div>
-            <div class="tot" th:if="${venta.descuento != null and venta.descuento > 0}"
-                 style="color:#fd7e14">
-                <span>Descuento:</span>
-                <span>- Q<span th:text="${#numbers.formatDecimal(venta.descuento,1,'COMMA',2,'POINT')}"></span></span>
-            </div>
-            <div class="tot main">
-                <span>TOTAL:</span>
-                <span>Q<span th:text="${#numbers.formatDecimal(venta.total,1,'COMMA',2,'POINT')}"></span></span>
-            </div>
+        <div class="row" th:if="${venta.descuento != null and venta.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+            <span class="label">Descuento</span>
+            <span th:text="${'- Q ' + #numbers.formatDecimal(venta.descuento,1,'COMMA',2,'POINT')}">- Q 0.00</span>
         </div>
-
-        <!-- Observación -->
-        <div th:if="${venta.observacion != null and !venta.observacion.isEmpty()}"
-             style="margin-top:14px;padding:10px 14px;background:#f8f8f8;border-radius:6px;font-size:12px;color:#555">
-            📝 <span th:text="${venta.observacion}"></span>
-        </div>
-
-        <!-- Firmas -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;padding-top:20px">
-            <div style="text-align:center">
-                <div style="border-top:1px solid #333;padding-top:8px;font-size:12px;color:#555">Firma del vendedor</div>
-            </div>
-            <div style="text-align:center">
-                <div style="border-top:1px solid #333;padding-top:8px;font-size:12px;color:#555">Firma del cliente</div>
-            </div>
+        <div class="row grand-total">
+            <span>TOTAL</span>
+            <span th:text="${'Q ' + #numbers.formatDecimal(venta.total,1,'COMMA',2,'POINT')}">Q 0.00</span>
         </div>
     </div>
 
-    <div class="footer">
-        <span>👁️ Mi Óptica — mi mejor visión</span>
-        <span th:text="'Generado: ' + ${#temporals.format(#temporals.createNow(),'dd/MM/yyyy HH:mm')}"></span>
-        <span th:text="${venta.numeroFactura}"></span>
+    <div class="footer-note center small" th:if="${venta.observacion != null and !#strings.isEmpty(venta.observacion)}">
+        <div class="strong" style="margin-bottom:4px;">Observación</div>
+        <div th:text="${venta.observacion}">Sin observaciones</div>
     </div>
 
-    <div class="btns">
-        <button class="btn bp" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-        <button class="btn bs" onclick="window.close()">✖ Cerrar</button>
+    <div class="footer-note center tiny">
+        <div>Gracias por su compra</div>
+        <div>Conserve este comprobante</div>
     </div>
 </div>
+
+<div class="actions">
+    <button class="print-btn" onclick="window.print()">Imprimir</button>
+</div>
+
 </body>
 </html>

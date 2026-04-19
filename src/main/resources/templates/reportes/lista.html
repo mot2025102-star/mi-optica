@@ -10,18 +10,18 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">📋 Reportes de Ventas</div>
+            <div class="topbar-title"> Reportes de Ventas</div>
             <div class="topbar-sub"
                  th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}">
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/corte-caja}" class="btn btn-secondary">🏧 Corte de Caja</a>
+            <a th:href="@{/corte-caja}" class="btn btn-secondary"> Corte de Caja</a>
             <a th:href="@{/reportes/exportar/excel(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
-               class="btn btn-secondary">📥 Excel</a>
+               class="btn btn-secondary"> Excel</a>
             <a th:href="@{/reportes/exportar/pdf(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
-               class="btn btn-secondary">📄 PDF</a>
-            <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
+               class="btn btn-secondary"> PDF</a>
+            <button class="btn btn-secondary" onclick="window.print()"> Imprimir</button>
         </div>
     </div>
 
@@ -85,7 +85,7 @@
                     </div>
 
                     <div style="display:flex;gap:8px;align-items:flex-end">
-                        <button type="submit" class="btn btn-primary">🔍</button>
+                        <button type="submit" class="btn btn-primary"></button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setAyer()">Ayer</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setSemana()">Esta semana</button>
@@ -97,7 +97,7 @@
         <!-- Stats globales -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon verde">💰</div>
+                <div class="stat-icon verde"></div>
                 <div class="stat-info">
                     <div class="stat-value"
                          th:text="'Q' + ${#numbers.formatDecimal(datos.totalGeneral,1,'COMMA',2,'POINT')}">
@@ -106,14 +106,14 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon turquesa">🧾</div>
+                <div class="stat-icon turquesa"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${datos.cantFacturas}">0</div>
                     <div class="stat-label">Facturas emitidas</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo">📊</div>
+                <div class="stat-icon amarillo"></div>
                 <div class="stat-info">
                     <div class="stat-value"
                          th:text="'Q' + ${#numbers.formatDecimal(datos.promedio,1,'COMMA',2,'POINT')}">
@@ -126,7 +126,7 @@
         <!-- Gráfica de ventas por día -->
         <div class="card mb-3" th:if="${!datos.diasLabels.isEmpty()}">
             <div class="card-header">
-                <div class="card-title">📈 Ventas por día</div>
+                <div class="card-title"> Ventas por día</div>
             </div>
             <div style="padding:16px 20px">
                 <canvas id="graficaDias" height="80"></canvas>
@@ -137,19 +137,19 @@
         <div style="display:flex;gap:4px;margin-bottom:16px" class="no-print">
             <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='productos')}"
                th:class="${tab=='productos'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                📦 Por producto
+                 Por producto
             </a>
             <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='vendedor')}"
                th:class="${tab=='vendedor'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                🛍️ Por vendedor
+                 Por vendedor
             </a>
             <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='categoria')}"
                th:class="${tab=='categoria'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                🏷️ Por categoría
+                 Por categoría
             </a>
             <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='detalle')}"
                th:class="${tab=='detalle'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                📋 Detalle
+                 Detalle
             </a>
         </div>
 
@@ -157,7 +157,7 @@
         <div th:if="${tab == 'productos'}">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📦 Top productos más vendidos</div>
+                    <div class="card-title"> Top productos más vendidos</div>
                 </div>
                 <div class="table-wrapper">
                     <table class="table">
@@ -204,7 +204,7 @@
         <div th:if="${tab == 'vendedor'}">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🛍️ Ventas por vendedor</div>
+                    <div class="card-title"> Ventas por vendedor</div>
                 </div>
                 <div class="table-wrapper">
                     <table class="table">
@@ -225,7 +225,7 @@
                                 <td class="text-gris text-sm" th:text="${i.index + 1}"></td>
                                 <td>
                                     <div style="display:flex;align-items:center;gap:10px">
-                                        <div style="width:34px;height:34px;border-radius:50%;background:rgba(39,194,201,0.15);display:flex;align-items:center;justify-content:center;font-size:15px">🛍️</div>
+                                        <div style="width:34px;height:34px;border-radius:50%;background:rgba(39,194,201,0.15);display:flex;align-items:center;justify-content:center;font-size:15px"></div>
                                         <span class="fw-600" th:text="${f.etiqueta}"></span>
                                     </div>
                                 </td>
@@ -254,7 +254,7 @@
         <div th:if="${tab == 'categoria'}">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🏷️ Ventas por categoría</div>
+                    <div class="card-title"> Ventas por categoría</div>
                 </div>
                 <div class="table-wrapper">
                     <table class="table">
@@ -303,7 +303,7 @@
         <div th:if="${tab == 'detalle'}">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📋 Detalle de ventas</div>
+                    <div class="card-title"> Detalle de ventas</div>
                 </div>
                 <div class="table-wrapper">
                     <table class="table">

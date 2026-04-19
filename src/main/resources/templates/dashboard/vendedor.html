@@ -7,13 +7,13 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">🧾 Mi Panel de Ventas</div>
+            <div class="topbar-title"> Mi Panel de Ventas</div>
             <div class="topbar-sub"
                  th:text="'Bienvenido, ' + ${usuario.nombreCompleto} + ' — ' + ${sucursal}">
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/ventas/nueva}" class="btn btn-primary">➕ Nueva Venta</a>
+            <a th:href="@{/ventas/nueva}" class="btn btn-primary"> Nueva Venta</a>
         </div>
     </div>
 
@@ -22,7 +22,7 @@
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon verde">💰</div>
+                <div class="stat-icon verde"></div>
                 <div class="stat-info">
                     <div class="stat-value"
                          th:text="${ventasHoy != null} ? 'Q' + ${#numbers.formatDecimal(ventasHoy,1,'COMMA',2,'POINT')} : 'Q0.00'">
@@ -31,14 +31,14 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon turquesa">🧾</div>
+                <div class="stat-icon turquesa"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${countHoy}">0</div>
                     <div class="stat-label">Facturas hoy</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo">⚠️</div>
+                <div class="stat-icon amarillo"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${stockBajo.size()}">0</div>
                     <div class="stat-label">Productos con stock bajo</div>
@@ -48,23 +48,23 @@
 
         <!-- Accesos rápidos -->
         <div class="card mb-3">
-            <div class="card-header"><div class="card-title">⚡ Accesos Rápidos</div></div>
+            <div class="card-header"><div class="card-title"> Accesos Rápidos</div></div>
             <div class="card-body" style="padding:16px 20px">
                 <div class="stats-grid">
                     <a th:href="@{/ventas/nueva}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon verde">➕</div>
+                        <div class="stat-icon verde"></div>
                         <div class="stat-info"><div class="stat-value" style="font-size:15px">Nueva Venta</div></div>
                     </a>
                     <a th:href="@{/ventas}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon turquesa">🧾</div>
+                        <div class="stat-icon turquesa"></div>
                         <div class="stat-info"><div class="stat-value" style="font-size:15px">Historial Ventas</div></div>
                     </a>
                     <a th:href="@{/ordenes-lab/nueva}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon morado">🔬</div>
+                        <div class="stat-icon morado"></div>
                         <div class="stat-info"><div class="stat-value" style="font-size:15px">Nueva Orden Lab</div></div>
                     </a>
                     <a th:href="@{/clientes}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon amarillo">👥</div>
+                        <div class="stat-icon amarillo"></div>
                         <div class="stat-info"><div class="stat-value" style="font-size:15px">Clientes</div></div>
                     </a>
                 </div>
@@ -74,7 +74,7 @@
         <!-- Stock bajo (alerta) -->
         <div class="card" th:if="${!stockBajo.isEmpty()}">
             <div class="card-header">
-                <div class="card-title">⚠️ Alerta de Stock Bajo</div>
+                <div class="card-title"> Alerta de Stock Bajo</div>
             </div>
             <div class="table-wrapper">
                 <table class="table">

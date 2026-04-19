@@ -23,7 +23,7 @@
     <div class="topbar">
         <div>
             <div class="topbar-title"
-                 th:text="${editando} ? '✏️ Editar Usuario' : '➕ Nuevo Usuario'">
+                 th:text="${editando} ? ' Editar Usuario' : ' Nuevo Usuario'">
             </div>
             <div class="topbar-sub"
                  th:text="${editando} ? ('Modificando: ' + req.nombreCompleto) : 'Solo administradores pueden crear usuarios'">
@@ -37,14 +37,14 @@
     <div class="page-body">
 
         <div th:if="${mensajeError}" class="alert alert-danger">
-            ❌ <span th:text="${mensajeError}"></span>
+             <span th:text="${mensajeError}"></span>
         </div>
 
         <div style="background:var(--gris-oscuro);border:1px solid var(--gris-borde);border-radius:12px;overflow:hidden;max-width:760px">
 
             <div style="padding:16px 24px;background:rgba(39,194,201,0.08);border-bottom:1px solid var(--gris-borde)">
                 <div style="font-size:15px;font-weight:700"
-                     th:text="${editando} ? '✏️ Editando usuario' : '➕ Registrar nuevo usuario'">
+                     th:text="${editando} ? ' Editando usuario' : ' Registrar nuevo usuario'">
                 </div>
                 <div class="text-gris text-sm" th:if="${editando}">
                     Deja la contraseña en blanco si no deseas cambiarla.
@@ -62,7 +62,7 @@
 
                 <!-- ── Datos personales ── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">
-                    👤 Datos del Usuario
+                     Datos del Usuario
                 </div>
 
                 <div class="form-row form-row-2">
@@ -95,7 +95,7 @@
 
                 <!-- ── Contraseña ── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
-                    🔒 Contraseña
+                     Contraseña
                     <span th:if="${editando}" class="text-gris text-sm" style="text-transform:none;font-weight:400;letter-spacing:0">
                         — dejar en blanco para no cambiar
                     </span>
@@ -149,7 +149,7 @@
 
                 <!-- ── Acceso y sucursal ── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
-                    🏢 Acceso y Sucursal
+                     Acceso y Sucursal
                 </div>
 
                 <div class="form-row form-row-3">
@@ -209,7 +209,7 @@
                     <a th:href="@{/usuarios}" class="btn btn-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary" style="min-width:170px"
                             onclick="return validarForm()">
-                        💾 <span th:text="${editando} ? 'Actualizar Usuario' : 'Crear Usuario'"></span>
+                         <span th:text="${editando} ? 'Actualizar Usuario' : 'Crear Usuario'"></span>
                     </button>
                 </div>
             </form>
@@ -221,11 +221,11 @@
 const editando = /*[[${editando}]]*/ false;
 
 const ROLES_DESC = {
-    '1': '🔧 Acceso completo a todo el sistema',
-    '2': '🛍️ Ventas, clientes, cotizaciones, kardex',
-    '3': '📦 Inventario, traslados, ingresos de mercancía',
-    '4': '👁️ Fichas clínicas, historial, proveedores',
-    '5': '💰 Reportes, corte de caja, saldos'
+    '1': ' Acceso completo a todo el sistema',
+    '2': ' Ventas, clientes, cotizaciones, kardex',
+    '3': ' Inventario, traslados, ingresos de mercancía',
+    '4': ' Fichas clínicas, historial, proveedores',
+    '5': ' Reportes, corte de caja, saldos'
 };
 
 function mostrarDescRol(id) {
@@ -269,10 +269,10 @@ function verificarMatch() {
     if (!p2) { msg.style.display = 'none'; return; }
     msg.style.display = 'block';
     if (p1 === p2) {
-        msg.textContent = '✅ Las contraseñas coinciden';
+        msg.textContent = ' Las contraseñas coinciden';
         msg.style.color = 'var(--verde)';
     } else {
-        msg.textContent = '❌ Las contraseñas no coinciden';
+        msg.textContent = ' Las contraseñas no coinciden';
         msg.style.color = 'var(--rojo)';
     }
 }

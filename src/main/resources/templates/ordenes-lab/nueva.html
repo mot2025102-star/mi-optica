@@ -9,7 +9,7 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">🔬 Nueva Orden de Laboratorio</div>
+            <div class="topbar-title"> Nueva Orden de Laboratorio</div>
             <div class="topbar-sub">Complete todos los datos clínicos</div>
         </div>
         <div class="topbar-actions">
@@ -22,7 +22,7 @@
 
         <!-- Datos del Cliente -->
         <div class="card mb-3">
-            <div class="card-header"><div class="card-title">👤 Datos del Cliente</div></div>
+            <div class="card-header"><div class="card-title"> Datos del Cliente</div></div>
             <div class="card-body" style="padding:16px 20px">
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
                     <div>
@@ -41,7 +41,7 @@
 
         <!-- Datos Clínicos -->
         <div class="card mb-3">
-            <div class="card-header"><div class="card-title">👁️ Datos Clínicos</div></div>
+            <div class="card-header"><div class="card-title"> Datos Clínicos</div></div>
             <div class="card-body" style="padding:16px 20px;overflow-x:auto">
                 <table class="table table-sm" style="min-width:700px">
                     <thead>
@@ -96,8 +96,8 @@
         <!-- Productos Solicitados -->
         <div class="card mb-3">
             <div class="card-header">
-                <div class="card-title">📦 Productos Solicitados</div>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFila()">➕ Agregar fila</button>
+                <div class="card-title"> Productos Solicitados</div>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFila()"> Agregar fila</button>
             </div>
             <div class="card-body" style="padding:0;overflow-x:auto">
                 <table class="table" id="tblProductos">
@@ -116,7 +116,7 @@
 
         <!-- Proceso y Entrega -->
         <div class="card mb-3">
-            <div class="card-header"><div class="card-title">🚚 Proceso y Entrega</div></div>
+            <div class="card-header"><div class="card-title"> Proceso y Entrega</div></div>
             <div class="card-body" style="padding:16px 20px">
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
                     <div>
@@ -138,7 +138,7 @@
 
         <div style="display:flex;justify-content:flex-end;gap:10px">
             <a th:href="@{/ordenes-lab}" class="btn btn-secondary">Cancelar</a>
-            <button class="btn btn-primary" onclick="guardarOrden()">💾 Guardar Orden</button>
+            <button class="btn btn-primary" onclick="guardarOrden()"> Guardar Orden</button>
         </div>
     </div>
 </div>
@@ -162,7 +162,7 @@
             <td><input class="form-control form-control-sm p-material" placeholder="CR-39, Policarbonato..."></td>
             <td><input class="form-control form-control-sm p-tratamiento" placeholder="AR, UV, Fotocromático..."></td>
             <td><input class="form-control form-control-sm p-color" placeholder="Transparente, Gris..."></td>
-            <td><button class="btn btn-sm btn-danger" onclick="quitarFila(${filaIdx})">🗑️</button></td>
+            <td><button class="btn btn-sm btn-danger" onclick="quitarFila(${filaIdx})"></button></td>
         `;
         document.getElementById('bodyProductos').appendChild(tr);
         filaIdx++;
@@ -227,7 +227,7 @@
 
     function mostrarError(msg) {
         const el = document.getElementById('alertaError');
-        el.textContent = '❌ ' + msg;
+        el.textContent = ' ' + msg;
         el.style.display = 'block';
         el.scrollIntoView({ behavior: 'smooth' });
     }

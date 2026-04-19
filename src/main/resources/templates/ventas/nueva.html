@@ -10,7 +10,7 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">➕ Nueva Venta</div>
+            <div class="topbar-title"> Nueva Venta</div>
             <div class="topbar-sub" th:text="${sucursal} + ' — ' + ${#temporals.format(#temporals.createNow(),'dd/MM/yyyy')}"></div>
         </div>
         <div class="topbar-actions">
@@ -22,25 +22,25 @@
 
         <!-- Alerta de errores -->
         <div id="alertaError" class="alert alert-danger" style="display:none">
-            ❌ <span id="alertaMsg"></span>
+             <span id="alertaMsg"></span>
         </div>
 
         <div style="background:var(--gris-oscuro);border:1px solid var(--gris-borde);border-radius:12px;overflow:hidden">
 
             <!-- Header -->
             <div style="padding:16px 20px;background:rgba(39,194,201,0.08);border-bottom:1px solid var(--gris-borde);display:flex;justify-content:space-between;align-items:center">
-                <div style="font-size:16px;font-weight:700">🧾 Nueva Venta</div>
+                <div style="font-size:16px;font-weight:700"> Nueva Venta</div>
                 <div class="text-gris text-sm">Factura: se generará automáticamente</div>
             </div>
 
             <!-- CLIENTE -->
             <div style="padding:20px;border-bottom:1px solid var(--gris-borde)">
-                <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">👤 Cliente</div>
+                <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Cliente</div>
                 <div class="form-row form-row-2">
                     <div class="form-group" style="position:relative">
                         <label class="form-label">Buscar cliente (opcional)</label>
                         <div style="position:relative">
-                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)">🔍</span>
+                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)"></span>
                             <input type="text" id="busqCliente" class="form-control" style="padding-left:36px"
                                    placeholder="Nombre, DPI o teléfono..." autocomplete="off"
                                    oninput="buscarCliente(this.value)">
@@ -61,11 +61,11 @@
             <div style="padding:20px;border-bottom:1px solid var(--gris-borde)">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
                     <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px">
-                        📦 Productos
+                         Productos
                         <span class="text-gris text-sm" style="text-transform:none;letter-spacing:0"
                               th:text="'(' + ${stockDisponible.size()} + ' disponibles)'"></span>
                     </div>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="agregarFila()">➕ Agregar</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="agregarFila()"> Agregar</button>
                 </div>
 
                 <!-- Encabezado columnas -->
@@ -81,7 +81,7 @@
 
                     <!-- Izquierda: forma de pago -->
                     <div>
-                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">💳 Forma de Pago</div>
+                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Forma de Pago</div>
                         <div class="form-row form-row-2">
                             <div class="form-group">
                                 <label class="form-label">Forma de pago *</label>
@@ -107,7 +107,7 @@
 
                     <!-- Derecha: resumen -->
                     <div>
-                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">💰 Resumen</div>
+                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Resumen</div>
                         <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                                 <span class="text-gris">Subtotal:</span>
@@ -127,7 +127,7 @@
                                 style="width:100%;margin-top:12px;padding:14px;font-size:15px"
                                 class="btn btn-primary"
                                 onclick="registrarVenta()">
-                            💾 Registrar Venta
+                             Registrar Venta
                         </button>
                     </div>
                 </div>
@@ -149,8 +149,8 @@
             <div style="font-size:20px;font-weight:700;color:var(--verde);margin-top:16px" id="exitoTotal"></div>
         </div>
         <div class="modal-footer" style="justify-content:center;gap:12px">
-            <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary">🖨️ Imprimir Factura</a>
-            <button class="btn btn-primary" onclick="nuevaVenta()">➕ Nueva Venta</button>
+            <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary"> Imprimir Factura</a>
+            <button class="btn btn-primary" onclick="nuevaVenta()"> Nueva Venta</button>
             <a th:href="@{/ventas}" class="btn btn-secondary">📋 Ver lista</a>
         </div>
     </div>

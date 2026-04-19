@@ -10,14 +10,14 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">📈 Kardex</div>
+            <div class="topbar-title"> Kardex</div>
             <div class="topbar-sub"
                  th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')} + ' — ' + ${movimientos.size()} + ' movimiento(s)'">
             </div>
         </div>
         <div class="topbar-actions">
-            <button class="btn btn-danger" onclick="abrirModalEgresoDirecto()">📤 Registrar Egreso</button>
-            <button class="btn btn-primary" onclick="abrirModalAgregar()">➕ Agregar Ingreso</button>
+            <button class="btn btn-danger" onclick="abrirModalEgresoDirecto()"> Registrar Egreso</button>
+            <button class="btn btn-primary" onclick="abrirModalAgregar()"> Agregar Ingreso</button>
             <a th:href="@{/inventario}" class="btn btn-secondary">← Inventario</a>
         </div>
     </div>
@@ -30,28 +30,28 @@
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon verde">📥</div>
+                <div class="stat-icon verde"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${#numbers.formatDecimal(totalEntradas,1,'COMMA',0,'POINT')}"></div>
                     <div class="stat-label">Unidades ingresadas</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon rojo">📤</div>
+                <div class="stat-icon rojo"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${#numbers.formatDecimal(totalSalidas,1,'COMMA',0,'POINT')}"></div>
                     <div class="stat-label">Unidades vendidas/salidas</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo">🔧</div>
+                <div class="stat-icon amarillo"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalAjustes}">0</div>
                     <div class="stat-label">Ajustes manuales</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon turquesa">📋</div>
+                <div class="stat-icon turquesa"></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${movimientos.size()}">0</div>
                     <div class="stat-label">Total movimientos</div>
@@ -79,9 +79,9 @@
                         <label class="form-label">Tipo de movimiento</label>
                         <select name="tipo" class="form-select">
                             <option value=""        th:selected="${tipo==''}">Todos</option>
-                            <option value="Entrada" th:selected="${tipo=='Entrada'}">📥 Entrada</option>
-                            <option value="Salida"  th:selected="${tipo=='Salida'}">📤 Salida</option>
-                            <option value="Ajuste"  th:selected="${tipo=='Ajuste'}">🔧 Ajuste</option>
+                            <option value="Entrada" th:selected="${tipo=='Entrada'}"> Entrada</option>
+                            <option value="Salida"  th:selected="${tipo=='Salida'}"> Salida</option>
+                            <option value="Ajuste"  th:selected="${tipo=='Ajuste'}"> Ajuste</option>
                         </select>
                     </div>
                     <div style="min-width:200px">
@@ -91,7 +91,7 @@
                                th:value="${buscar}">
                     </div>
                     <div style="display:flex;gap:8px;align-items:flex-end">
-                        <button type="submit" class="btn btn-primary">🔍</button>
+                        <button type="submit" class="btn btn-primary"></button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
                     </div>
@@ -102,7 +102,7 @@
         <!-- Tabla -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title" th:text="'📋 ' + ${movimientos.size()} + ' movimiento(s)'"></div>
+                <div class="card-title" th:text="' ' + ${movimientos.size()} + ' movimiento(s)'"></div>
                 <input type="text" class="form-control" style="width:200px"
                        placeholder="Filtro rápido..." oninput="filtrar(this.value)">
             </div>
@@ -127,16 +127,16 @@
                     <tbody>
                         <tr th:if="${movimientos.isEmpty()}">
                             <td colspan="12" style="text-align:center;padding:50px;color:var(--gris-texto)">
-                                <div style="font-size:40px">📈</div>
+                                <div style="font-size:40px"></div>
                                 <div style="margin-top:10px">Sin movimientos en el período.</div>
                             </td>
                         </tr>
  
                         <tr th:each="k : ${movimientos}">
                             <td>
-                                <span th:if="${k.tipoMovimiento == 'Entrada'}" class="badge badge-success">📥 Entrada</span>
-                                <span th:if="${k.tipoMovimiento == 'Salida'}"  class="badge badge-danger">📤 Salida</span>
-                                <span th:if="${k.tipoMovimiento == 'Ajuste'}"  class="badge badge-warning">🔧 Ajuste</span>
+                                <span th:if="${k.tipoMovimiento == 'Entrada'}" class="badge badge-success"> Entrada</span>
+                                <span th:if="${k.tipoMovimiento == 'Salida'}"  class="badge badge-danger"> Salida</span>
+                                <span th:if="${k.tipoMovimiento == 'Ajuste'}"  class="badge badge-warning"> Ajuste</span>
                             </td>
                             <td><code th:text="${k.producto.codigo}"></code></td>
                             <td><div class="fw-600 text-sm" th:text="${k.producto.detalle}"></div></td>
@@ -193,12 +193,12 @@
                                             th:data-obs="${k.observacion != null ? k.observacion : ''}"
                                             th:data-factura="${k.referencia != null ? k.referencia : ''}"
                                             onclick="abrirModalEditarDesdeBtn(this)"
-                                            title="Editar">✏️</button>
+                                            title="Editar"></button>
                                     <form th:action="@{/kardex/eliminar/{id}(id=${k.idKardex})}"
                                           method="post" style="display:inline"
                                           onsubmit="return confirm('¿Eliminar este movimiento?')">
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">🗑️</button>
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar"></button>
                                     </form>
                                 </div>
                             </td>
@@ -214,7 +214,7 @@
 <div id="modalAgregar" class="modal-overlay">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">➕ Agregar Ingreso</div>
+            <div class="modal-title"> Agregar Ingreso</div>
             <button onclick="cerrarModalAgregar()" class="modal-close">✕</button>
         </div>
         <form th:action="@{/kardex/agregar}" method="post">
@@ -276,7 +276,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="cerrarModalAgregar()" class="btn btn-secondary">Cancelar</button>
-                <button type="submit" class="btn btn-primary">💾 Guardar Ingreso</button>
+                <button type="submit" class="btn btn-primary"> Guardar Ingreso</button>
             </div>
         </form>
     </div>
@@ -286,7 +286,7 @@
 <div id="modalEgreso" class="modal-overlay">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">📤 Registrar Egreso</div>
+            <div class="modal-title"> Registrar Egreso</div>
             <button onclick="cerrarModalEgreso()" class="modal-close">✕</button>
         </div>
         <form th:action="@{/kardex/egreso}" method="post">
@@ -336,7 +336,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="cerrarModalEgreso()" class="btn btn-secondary">Cancelar</button>
-                <button type="submit" class="btn btn-danger">💾 Guardar Egreso</button>
+                <button type="submit" class="btn btn-danger"> Guardar Egreso</button>
             </div>
         </form>
     </div>
@@ -346,7 +346,7 @@
 <div id="modalEditar" class="modal-overlay">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">✏️ Editar Movimiento</div>
+            <div class="modal-title"> Editar Movimiento</div>
             <button onclick="cerrarModalEditar()" class="modal-close">✕</button>
         </div>
         <form th:action="@{/kardex/editar}" method="post">
@@ -356,9 +356,9 @@
                 <div class="form-group">
                     <label class="form-label">Tipo de movimiento</label>
                     <select id="editTipo" name="tipoMovimiento" class="form-select" required>
-                        <option value="Entrada">📥 Entrada</option>
-                        <option value="Salida">📤 Salida</option>
-                        <option value="Ajuste">🔧 Ajuste</option>
+                        <option value="Entrada"> Entrada</option>
+                        <option value="Salida"> Salida</option>
+                        <option value="Ajuste"> Ajuste</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -398,7 +398,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="cerrarModalEditar()" class="btn btn-secondary">Cancelar</button>
-                <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+                <button type="submit" class="btn btn-primary"> Guardar Cambios</button>
             </div>
         </form>
     </div>

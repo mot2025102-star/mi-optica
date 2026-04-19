@@ -23,28 +23,28 @@
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon turquesa">📦</div>
+                <div class="stat-icon turquesa"></div>
                 <div class="stat-info">
                     <div class="stat-value" id="statProductos" >...</div>
                     <div class="stat-label" >Productos en catálogo</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon verde">💰</div>
+                <div class="stat-icon verde"></div>
                 <div class="stat-info">
                     <div class="stat-value" id="statVentasHoy">...</div>
                     <div class="stat-label">Ventas hoy</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo">👥</div>
+                <div class="stat-icon amarillo"></div>
                 <div class="stat-info">
                     <div class="stat-value" id="statClientes">...</div>
                     <div class="stat-label" >Clientes registrados</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon rojo" >⚠️</div>
+                <div class="stat-icon rojo" ></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${stockBajo.size()}" >0</div>
                     <div class="stat-label" >Stock bajo</div>
@@ -55,7 +55,7 @@
         <!-- Stock bajo -->
         <div class="card" th:if="${!stockBajo.isEmpty()}">
             <div class="card-header">
-                <div class="card-title" >⚠️ Productos con Stock Bajo</div>
+                <div class="card-title" > Productos con Stock Bajo</div>
                 <a th:href="@{/inventario}" class="btn btn-secondary btn-sm" >Ver inventario →</a>
             </div>
             <div class="table-wrapper">
@@ -83,7 +83,7 @@
                         </td>
                         <td>
                             <a th:href="@{/traslados(pid=${inv.producto.idProducto})}"
-                               class="btn btn-sm btn-warning">🔄 Trasladar</a>
+                               class="btn btn-sm btn-warning"> Trasladar</a>
                         </td>
                     </tr>
                     </tbody>
@@ -94,12 +94,12 @@
         <!-- Accesos rápidos -->
         <div class="stats-grid">
             <a th:href="@{/inventario}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon turquesa" >📊</div>
+                <div class="stat-icon turquesa" ></div>
                 <div class="stat-info"><div class="stat-value" style="font-size:15px" >Inventario</div></div>
             </a>
             
             <a th:href="@{/reportes}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon verde" >📋</div>
+                <div class="stat-icon verde" ></div>
                 <div class="stat-info"><div class="stat-value" style="font-size:15px" >Reportes</div></div>
             </a>
         </div>

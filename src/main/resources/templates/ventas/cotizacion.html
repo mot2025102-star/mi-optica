@@ -10,11 +10,11 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">💰 Cotización de Lentes</div>
+            <div class="topbar-title"> Cotización de Lentes</div>
             <div class="topbar-sub" th:text="${sucursal} + ' — Basada en ficha clínica del optometrista'"></div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/ventas/nueva}" class="btn btn-secondary">🧾 Ir a Venta</a>
+            <a th:href="@{/ventas/nueva}" class="btn btn-secondary"> Ir a Venta</a>
             <a th:href="@{/ventas}" class="btn btn-secondary">← Volver</a>
         </div>
     </div>
@@ -22,7 +22,7 @@
     <div class="page-body">
 
         <div id="alertaError" class="alert alert-danger" style="display:none">
-            ❌ <span id="alertaMsg"></span>
+             <span id="alertaMsg"></span>
         </div>
 
         <!-- PASO 1: BUSCAR FICHA CLÍNICA -->
@@ -58,7 +58,7 @@
         <div class="card mb-3" id="seccionFicha" style="display:none">
             <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06);display:flex;justify-content:space-between;align-items:center">
                 <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👁️ Paso 2 — Graduación Recetada por el Optometrista</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Paso 2 — Graduación Recetada por el Optometrista</div>
                     <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Esta es la receta que dejó el optometrista en la ficha clínica</div>
                 </div>
                 <div id="fichaNumero" style="font-size:22px;font-weight:700;color:var(--turquesa)"></div>
@@ -115,11 +115,11 @@
                 <!-- Detalle lentes / observaciones -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                     <div>
-                        <div style="font-size:11px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:6px">📋 Material / detalle recomendado por optometrista</div>
+                        <div style="font-size:11px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:6px"> Material / detalle recomendado por optometrista</div>
                         <div id="dDetalleLentes" style="padding:10px 14px;background:rgba(39,194,201,0.06);border:1px solid rgba(39,194,201,0.2);border-radius:8px;font-size:13px;min-height:40px;color:var(--texto)">—</div>
                     </div>
                     <div>
-                        <div style="font-size:11px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:6px">📝 Observaciones</div>
+                        <div style="font-size:11px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:6px"> Observaciones</div>
                         <div id="dObservaciones" style="padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--gris-borde);border-radius:8px;font-size:13px;min-height:40px;color:var(--gris-texto)">—</div>
                     </div>
                 </div>
@@ -131,10 +131,10 @@
             <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
                 <div style="display:flex;justify-content:space-between;align-items:center">
                     <div>
-                        <div style="font-size:13px;font-weight:700;color:var(--turquesa)">📦 Paso 3 — Seleccionar Lentes y Productos para Cotizar</div>
+                        <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Paso 3 — Seleccionar Lentes y Productos para Cotizar</div>
                         <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Selecciona los lentes del inventario según la graduación recetada</div>
                     </div>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="agregarFila()">➕ Agregar producto</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="agregarFila()"> Agregar producto</button>
                 </div>
             </div>
             <div class="card-body">
@@ -164,7 +164,7 @@
         <!-- PASO 4: RESUMEN -->
         <div class="card mb-3" id="seccionResumen" style="display:none">
             <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                <div style="font-size:13px;font-weight:700;color:var(--turquesa)">💰 Paso 4 — Resumen de Cotización</div>
+                <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Paso 4 — Resumen de Cotización</div>
             </div>
             <div class="card-body">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
@@ -175,16 +175,16 @@
                                   placeholder="Notas adicionales para el cliente (vigencia, condiciones, etc.)..."></textarea>
                         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
                             <button type="button" class="btn btn-primary" onclick="convertirAVenta()">
-                                🧾 Convertir en Venta
+                                 Convertir en Venta
                             </button>
                             <button type="button" class="btn btn-secondary" onclick="imprimirCotizacion()">
-                                🖨️ Imprimir Cotización
+                                 Imprimir Cotización
                             </button>
                         </div>
                     </div>
 
                     <div>
-                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">💰 Total</div>
+                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px"> Total</div>
                         <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                                 <span class="text-gris">Subtotal:</span>
@@ -216,12 +216,12 @@
 <div class="modal-overlay" id="modalImprimir">
     <div class="modal" style="max-width:700px">
         <div class="modal-header">
-            <div class="modal-title">🖨️ Vista de Cotización</div>
+            <div class="modal-title"> Vista de Cotización</div>
             <button class="btn btn-secondary btn-sm" onclick="cerrarModal('modalImprimir')">✕</button>
         </div>
         <div class="modal-body" id="areaCotizacion" style="padding:24px;font-size:13px"></div>
         <div class="modal-footer">
-            <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir</button>
+            <button class="btn btn-primary" onclick="window.print()"> Imprimir</button>
             <button class="btn btn-secondary" onclick="cerrarModal('modalImprimir')">Cerrar</button>
         </div>
     </div>
@@ -231,7 +231,7 @@
 <div class="modal-overlay" id="modalConvertir">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">🧾 Convertir Cotización en Venta</div>
+            <div class="modal-title"> Convertir Cotización en Venta</div>
         </div>
         <div class="modal-body" style="padding:20px">
             <p class="text-gris" style="margin-bottom:16px">Se registrará la venta con los productos de esta cotización. La graduación quedará guardada en las observaciones.</p>
@@ -250,7 +250,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" onclick="registrarVentaDesdeCotz()">💾 Registrar Venta</button>
+            <button class="btn btn-primary" onclick="registrarVentaDesdeCotz()"> Registrar Venta</button>
             <button class="btn btn-secondary" onclick="cerrarModal('modalConvertir')">Cancelar</button>
         </div>
     </div>
@@ -260,17 +260,17 @@
 <div class="modal-overlay" id="modalExito">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">✅ Venta Registrada</div>
+            <div class="modal-title"> Venta Registrada</div>
         </div>
         <div class="modal-body" style="text-align:center;padding:30px">
-            <div style="font-size:48px;margin-bottom:12px">🧾</div>
+            <div style="font-size:48px;margin-bottom:12px"></div>
             <div style="font-size:22px;font-weight:700;color:var(--turquesa)" id="exitoFactura"></div>
             <div style="color:var(--gris-texto);margin-top:8px">Factura generada exitosamente</div>
             <div style="font-size:20px;font-weight:700;color:var(--verde);margin-top:16px" id="exitoTotal"></div>
         </div>
         <div class="modal-footer" style="justify-content:center;gap:12px">
-            <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary">🖨️ Imprimir Factura</a>
-            <a th:href="@{/ventas}" class="btn btn-primary">📋 Ver ventas</a>
+            <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary"> Imprimir Factura</a>
+            <a th:href="@{/ventas}" class="btn btn-primary"> Ver ventas</a>
         </div>
     </div>
 </div>

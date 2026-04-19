@@ -15,7 +15,7 @@
     <div class="topbar">
         <div>
             <div class="topbar-title"
-                 th:text="${editando} ? '✏️ Editar Cliente' : '➕ Nuevo Cliente'">
+                 th:text="${editando} ? ' Editar Cliente' : ' Nuevo Cliente'">
             </div>
             <div class="topbar-sub"
                  th:text="${editando} ? ('Modificando: ' + cliente.nombre) : 'Completá los datos del cliente'">
@@ -30,7 +30,7 @@
 
         <!-- Error general -->
         <div th:if="${mensajeError}" class="alert alert-danger">
-            ❌ <span th:text="${mensajeError}"></span>
+             <span th:text="${mensajeError}"></span>
         </div>
 
         <!-- Formulario -->
@@ -39,7 +39,7 @@
             <!-- Header del form -->
             <div style="padding:16px 24px;background:rgba(39,194,201,0.08);border-bottom:1px solid var(--gris-borde)">
                 <div style="font-size:15px;font-weight:700"
-                     th:text="${editando} ? '✏️ Editando cliente' : '➕ Registrar nuevo cliente'">
+                     th:text="${editando} ? ' Editando cliente' : ' Registrar nuevo cliente'">
                 </div>
             </div>
 
@@ -125,7 +125,7 @@
 
                 <!-- ── SECCIÓN: Contacto ──────────────────────────── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
-                    📞 Contacto
+                     Contacto
                 </div>
 
                 <div class="form-row form-row-3">
@@ -154,7 +154,7 @@
 
                 <!-- ── SECCIÓN: Dirección ────────────────────────── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
-                    📍 Dirección
+                     Dirección
                 </div>
 
                 <div class="form-group">
@@ -192,7 +192,7 @@
 
                 <!-- ── SECCIÓN: Notas ────────────────────────────── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
-                    📝 Notas
+                     Notas
                 </div>
 
                 <div class="form-group">
@@ -208,7 +208,7 @@
                 <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--gris-borde)">
                     <a th:href="@{/clientes}" class="btn btn-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary" style="min-width:160px">
-                        💾 <span th:text="${editando} ? 'Actualizar Cliente' : 'Registrar Cliente'"></span>
+                         <span th:text="${editando} ? 'Actualizar Cliente' : 'Registrar Cliente'"></span>
                     </button>
                 </div>
 

@@ -11,7 +11,7 @@
     <div class="topbar">
         <div>
             <div class="topbar-title"
-                 th:text="${editando} ? '✏️ Editar Ficha Clínica' : '➕ Nueva Ficha Clínica'"></div>
+                 th:text="${editando} ? ' Editar Ficha Clínica' : ' Nueva Ficha Clínica'"></div>
             <div class="topbar-sub"
                  th:text="${editando} ? 'Modificando ficha #' + ficha.idFicha : 'Registrar nueva consulta'"></div>
         </div>
@@ -23,7 +23,7 @@
     <div class="page-body">
 
         <div th:if="${mensajeError}" class="alert alert-danger">
-            ❌ <span th:text="${mensajeError}"></span>
+             <span th:text="${mensajeError}"></span>
         </div>
 
         <form th:action="@{/fichas/guardar}" method="post">
@@ -33,7 +33,7 @@
             <!-- ── DATOS GENERALES ─────────────────────────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👤 Datos Generales</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Datos Generales</div>
                 </div>
                 <div class="card-body">
                     <div class="form-row form-row-3">
@@ -91,7 +91,7 @@
             <!-- ── GRADUACIÓN ─────────────────────────────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👁️ Graduación</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Graduación</div>
                 </div>
                 <div class="card-body">
 
@@ -165,7 +165,7 @@
             <!-- 1. Síntomas -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">🩺 1. Síntomas</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> 1. Síntomas</div>
                     <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Marcar todo lo que aplique</div>
                 </div>
                 <div class="card-body">
@@ -186,7 +186,7 @@
             <!-- 2. Signos -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">🔍 2. Signos</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> 2. Signos</div>
                 </div>
                 <div class="card-body">
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
@@ -205,7 +205,7 @@
             <!-- 3. Antecedentes Médicos Personales -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">🏥 3. Antecedentes Médicos Personales</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> 3. Antecedentes Médicos Personales</div>
                 </div>
                 <div class="card-body">
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px">
@@ -228,7 +228,7 @@
             <!-- 4. Antecedentes Familiares -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👨‍👩‍👧 4. Antecedentes Familiares</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">👨‍👩 4. Antecedentes Familiares</div>
                 </div>
                 <div class="card-body">
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px">
@@ -316,7 +316,7 @@
             <!-- 6. Hábitos Visuales -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">💻 6. Hábitos Visuales</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> 6. Hábitos Visuales</div>
                 </div>
                 <div class="card-body">
                     <div class="form-row form-row-2" style="margin-bottom:16px">
@@ -376,7 +376,7 @@
             <!-- ── PRUEBAS PRELIMINARES ───────────────────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">🔬 Pruebas Preliminares</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Pruebas Preliminares</div>
                 </div>
                 <div class="card-body">
 
@@ -466,7 +466,7 @@
             <!-- ── GRADUACIÓN ACTUAL (RECETA FINAL) ──────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)">📋 Graduación Actual — Receta Final</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Graduación Actual — Receta Final</div>
                     <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Resultado final de la consulta</div>
                 </div>
                 <div class="card-body">
@@ -546,7 +546,7 @@
             <div style="display:flex;gap:12px;justify-content:flex-end">
                 <a th:href="@{/fichas}" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" class="btn btn-primary" style="min-width:160px">
-                    💾 <span th:text="${editando} ? 'Actualizar Ficha' : 'Guardar Ficha'"></span>
+                     <span th:text="${editando} ? 'Actualizar Ficha' : 'Guardar Ficha'"></span>
                 </button>
             </div>
 

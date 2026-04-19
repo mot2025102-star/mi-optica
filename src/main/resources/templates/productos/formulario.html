@@ -10,7 +10,7 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title" th:text="${editando} ? '✏️ Editar Producto' : '➕ Nuevo Producto'"></div>
+            <div class="topbar-title" th:text="${editando} ? ' Editar Producto' : ' Nuevo Producto'"></div>
             <div class="topbar-sub" th:text="${editando} ? 'Modificar información del producto' : 'Registrar nuevo producto en el sistema'"></div>
         </div>
         <div class="topbar-actions">
@@ -21,7 +21,7 @@
     <div class="page-body">
  
         <div id="alertaValidacion" class="alert alert-danger" style="display:none"></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">❌ <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger"> <span th:text="${mensajeError}"></span></div>
  
         <!-- Form oculto con todos los hiddens -->
         <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"
@@ -56,27 +56,27 @@
         <div id="panelTipos" class="card mb-3"
              th:style="${producto.tipoProducto != null and !#strings.isEmpty(producto.tipoProducto)} ? 'display:none' : ''">
             <div class="card-header">
-                <div class="card-title">🏷️ ¿Qué tipo de producto vas a registrar?</div>
+                <div class="card-title"> ¿Qué tipo de producto vas a registrar?</div>
             </div>
             <div class="card-body" style="padding:24px">
                 <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
                     <div class="tipo-card" id="card-ARMAZON"   onclick="seleccionarTipo('ARMAZON')">
-                        <div style="font-size:40px">🕶️</div>
+                        <div style="font-size:40px"></div>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Armazón</div>
                         <div class="text-gris text-sm">Marca, modelo, color</div>
                     </div>
                     <div class="tipo-card" id="card-LENTE"     onclick="seleccionarTipo('LENTE')">
-                        <div style="font-size:40px">🔬</div>
+                        <div style="font-size:40px"></div>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Lente</div>
                         <div class="text-gris text-sm">Tipo, material, tratamiento</div>
                     </div>
                     <div class="tipo-card" id="card-LIMPIEZA"  onclick="seleccionarTipo('LIMPIEZA')">
-                        <div style="font-size:40px">🧴</div>
+                        <div style="font-size:40px"></div>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Limpieza</div>
                         <div class="text-gris text-sm">Líquidos, paños</div>
                     </div>
                     <div class="tipo-card" id="card-ACCESORIO" onclick="seleccionarTipo('ACCESORIO')">
-                        <div style="font-size:40px">🎒</div>
+                        <div style="font-size:40px"></div>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Accesorio</div>
                         <div class="text-gris text-sm">Estuches, cordones</div>
                     </div>
@@ -88,7 +88,7 @@
         <div id="panelArmazon" style="display:none">
             <div class="card mb-3">
                 <div class="card-header">
-                    <div class="card-title">🕶️ Datos del Armazón</div>
+                    <div class="card-title"> Datos del Armazón</div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
                 </div>
                 <div class="card-body" style="padding:20px">
@@ -147,7 +147,7 @@
                 </div>
             </div>
             <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title">📊 Stock Inicial por Sucursal</div></div>
+                <div class="card-header"><div class="card-title"> Stock Inicial por Sucursal</div></div>
                 <div class="card-body" style="padding:20px">
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
@@ -166,7 +166,7 @@
             </div>
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" form="formPrincipal" class="btn btn-primary">💾 <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+                <button type="submit" form="formPrincipal" class="btn btn-primary"> <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
             </div>
         </div>
  
@@ -221,14 +221,14 @@
                         </div>
                     </div>
                     <div id="precioAutoBox" style="display:none;margin-top:16px;padding:20px;background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.25);border-radius:10px">
-                        <div class="fw-600" style="color:var(--turquesa);margin-bottom:12px">💰 Precio según combinación</div>
+                        <div class="fw-600" style="color:var(--turquesa);margin-bottom:12px"> Precio según combinación</div>
                         <div style="display:flex;gap:32px">
                             <div><div class="text-gris text-sm">Costo</div><div class="fw-600" style="font-size:22px" id="lblCosto">—</div></div>
                             <div><div class="text-gris text-sm">Precio Venta</div><div class="fw-600" style="font-size:22px;color:var(--turquesa)" id="lblPrecio">—</div></div>
                         </div>
                     </div>
                     <div id="precioNoEncontrado" style="display:none;margin-top:12px;padding:12px 16px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;font-size:13px;color:var(--amarillo)">
-                        ⚠️ No hay precio configurado para esta combinación. Puedes guardarlo y configurarlo después.
+                         No hay precio configurado para esta combinación. Puedes guardarlo y configurarlo después.
                     </div>
                     <div class="form-group" style="margin-top:16px">
                         <label class="form-label">Descripción (opcional)</label>
@@ -237,7 +237,7 @@
                 </div>
             </div>
             <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title">📊 Stock Inicial por Sucursal</div></div>
+                <div class="card-header"><div class="card-title"> Stock Inicial por Sucursal</div></div>
                 <div class="card-body" style="padding:20px">
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
@@ -256,7 +256,7 @@
             </div>
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" form="formPrincipal" class="btn btn-primary">💾 <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+                <button type="submit" form="formPrincipal" class="btn btn-primary"> <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
             </div>
         </div>
  
@@ -264,7 +264,7 @@
         <div id="panelOtro" style="display:none">
             <div class="card mb-3">
                 <div class="card-header">
-                    <div class="card-title" id="tituloOtro">📦 Datos del Producto</div>
+                    <div class="card-title" id="tituloOtro"> Datos del Producto</div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
                 </div>
                 <div class="card-body" style="padding:20px">
@@ -319,7 +319,7 @@
                 </div>
             </div>
             <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title">📊 Stock Inicial por Sucursal</div></div>
+                <div class="card-header"><div class="card-title"> Stock Inicial por Sucursal</div></div>
                 <div class="card-body" style="padding:20px">
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
@@ -338,7 +338,7 @@
             </div>
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" form="formPrincipal" class="btn btn-primary">💾 <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+                <button type="submit" form="formPrincipal" class="btn btn-primary"> <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
             </div>
         </div>
  
@@ -355,10 +355,10 @@
 const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
  
 const TITULOS = {
-    ARMAZON:  '🕶️ Armazón',
-    LENTE:    '🔬 Lente',
-    LIMPIEZA: '🧴 Producto de Limpieza',
-    ACCESORIO:'🎒 Accesorio'
+    ARMAZON:  ' Armazón',
+    LENTE:    ' Lente',
+    LIMPIEZA: ' Producto de Limpieza',
+    ACCESORIO:' Accesorio'
 };
  
 const CAMPOS = {
@@ -393,7 +393,7 @@ function seleccionarTipo(tipo) {
         document.getElementById('panelLente').style.display = 'block';
         consultarPrecio();
     } else {
-        document.getElementById('tituloOtro').textContent = (TITULOS[tipo] ? TITULOS[tipo] + ' — Datos' : '📦 Datos del Producto');
+        document.getElementById('tituloOtro').textContent = (TITULOS[tipo] ? TITULOS[tipo] + ' — Datos' : ' Datos del Producto');
         document.getElementById('panelOtro').style.display = 'block';
     }
 }
@@ -412,7 +412,7 @@ function sincronizarYValidar() {
     const alerta = document.getElementById('alertaValidacion');
  
     if (!tipo) {
-        alerta.textContent = '⚠️ Debes seleccionar un tipo de producto.';
+        alerta.textContent = ' Debes seleccionar un tipo de producto.';
         alerta.style.display = 'block';
         window.scrollTo(0,0);
         return false;
@@ -422,8 +422,8 @@ function sincronizarYValidar() {
     const codigo  = document.getElementById(c.codigo)?.value?.trim();
     const detalle = document.getElementById(c.detalle)?.value?.trim();
  
-    if (!codigo)  { alerta.textContent = '⚠️ El código es obligatorio.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
-    if (!detalle) { alerta.textContent = '⚠️ El nombre / detalle es obligatorio.'; alerta.style.display='block'; document.getElementById(c.detalle).focus(); return false; }
+    if (!codigo)  { alerta.textContent = ' El código es obligatorio.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
+    if (!detalle) { alerta.textContent = ' El nombre / detalle es obligatorio.'; alerta.style.display='block'; document.getElementById(c.detalle).focus(); return false; }
  
     document.getElementById('hCodigo').value    = codigo;
     document.getElementById('hDetalle').value   = detalle;
