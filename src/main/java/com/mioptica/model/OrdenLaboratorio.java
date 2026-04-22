@@ -72,4 +72,15 @@ public class OrdenLaboratorio {
 
     @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleOrdenLab> productos = new ArrayList<>();
+
+    // ── Origen de la orden ─────────────────────────────────────────
+    @Column(name = "origen", length = 30)
+    private String origen = "MANUAL";
+    // Valores: FICHA_INTERNA | RECETA_EXTERNA | MANUAL
+
+    @Column(name = "id_ficha")
+    private Integer idFicha;  // FK a fichas_clinicas (null si no viene de ficha)
+
+    @Column(name = "nota_origen", columnDefinition = "TEXT")
+    private String notaOrigen;  // "Graduación dada por el cliente" si es externa
 }

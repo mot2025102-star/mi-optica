@@ -75,6 +75,7 @@
                             <th sec:authorize="hasRole('ADMINISTRADOR')">Sucursal</th>
                             <th>Entrega Est.</th>
                             <th>Estado</th>
+                            <th>Origen</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -89,8 +90,8 @@
                         </tr>
                         <tr th:each="o : ${ordenes}">
                             <td class="text-turquesa fw-600" th:text="${o.numeroOrden}"></td>
-                            <td class="text-sm" th:text="${#temporals.format(o.fechaEmision,'dd/MM/yyyy')}"></td>
                             <td class="text-sm" th:text="${o.cliente != null ? o.cliente.nombre : 'CF'}"></td>
+                            <td class="text-sm" th:text="${#temporals.format(o.fechaEmision,'dd/MM/yyyy')}"></td>
                             <td class="text-sm text-gris" th:text="${o.usuario.nombreCompleto}"></td>
                             <td class="text-sm" sec:authorize="hasRole('ADMINISTRADOR')"
                                 th:text="${o.sucursal.nombre}"></td>
@@ -106,13 +107,21 @@
                                       th:text="${o.estado}">
                                 </span>
                             </td>
+                            <!-- CELDA ORIGEN (nueva) -->
+                            <td>
+                                <span th:if="${o.origen == 'FICHA_INTERNA'}"  class="badge badge-info">🏥 Ficha</span>
+                                <span th:if="${o.origen == 'RECETA_EXTERNA'}" class="badge badge-warning">📋 Externa</span>
+                                <span th:if="${o.origen == 'MANUAL' or o.origen == null}" class="badge badge-secondary">✏️ Manual</span>
+                            </td>
+
+                            <!-- CELDA ACCIONES (modificada) -->
                             <td>
                                 <div class="d-flex gap-1">
                                     <button class="btn btn-sm btn-secondary"
                                         th:data-id="${o.idOrden}"
                                         th:data-num="${o.numeroOrden}"
                                         onclick="verDetalle(this.dataset.id, this.dataset.num)">
-                                        
+                                        👁️
                                     </button>
                                     <!-- Cambio de estado rápido -->
                                     <select class="form-select form-select-sm"
@@ -125,6 +134,14 @@
                                         <option value="Entregado"  th:selected="${o.estado=='Entregado'}"> Entregado</option>
                                         <option value="Cancelado"  th:selected="${o.estado=='Cancelado'}"> Cancelado</option>
                                     </select>
+                                    <!-- Botón eliminar solo admin -->
+                                    <div sec:authorize="hasRole('ADMINISTRADOR')">
+                                        <button class="btn btn-sm btn-danger"
+                                                th:data-id="${o.idOrden}"
+                                                onclick="eliminarOrden(this.dataset.id)">
+                                            🗑️
+                                        </button>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -182,6 +199,19 @@ async function cambiarEstado(id, estado) {
     });
     const d = await r.json();
     if (!d.ok) alert('Error: ' + d.error);
+}
+
+async function eliminarOrden(id) {
+    if (!confirm('¿Eliminar esta orden? Esta acción no se puede deshacer.')) return;
+    const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content || '';
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+    const r = await fetch(`/ordenes-lab/eliminar/${id}`, {
+        method: 'POST',
+        headers: { [csrfHeader]: csrfToken }
+    });
+    const d = await r.json();
+    if (d.ok) location.reload();
+    else alert('Error: ' + d.error);
 }
 
 async function verDetalle(id, num) {

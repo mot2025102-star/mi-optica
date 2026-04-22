@@ -25,6 +25,7 @@ public class VentaService {
     private final SucursalRepository       sucursalRepo;
     private final UsuarioRepository        usuarioRepo;
     private final KardexRepository         kardexRepo;
+    private final OrdenLaboratorioRepository ordenRepo;  // para venta con orden externa
 
     // ─── Listar ventas ────────────────────────────────────────────
     public List<Venta> listarPorPeriodo(LocalDate fi, LocalDate ff,
@@ -163,6 +164,11 @@ public class VentaService {
         recibo.setVenta(venta);
         reciboRepo.save(recibo);
 
+        // ── 7. Si es receta externa → generar Orden de Laboratorio ───
+        if (req.isRecetaExterna()) {
+            generarOrdenRecetaExterna(req, venta, sucursal, usuario);
+        }
+
         return venta;
     }
 
@@ -234,5 +240,47 @@ public class VentaService {
 
         return prefijo + "-" + idSucursal + "-"
                 + String.format("%06d", corr.getValorActual());
+    }
+    
+    // ── Helper: orden desde receta externa ───────────────────────
+    private void generarOrdenRecetaExterna(VentaRequest req, Venta venta,
+                                        Sucursal sucursal, Usuario usuario) {
+        try {
+            int next = ordenRepo.findMaxId().orElse(0) + 1;  // ← inyecta ordenRepo
+
+            OrdenLaboratorio orden = new OrdenLaboratorio();
+            orden.setNumeroOrden(String.format("OL-%06d", next));
+            orden.setSucursal(sucursal);
+            orden.setUsuario(usuario);
+            orden.setCliente(venta.getCliente());
+            orden.setFechaEmision(LocalDate.now());
+            orden.setEstado("Pendiente");
+
+            // Origen
+            orden.setOrigen("RECETA_EXTERNA");
+            orden.setIdFicha(null);
+            orden.setNotaOrigen("⚠️ Graduación dada por el cliente — Factura: "
+                    + venta.getNumeroFactura());
+
+            // Graduación
+            orden.setOdEsfera(req.getRxOdEsfera());
+            orden.setOdCilindro(req.getRxOdCilindro());
+            orden.setOdEje(req.getRxOdEje());
+            orden.setOdAdd(req.getRxOdAdd());
+
+            orden.setOiEsfera(req.getRxOiEsfera());
+            orden.setOiCilindro(req.getRxOiCilindro());
+            orden.setOiEje(req.getRxOiEje());
+            orden.setOiAdd(req.getRxOiAdd());
+
+            orden.setPantoscopico(req.getRxPantoscopico());
+            orden.setVertex(req.getRxVertex());
+            orden.setPanoramico(req.getRxPanoramico());
+
+            ordenRepo.save(orden);
+
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo generar orden receta externa: " + e.getMessage());
+        }
     }
 }

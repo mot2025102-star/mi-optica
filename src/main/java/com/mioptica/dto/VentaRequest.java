@@ -16,6 +16,27 @@ public class VentaRequest {
     private BigDecimal descuentoGlobal;
     private String    observacion;
     private List<ItemVenta> items;
+    // ── Receta externa (opcional) ──────────────────────────────────
+    private boolean recetaExterna = false;
+
+    // Graduación externa OD
+    private String rxOdEsfera;
+    private String rxOdCilindro;
+    private String rxOdEje;
+    private String rxOdAdd;
+
+    // Graduación externa OI
+    private String rxOiEsfera;
+    private String rxOiCilindro;
+    private String rxOiEje;
+    private String rxOiAdd;
+
+    // Medidas
+    private String rxPantoscopico;
+    private String rxVertex;
+    private String rxPanoramico;
+
+    private Integer rxIdCliente; // cliente para la orden (puede ser null=CF)
 
     @Data
     public static class ItemVenta {

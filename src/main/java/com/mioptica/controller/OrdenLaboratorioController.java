@@ -158,4 +158,17 @@ public class OrdenLaboratorioController {
     }
 
     private String nv(String s) { return s != null ? s : ""; }
+
+    // ── ELIMINAR (solo ADMINISTRADOR) ────────────────────────────
+    @PostMapping("/eliminar/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> eliminar(@PathVariable Integer id) {
+        try {
+            ordenService.eliminar(id);
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
 }

@@ -99,4 +99,11 @@ public class OrdenLaboratorioService {
         o.setEstado(nuevoEstado);
         ordenRepo.save(o);
     }
+
+    @Transactional //eliminar para orden laboratorio controller
+    public void eliminar(Integer id) {
+        OrdenLaboratorio o = ordenRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+        ordenRepo.delete(o);
+    }
 }
