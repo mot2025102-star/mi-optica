@@ -3,80 +3,115 @@
                 xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
 <body>
-
 <div th:replace="~{fragments/layout :: sidebar}" th:with="activePage='dashboard'"></div>
 
 <div class="main-content">
-
-    <!-- Topbar -->
     <div class="topbar">
         <div>
-            <div class="topbar-title"> Panel Clínico</div>
+            <div class="topbar-title">Panel Clínico</div>
             <div class="topbar-sub"
                  th:text="'Bienvenido, ' + ${usuario.nombreCompleto} + ' — ' + ${usuario.sucursal?.nombre}">
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/fichas/nueva}" class="btn btn-primary"> Nueva Ficha</a>
+            <a th:href="@{/fichas/nueva}" class="btn btn-primary">Nueva Ficha</a>
         </div>
     </div>
 
     <div class="page-body">
 
-        <!-- ── Stats ─────────────────────────────────────────────── -->
+        <!-- Stats -->
         <div class="stats-grid">
-
             <div class="stat-card">
-                <div class="stat-icon turquesa"></div>
+                <div class="stat-icon turquesa">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalFichas}">0</div>
                     <div class="stat-label">Total mis fichas</div>
                 </div>
             </div>
-
             <div class="stat-card">
-                <div class="stat-icon amarillo"></div>
+                <div class="stat-icon amarillo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8"  y1="2" x2="8"  y2="6"/>
+                        <line x1="3"  y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${pendientes}">0</div>
                     <div class="stat-label">Entregas pendientes</div>
                 </div>
             </div>
-
             <div class="stat-card">
-                <div class="stat-icon rojo"></div>
+                <div class="stat-icon rojo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${conSaldo}">0</div>
                     <div class="stat-label">Con saldo pendiente</div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ── Accesos rápidos ───────────────────────────────────── -->
-        <div class="stats-grid" style="margin-bottom: 24px;">
-            <a th:href="@{/fichas/nueva}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon turquesa"></div>
+        <!-- Accesos rápidos -->
+        <div class="stats-grid" style="margin-bottom:24px">
+            <a th:href="@{/fichas/nueva}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon turquesa">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <line x1="9"  y1="15" x2="15" y2="15"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" style="font-size:15px">Nueva Ficha</div>
                     <div class="stat-label">Registrar consulta</div>
                 </div>
             </a>
-            <a th:href="@{/fichas}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon verde"></div>
+            <a th:href="@{/fichas}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon verde">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" style="font-size:15px">Mis Fichas</div>
                     <div class="stat-label">Ver historial clínico</div>
                 </div>
             </a>
-            <a th:href="@{/clientes}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon amarillo"></div>
+            <a th:href="@{/clientes}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon amarillo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" style="font-size:15px">Pacientes</div>
                     <div class="stat-label">Buscar cliente</div>
                 </div>
             </a>
-            <a th:href="@{/productos}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon naranja"></div>
+            <a th:href="@{/productos}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon naranja">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" style="font-size:15px">Productos</div>
                     <div class="stat-label">Catálogo óptico</div>
@@ -84,13 +119,12 @@
             </a>
         </div>
 
-        <!-- ── Próximas entregas ─────────────────────────────────── -->
+        <!-- Próximas entregas -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Próximas entregas</div>
                 <a th:href="@{/fichas}" class="btn btn-secondary btn-sm">Ver todas →</a>
             </div>
-
             <div class="table-wrapper">
                 <table class="table">
                     <thead>
@@ -103,24 +137,17 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        <!-- Sin entregas pendientes -->
                         <tr th:if="${proximasEntregas.isEmpty()}">
                             <td colspan="5" style="text-align:center;padding:40px;color:var(--gris-texto)">
-                                <div style="font-size:36px"></div>
+                                <div style="font-size:36px">📭</div>
                                 <div style="margin-top:8px">No hay entregas pendientes próximas.</div>
                             </td>
                         </tr>
-
                         <tr th:each="f : ${proximasEntregas}">
-
-                            <!-- Cliente -->
                             <td>
                                 <div class="fw-600" th:text="${f.cliente.nombre}"></div>
                                 <div class="text-gris text-sm" th:text="${f.cliente.telefono ?: '—'}"></div>
                             </td>
-
-                            <!-- Fecha entrega con semáforo -->
                             <td>
                                 <span th:with="dias=${f.diasParaEntrega}"
                                       th:style="${dias < 0}   ? 'color:var(--rojo);font-weight:600' :
@@ -130,21 +157,16 @@
                                 </span>
                                 <div class="text-sm"
                                      th:with="dias=${f.diasParaEntrega}"
-                                     th:text="${dias < 0}   ? ' Vencida hace ' + ${-dias} + ' día(s)' :
-                                               (${dias == 0} ? ' Hoy' :
-                                               'En ' + ${dias} + ' día(s)')"
+                                     th:text="${dias < 0}   ? 'Vencida hace ' + ${-dias} + ' día(s)' :
+                                               (${dias == 0} ? 'Hoy' : 'En ' + ${dias} + ' día(s)')"
                                      th:style="${dias < 0} ? 'color:var(--rojo)' :
                                                 (${dias == 0} ? 'color:var(--naranja)' : 'color:var(--gris-texto)')">
                                 </div>
                             </td>
-
-                            <!-- Estado -->
                             <td>
-                                <span th:if="${f.estadoEntrega == 'En proceso'}"  class="badge badge-info"> En proceso</span>
-                                <span th:if="${f.estadoEntrega == 'Pendiente' or f.estadoEntrega == null}" class="badge badge-warning"> Pendiente</span>
+                                <span th:if="${f.estadoEntrega == 'En proceso'}"  class="badge badge-info">En proceso</span>
+                                <span th:if="${f.estadoEntrega == 'Pendiente' or f.estadoEntrega == null}" class="badge badge-warning">Pendiente</span>
                             </td>
-
-                            <!-- Saldo -->
                             <td style="text-align:right">
                                 <span th:if="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                                       class="fw-600" style="color:var(--rojo)"
@@ -152,13 +174,10 @@
                                 <span th:unless="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                                       class="badge badge-success">Pagado</span>
                             </td>
-
-                            <!-- Acción -->
                             <td>
                                 <a th:href="@{/fichas/editar/{id}(id=${f.idFicha})}"
-                                   class="btn btn-sm btn-secondary"> Editar</a>
+                                   class="btn btn-sm btn-secondary">Editar</a>
                             </td>
-
                         </tr>
                     </tbody>
                 </table>
@@ -168,5 +187,14 @@
     </div>
 </div>
 
+<style>
+.stat-icon { font-size:0; }
+.stat-icon::before { display:none !important; }
+.stat-icon svg { width:22px; height:22px; transition:transform .2s ease, opacity .2s ease; }
+.stat-card:hover .stat-icon svg { transform:scale(1.18); }
+.acceso-rapido .stat-icon svg { opacity:.7; }
+.acceso-rapido:hover .stat-icon { box-shadow:0 0 0 3px var(--gold-glow); }
+.acceso-rapido:hover .stat-icon svg { transform:scale(1.22); opacity:1; }
+</style>
 </body>
 </html>

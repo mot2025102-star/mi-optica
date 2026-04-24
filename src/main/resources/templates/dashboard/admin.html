@@ -9,54 +9,86 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title"> Panel de Administración</div>
+            <div class="topbar-title">Panel de Administración</div>
             <div class="topbar-sub"
                  th:text="'Bienvenido, ' + ${usuario.nombreCompleto} + ' — ' + ${usuario.sucursal?.nombre}">
             </div>
         </div>
-        <div class="topbar-actions">
-        </div>
+        <div class="topbar-actions"></div>
     </div>
 
     <div class="page-body">
 
-        <!-- Stats -->
+        <!-- ── Stats ─────────────────────────────────────────────── -->
         <div class="stats-grid">
+
+            <!-- Productos en catálogo -->
             <div class="stat-card">
-                <div class="stat-icon turquesa"></div>
+                <div class="stat-icon turquesa">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
-                    <div class="stat-value" id="statProductos" >...</div>
-                    <div class="stat-label" >Productos en catálogo</div>
+                    <div class="stat-value" id="statProductos">...</div>
+                    <div class="stat-label">Productos en catálogo</div>
                 </div>
             </div>
+
+            <!-- Ventas hoy -->
             <div class="stat-card">
-                <div class="stat-icon verde"></div>
+                <div class="stat-icon verde">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" id="statVentasHoy">...</div>
                     <div class="stat-label">Ventas hoy</div>
                 </div>
             </div>
+
+            <!-- Clientes registrados -->
             <div class="stat-card">
-                <div class="stat-icon amarillo"></div>
+                <div class="stat-icon amarillo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" id="statClientes">...</div>
-                    <div class="stat-label" >Clientes registrados</div>
+                    <div class="stat-label">Clientes registrados</div>
                 </div>
             </div>
+
+            <!-- Stock bajo -->
             <div class="stat-card">
-                <div class="stat-icon rojo" ></div>
+                <div class="stat-icon rojo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
-                    <div class="stat-value" th:text="${stockBajo.size()}" >0</div>
-                    <div class="stat-label" >Stock bajo</div>
+                    <div class="stat-value" th:text="${stockBajo.size()}">0</div>
+                    <div class="stat-label">Stock bajo</div>
                 </div>
             </div>
+
         </div>
 
-        <!-- Stock bajo -->
+        <!-- ── Stock bajo ─────────────────────────────────────────── -->
         <div class="card" th:if="${!stockBajo.isEmpty()}">
             <div class="card-header">
-                <div class="card-title" > Productos con Stock Bajo</div>
-                <a th:href="@{/inventario}" class="btn btn-secondary btn-sm" >Ver inventario →</a>
+                <div class="card-title">Productos con Stock Bajo</div>
+                <a th:href="@{/inventario}" class="btn btn-secondary btn-sm">Ver inventario →</a>
             </div>
             <div class="table-wrapper">
                 <table class="table">
@@ -83,7 +115,7 @@
                         </td>
                         <td>
                             <a th:href="@{/traslados(pid=${inv.producto.idProducto})}"
-                               class="btn btn-sm btn-warning"> Trasladar</a>
+                               class="btn btn-sm btn-warning">Trasladar</a>
                         </td>
                     </tr>
                     </tbody>
@@ -91,33 +123,87 @@
             </div>
         </div>
 
-        <!-- Accesos rápidos -->
+        <!-- ── Accesos rápidos ────────────────────────────────────── -->
         <div class="stats-grid">
-            <a th:href="@{/inventario}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon turquesa" ></div>
-                <div class="stat-info"><div class="stat-value" style="font-size:15px" >Inventario</div></div>
+
+            <a th:href="@{/inventario}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon turquesa">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" style="font-size:15px">Inventario</div>
+                    <div class="stat-label">Ver existencias</div>
+                </div>
             </a>
-            
-            <a th:href="@{/reportes}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                <div class="stat-icon verde" ></div>
-                <div class="stat-info"><div class="stat-value" style="font-size:15px" >Reportes</div></div>
+
+            <a th:href="@{/reportes}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                <div class="stat-icon verde">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6"  y1="20" x2="6"  y2="14"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" style="font-size:15px">Reportes</div>
+                    <div class="stat-label">Ver reportes</div>
+                </div>
             </a>
+
         </div>
+
     </div>
 </div>
 
+<style>
+/* ── Ícono SVG dentro del stat-icon ── */
+.stat-icon {
+    /* quita el ::before que pintaba el círculo genérico */
+    font-size: 0;
+}
+.stat-icon::before {
+    display: none !important;
+}
+.stat-icon svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Hover en stat-card normales */
+.stat-card:hover .stat-icon svg {
+    transform: scale(1.18);
+    opacity: 1;
+}
+
+/* Accesos rápidos: efecto más pronunciado al hover */
+.acceso-rapido .stat-icon svg {
+    opacity: 0.7;
+}
+.acceso-rapido:hover .stat-icon {
+    box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.acceso-rapido:hover .stat-icon svg {
+    transform: scale(1.22);
+    opacity: 1;
+}
+</style>
+
 <script>
-// Cargar stats vía API REST (asíncrono)
 async function cargarStats() {
     try {
         const r = await fetch('/api/stats/admin');
         const d = await r.json();
-        document.getElementById('statProductos').textContent  = d.productos  ?? '—';
-        document.getElementById('statVentasHoy').textContent  = 'Q' + (d.ventasHoy ?? '0.00');
-        document.getElementById('statClientes').textContent   = d.clientes   ?? '—';
+        document.getElementById('statProductos').textContent = d.productos  ?? '—';
+        document.getElementById('statVentasHoy').textContent = 'Q' + (d.ventasHoy ?? '0.00');
+        document.getElementById('statClientes').textContent  = d.clientes   ?? '—';
     } catch(e) { console.warn('Stats no disponibles aún'); }
 }
 cargarStats();
 </script>
+
 </body>
 </html>

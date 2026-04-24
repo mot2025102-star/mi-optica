@@ -18,6 +18,15 @@
         .sidebar-item.active .sidebar-item-icon { opacity: 1; }
         .sidebar-item-icon svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
     </style>
+    <!--/* Script que pone la clase de página en el <body> en cuanto carga el DOM */-->
+    <script th:inline="javascript">
+        const _activePage = /*[[${activePage}]]*/ '';
+        document.addEventListener('DOMContentLoaded', function() {
+            if (_activePage) {
+                document.body.classList.add('page-' + _activePage);
+            }
+        });
+    </script>
 </head>
 
 <div th:fragment="sidebar" class="sidebar">

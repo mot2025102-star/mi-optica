@@ -7,13 +7,13 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title"> Mi Panel de Ventas</div>
+            <div class="topbar-title">Mi Panel de Ventas</div>
             <div class="topbar-sub"
                  th:text="'Bienvenido, ' + ${usuario.nombreCompleto} + ' — ' + ${sucursal}">
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/ventas/nueva}" class="btn btn-primary"> Nueva Venta</a>
+            <a th:href="@{/ventas/nueva}" class="btn btn-primary">Nueva Venta</a>
         </div>
     </div>
 
@@ -22,7 +22,12 @@
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon verde"></div>
+                <div class="stat-icon verde">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value"
                          th:text="${ventasHoy != null} ? 'Q' + ${#numbers.formatDecimal(ventasHoy,1,'COMMA',2,'POINT')} : 'Q0.00'">
@@ -31,14 +36,27 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon turquesa"></div>
+                <div class="stat-icon turquesa">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${countHoy}">0</div>
                     <div class="stat-label">Facturas hoy</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo"></div>
+                <div class="stat-icon amarillo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${stockBajo.size()}">0</div>
                     <div class="stat-label">Productos con stock bajo</div>
@@ -48,38 +66,77 @@
 
         <!-- Accesos rápidos -->
         <div class="card mb-3">
-            <div class="card-header"><div class="card-title"> Accesos Rápidos</div></div>
+            <div class="card-header"><div class="card-title">Accesos Rápidos</div></div>
             <div class="card-body" style="padding:16px 20px">
                 <div class="stats-grid">
-                    <a th:href="@{/ventas/nueva}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon verde"></div>
-                        <div class="stat-info"><div class="stat-value" style="font-size:15px">Nueva Venta</div></div>
+                    <a th:href="@{/ventas/nueva}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                        <div class="stat-icon verde">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 2v3.5M4 5.5H20M4 5.5l1.5 14h13l1.5-14"/>
+                                <path d="M9 10v4M15 10v4"/>
+                                <line x1="12" y1="8" x2="12" y2="2"/>
+                                <line x1="9"  y1="5" x2="15" y2="5"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" style="font-size:15px">Nueva Venta</div>
+                            <div class="stat-label">Registrar venta</div>
+                        </div>
                     </a>
-                    <a th:href="@{/ventas}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon turquesa"></div>
-                        <div class="stat-info"><div class="stat-value" style="font-size:15px">Historial Ventas</div></div>
+                    <a th:href="@{/ventas}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                        <div class="stat-icon turquesa">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 2v3.5M4 5.5H20M4 5.5l1.5 14h13l1.5-14"/>
+                                <path d="M9 10v4M15 10v4"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" style="font-size:15px">Historial Ventas</div>
+                            <div class="stat-label">Ver ventas</div>
+                        </div>
                     </a>
-                    <a th:href="@{/ordenes-lab/nueva}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon morado"></div>
-                        <div class="stat-info"><div class="stat-value" style="font-size:15px">Nueva Orden Lab</div></div>
+                    <a th:href="@{/ordenes-lab/nueva}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                        <div class="stat-icon naranja">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0h10m-10 0a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2m0 0V9m0 5a2 2 0 0 1-2-2V9m0 0H9"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" style="font-size:15px">Nueva Orden Lab</div>
+                            <div class="stat-label">Laboratorio</div>
+                        </div>
                     </a>
-                    <a th:href="@{/clientes}" class="stat-card" style="text-decoration:none;cursor:pointer">
-                        <div class="stat-icon amarillo"></div>
-                        <div class="stat-info"><div class="stat-value" style="font-size:15px">Clientes</div></div>
+                    <a th:href="@{/clientes}" class="stat-card acceso-rapido" style="text-decoration:none;cursor:pointer">
+                        <div class="stat-icon amarillo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" style="font-size:15px">Clientes</div>
+                            <div class="stat-label">Buscar cliente</div>
+                        </div>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Stock bajo (alerta) -->
+        <!-- Stock bajo -->
         <div class="card" th:if="${!stockBajo.isEmpty()}">
             <div class="card-header">
-                <div class="card-title"> Alerta de Stock Bajo</div>
+                <div class="card-title">Alerta de Stock Bajo</div>
             </div>
             <div class="table-wrapper">
                 <table class="table">
                     <thead>
-                        <tr><th>Producto</th><th>Código</th><th style="text-align:center">Existencia</th></tr>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Código</th>
+                            <th style="text-align:center">Existencia</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr th:each="inv : ${stockBajo}">
@@ -96,7 +153,18 @@
                 </table>
             </div>
         </div>
+
     </div>
 </div>
+
+<style>
+.stat-icon { font-size:0; }
+.stat-icon::before { display:none !important; }
+.stat-icon svg { width:22px; height:22px; transition:transform .2s ease, opacity .2s ease; }
+.stat-card:hover .stat-icon svg { transform:scale(1.18); }
+.acceso-rapido .stat-icon svg { opacity:.7; }
+.acceso-rapido:hover .stat-icon { box-shadow:0 0 0 3px var(--gold-glow); }
+.acceso-rapido:hover .stat-icon svg { transform:scale(1.22); opacity:1; }
+</style>
 </body>
 </html>
