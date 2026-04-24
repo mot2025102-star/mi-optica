@@ -98,11 +98,13 @@ body{
   font-size:14px;
   line-height:1.55;
   color:var(--text);
-  background:var(--bg);
+  background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,178,122,.06), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(212,178,122,.03), transparent 60%);
-  background-attachment:fixed;
+    linear-gradient(rgba(10,10,11,.80), rgba(10,10,11,.80)),
+    url('/img/Wallpaper-Dashboard.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   min-height:100vh;
   font-feature-settings:"ss01","cv11","calt";
   -webkit-font-smoothing:antialiased;
@@ -138,8 +140,6 @@ h4{ font-size:18px; }
 .mono{ font-family:var(--font-mono); }
 
 /* ══════════════ TOPBAR (reemplaza sidebar visualmente) ══════════════ */
-/* La clase .sidebar conserva su nombre por compatibilidad con Thymeleaf,
-   pero ahora se renderiza como una barra superior horizontal.            */
 .sidebar{
   position:fixed;
   top:0; left:0; right:0;
@@ -173,11 +173,10 @@ h4{ font-size:18px; }
   width:28px; height:28px;
   display:grid; place-items:center;
   background:transparent;
-  font-size:0; /* ocultamos cualquier emoji que venga del HTML */
+  font-size:0;
   border-radius:0;
 }
 .sidebar-logo-icon::before{
-  /* Logo SVG inline: ojo geométrico minimalista en oro */
   content:"";
   width:28px; height:28px;
   background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23d4b27a' stroke-width='1.4'><path d='M2 20 C 8 8, 32 8, 38 20 C 32 32, 8 32, 2 20 Z'/><circle cx='20' cy='20' r='6'/><circle cx='20' cy='20' r='2.2' fill='%23d4b27a'/></svg>") center/contain no-repeat;
@@ -208,18 +207,15 @@ h4{ font-size:18px; }
   overflow-y:visible;
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
-  /* Ocultar scrollbar en todos los navegadores */
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
 .sidebar-nav::-webkit-scrollbar{ display:none; }
 
-/* Las section-labels se ocultan en topbar */
 .sidebar-section-label{
   display:none !important;
 }
 
-/* Cada item es un link tipo MEN / WOMEN / KIDS */
 .sidebar-item{
   position:relative;
   display:inline-flex;
@@ -235,10 +231,9 @@ h4{ font-size:18px; }
   transition:color var(--t-fast) var(--ease);
   white-space:nowrap;
 }
-.sidebar-item-icon{ display:none; } /* ocultamos los emojis viejos */
+.sidebar-item-icon{ display:none; }
 .sidebar-item-text{ position:relative; z-index:1; }
 
-/* Underline animado tipo Nike */
 .sidebar-item::after{
   content:"";
   position:absolute;
@@ -286,7 +281,7 @@ h4{ font-size:18px; }
   margin-top:2px;
 }
 
-/* Footer (cerrar sesión) — se reposiciona dentro del topbar */
+/* Footer (cerrar sesión) */
 .sidebar-footer{
   margin-left:8px;
   display:flex; align-items:center;
@@ -312,7 +307,7 @@ h4{ font-size:18px; }
   color:var(--danger) !important;
   background:var(--danger-dim) !important;
 }
-.sidebar-footer button span:first-child{ display:none; } /* emoji 🚪 */
+.sidebar-footer button span:first-child{ display:none; }
 
 /* ══════════════ MAIN CONTENT ══════════════ */
 .main-content{
@@ -326,7 +321,6 @@ h4{ font-size:18px; }
   to  { opacity:1; transform:translateY(0); }
 }
 
-/* Topbar de página (encabezado dentro del contenido, no la nav) */
 .topbar{
   display:flex; align-items:flex-end; justify-content:space-between;
   gap:24px; flex-wrap:wrap;
@@ -398,14 +392,13 @@ h4{ font-size:18px; }
   width:48px; height:48px;
   border-radius:var(--r-sm);
   display:grid; place-items:center;
-  font-size:0; /* ocultamos emoji existente */
+  font-size:0;
   background:var(--gold-glow);
   color:var(--gold);
   border:1px solid var(--gold-glow);
   flex-shrink:0;
   position:relative;
 }
-/* Iconos SVG reemplazando emojis por color de stat-icon */
 .stat-icon::before{
   content:""; width:22px; height:22px;
   background:currentColor;
@@ -715,12 +708,9 @@ textarea{ resize:vertical; min-height:90px; }
 .text-rojo{ color:var(--danger); }
 .text-naranja{ color:var(--naranja); }
 
-/* Accent helpers para títulos editoriales */
 .accent-italic{ font-family:var(--font-display); font-style:italic; color:var(--gold); font-weight:500; }
 
-/* ══════════════ LOGIN (no se toca el HTML, se decora con CSS) ══════════════ */
-/* El HTML del login no se modifica. Estas reglas solo refinan los colores
-   y la tipografía si las clases ya existen. */
+/* ══════════════ LOGIN ══════════════ */
 .login-page{
   min-height:100vh;
   display:grid; place-items:center;
@@ -764,7 +754,7 @@ textarea{ resize:vertical; min-height:90px; }
   .sidebar{ padding:0 16px; gap:12px; height:60px; }
   :root{ --topbar-h:60px; }
   .sidebar-logo-sub{ display:none; }
-  .sidebar-nav{ display:none; }   /* el menú colapsado se manejará en layout.html */
+  .sidebar-nav{ display:none; }
   .sidebar-user-info{ display:none; }
   .main-content{ padding:calc(var(--topbar-h) + 20px) 18px 40px; }
   .topbar-title{ font-size:26px; }
@@ -824,14 +814,13 @@ body.nav-open .sidebar-item::after{ display:none; }
   .text-turquesa{ color:#7a5a2a !important; }
 }
 
-/* ══════════════ RECIBO TÉRMICO (facturas, corte, cotización) ══════════════ */
-/* Aplicar la clase .thermal al contenedor para mostrar estilo recibo. */
+/* ══════════════ RECIBO TÉRMICO ══════════════ */
 .thermal{
   font-family:var(--font-mono);
   background:var(--bg-elev-1);
   color:var(--text);
   width:100%;
-  max-width:360px;            /* ~80mm a 96dpi */
+  max-width:360px;
   margin:0 auto;
   padding:24px 22px;
   border:1px dashed var(--gris-borde);
