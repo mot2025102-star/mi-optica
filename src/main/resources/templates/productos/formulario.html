@@ -2,43 +2,47 @@
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
- 
+
 <head th:replace="~{fragments/layout :: head('Producto')}"></head>
 <body>
 <div th:replace="~{fragments/layout :: sidebar}"></div>
- 
+
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title" th:text="${editando} ? ' Editar Producto' : ' Nuevo Producto'"></div>
-            <div class="topbar-sub" th:text="${editando} ? 'Modificar información del producto' : 'Registrar nuevo producto en el sistema'"></div>
+            <div class="topbar-title" th:text="${editando} ? 'Editar Producto' : 'Nuevo Producto'"></div>
+            <div class="topbar-sub"   th:text="${editando} ? 'Modificar información del producto' : 'Registrar nuevo producto en el sistema'"></div>
         </div>
         <div class="topbar-actions">
             <a th:href="@{/productos}" class="btn btn-secondary">← Volver</a>
         </div>
     </div>
- 
+
     <div class="page-body">
- 
+
         <div id="alertaValidacion" class="alert alert-danger" style="display:none"></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"> <span th:text="${mensajeError}"></span></div>
- 
-        <!-- Form oculto con todos los hiddens -->
+        <div th:if="${mensajeError}" class="alert alert-danger"><span th:text="${mensajeError}"></span></div>
+
+        <!-- ═══ FORM OCULTO CON HIDDENS ══════════════════════════ -->
         <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"
               onsubmit="return sincronizarYValidar()">
+            <!-- Stock por sucursal -->
             <input type="hidden" name="existencia_1" id="hExistencia_1" value="0">
             <input type="hidden" name="costo_1"      id="hCosto_1"      value="0">
             <input type="hidden" name="precio_1"     id="hPrecio_1"     value="0">
             <input type="hidden" name="existencia_2" id="hExistencia_2" value="0">
             <input type="hidden" name="costo_2"      id="hCosto_2"      value="0">
             <input type="hidden" name="precio_2"     id="hPrecio_2"     value="0">
-              <!-- Agrega esto dentro del form id="formPrincipal" -->
-            <input type="hidden" id="sucActiva_1" name="sucActiva_1" value="0">
-            <input type="hidden" id="sucActiva_2" name="sucActiva_2" value="0">
+            <input type="hidden" id="sucActiva_1"    name="sucActiva_1" value="0">
+            <input type="hidden" id="sucActiva_2"    name="sucActiva_2" value="0">
+
+            <!-- CSRF + ID -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <input type="hidden" name="idProducto"                     th:value="${producto.idProducto}"/>
-                <!-- DESPUÉS -->
-            <input type="hidden" id="hTipo" name="tipoProducto" th:value="${producto.tipoProducto != null and producto.tipoProducto != 'GENERAL'} ? ${producto.tipoProducto} : ''"/>
+            <input type="hidden" name="idProducto" th:value="${producto.idProducto}"/>
+
+            <!-- Campos comunes -->
+            <input type="hidden" id="hTipo"      name="tipoProducto"
+                   th:value="${producto.tipoProducto != null and producto.tipoProducto != 'GENERAL'} ? ${producto.tipoProducto} : ''"/>
             <input type="hidden" id="hCodigo"    name="codigo"         th:value="${producto.codigo}"/>
             <input type="hidden" id="hDetalle"   name="detalle"        th:value="${producto.detalle}"/>
             <input type="hidden" id="hDesc"      name="descripcion"    th:value="${producto.descripcion}"/>
@@ -47,145 +51,326 @@
             <input type="hidden" id="hModelo"    name="modelo"         th:value="${producto.modelo}"/>
             <input type="hidden" id="hMarca"     name="marca.idMarca"  th:value="${producto.marca != null ? producto.marca.idMarca : ''}"/>
             <input type="hidden" id="hCategoria" name="categoria.idCategoria" th:value="${producto.categoria != null ? producto.categoria.idCategoria : ''}"/>
-            <input type="hidden" id="hTipoL"     name="tipoLente.idTipo"             th:value="${producto.tipoLente != null ? producto.tipoLente.idTipo : ''}"/>
-            <input type="hidden" id="hMaterialL" name="materialLente.idMaterial"     th:value="${producto.materialLente != null ? producto.materialLente.idMaterial : ''}"/>
+            <input type="hidden" id="hTipoL"     name="tipoLente.idTipo"               th:value="${producto.tipoLente != null ? producto.tipoLente.idTipo : ''}"/>
+            <input type="hidden" id="hMaterialL" name="materialLente.idMaterial"       th:value="${producto.materialLente != null ? producto.materialLente.idMaterial : ''}"/>
             <input type="hidden" id="hTratL"     name="tratamientoLente.idTratamiento" th:value="${producto.tratamientoLente != null ? producto.tratamientoLente.idTratamiento : ''}"/>
+
+            <!-- Campos Armazón -->
+            <input type="hidden" id="hMaterialA"  name="materialArmazon"  th:value="${producto.materialArmazon}"/>
+            <input type="hidden" id="hFamiliaA"   name="familiaArmazon"   th:value="${producto.familiaArmazon}"/>
+            <input type="hidden" id="hFormaA"     name="formaArmazon"     th:value="${producto.formaArmazon}"/>
+            <input type="hidden" id="hSegmentoA"  name="segmentoArmazon"  th:value="${producto.segmentoArmazon}"/>
+            <input type="hidden" id="hGamaA"      name="gamaArmazon"      th:value="${producto.gamaArmazon}"/>
+            <input type="hidden" id="hMedHorizA"  name="medHorizontal"    th:value="${producto.medHorizontal}"/>
+            <input type="hidden" id="hMedVertA"   name="medVertical"      th:value="${producto.medVertical}"/>
+            <input type="hidden" id="hMedDiagA"   name="medDiagonal"      th:value="${producto.medDiagonal}"/>
+            <input type="hidden" id="hMedPuenteA" name="medPuente"        th:value="${producto.medPuente}"/>
+            <input type="hidden" id="hMedVarA"    name="medVarrilla"      th:value="${producto.medVarrilla}"/>
         </form>
- 
-        <!-- ═══ SELECCIÓN DE TIPO ══════════════════════════════════ -->
-        <div id="panelTipos" class="card mb-3"
-             th:style="${producto.tipoProducto != null and !#strings.isEmpty(producto.tipoProducto)} ? 'display:none' : ''">
+
+        <!-- ═══ SELECCIÓN DE TIPO ═════════════════════════════════ -->
+        <div id="panelTipos" class="card mb-3" style="display:block">
             <div class="card-header">
-                <div class="card-title"> ¿Qué tipo de producto vas a registrar?</div>
+                <div class="card-title">¿Qué tipo de producto vas a registrar?</div>
             </div>
             <div class="card-body" style="padding:24px">
                 <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
-                    <div class="tipo-card" id="card-ARMAZON"   onclick="seleccionarTipo('ARMAZON')">
-                        <div style="font-size:40px"></div>
+
+                    <div class="tipo-card" id="card-ARMAZON" onclick="seleccionarTipo('ARMAZON')">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa)">
+                            <path d="M2 9h3.5L7 12h10l1.5-3H22"/>
+                            <path d="M7 12v4a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1"/>
+                            <path d="M17 12v4a2 2 0 0 0-2 2h-1a2 2 0 0 0-2-2v-1"/>
+                            <line x1="12" y1="12" x2="12" y2="15"/>
+                        </svg>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Armazón</div>
                         <div class="text-gris text-sm">Marca, modelo, color</div>
                     </div>
-                    <div class="tipo-card" id="card-LENTE"     onclick="seleccionarTipo('LENTE')">
-                        <div style="font-size:40px"></div>
+
+                    <div class="tipo-card" id="card-LENTE" onclick="seleccionarTipo('LENTE')">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa)">
+                            <circle cx="11" cy="11" r="7"/>
+                            <line x1="16.5" y1="16.5" x2="22" y2="22"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                            <line x1="11" y1="8" x2="11" y2="14"/>
+                        </svg>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Lente</div>
                         <div class="text-gris text-sm">Tipo, material, tratamiento</div>
                     </div>
-                    <div class="tipo-card" id="card-LIMPIEZA"  onclick="seleccionarTipo('LIMPIEZA')">
-                        <div style="font-size:40px"></div>
+
+                    <div class="tipo-card" id="card-LIMPIEZA" onclick="seleccionarTipo('LIMPIEZA')">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa)">
+                            <path d="M9 3h6l1 7H8L9 3z"/>
+                            <path d="M8 10c0 0-2 1.5-2 5a6 6 0 0 0 12 0c0-3.5-2-5-2-5"/>
+                            <line x1="12" y1="14" x2="12" y2="17"/>
+                        </svg>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Limpieza</div>
                         <div class="text-gris text-sm">Líquidos, paños</div>
                     </div>
+
                     <div class="tipo-card" id="card-ACCESORIO" onclick="seleccionarTipo('ACCESORIO')">
-                        <div style="font-size:40px"></div>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa)">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                            <line x1="12" y1="12" x2="12" y2="16"/>
+                            <line x1="10" y1="14" x2="14" y2="14"/>
+                        </svg>
                         <div class="fw-600" style="font-size:15px;margin-top:8px">Accesorio</div>
                         <div class="text-gris text-sm">Estuches, cordones</div>
                     </div>
+
                 </div>
             </div>
         </div>
- 
-        <!-- ═══ PANEL ARMAZÓN ═════════════════════════════════════ -->
+
+        <!-- ═══ PANEL ARMAZÓN ════════════════════════════════════ -->
         <div id="panelArmazon" style="display:none">
             <div class="card mb-3">
                 <div class="card-header">
-                    <div class="card-title"> Datos del Armazón</div>
+                    <div class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px">
+                            <path d="M2 9h3.5L7 12h10l1.5-3H22"/>
+                            <path d="M7 12v4a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1"/>
+                            <path d="M17 12v4a2 2 0 0 0-2 2h-1a2 2 0 0 0-2-2v-1"/>
+                            <line x1="12" y1="12" x2="12" y2="15"/>
+                        </svg>
+                        Datos del Armazón
+                    </div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
                 </div>
                 <div class="card-body" style="padding:20px">
+
+                    <!-- Fila 1: Código + Nombre -->
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Código *</label>
-                            <input type="text" id="vCodigoA" class="form-control" placeholder="Ej: BZ147" th:value="${producto.codigo}">
+                            <input type="text" id="vCodigoA" class="form-control"
+                                   placeholder="Ej: BZ128/BLK" th:value="${producto.codigo}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nombre / Detalle *</label>
-                            <input type="text" id="vDetalleA" class="form-control" placeholder="Ej: Armazón Baron BZ147 BLACK" th:value="${producto.detalle}">
+                            <input type="text" id="vDetalleA" class="form-control"
+                                   placeholder="Ej: Armazón Baron BZ128 Negro" th:value="${producto.detalle}">
                         </div>
                     </div>
+
+                    <!-- Fila 2: Marca + Modelo + Color -->
                     <div class="form-row form-row-3">
                         <div class="form-group">
                             <label class="form-label">Marca</label>
                             <div style="display:flex;gap:8px">
                                 <select id="vMarcaA" class="form-select">
                                     <option value="">— Sin marca —</option>
-                                    <option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}"
-                                            th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option>
+                                    <option th:each="m : ${marcas}"
+                                            th:value="${m.idMarca}" th:text="${m.nombre}"
+                                            th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}">
+                                    </option>
                                 </select>
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Modelo</label>
-                            <input type="text" id="vModeloA" class="form-control" placeholder="Ej: BZ147" th:value="${producto.modelo}">
+                            <input type="text" id="vModeloA" class="form-control"
+                                   placeholder="Ej: BZ128" th:value="${producto.modelo}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Color</label>
-                            <input type="text" id="vColorA" class="form-control" placeholder="Ej: BLACK, BROWN" th:value="${producto.color}">
+                            <input type="text" id="vColorA" class="form-control"
+                                   placeholder="Ej: Negro, Café" th:value="${producto.color}">
                         </div>
                     </div>
+
+                    <!-- Fila 3: Material + Unidad -->
                     <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Material</label>
+                            <select id="vMaterialA" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="ACERO_INOXIDABLE" th:selected="${producto.materialArmazon == 'ACERO_INOXIDABLE'}">Acero Inoxidable</option>
+                                <option value="TITANIUM"         th:selected="${producto.materialArmazon == 'TITANIUM'}">Titanium</option>
+                                <option value="ALUMINIO"         th:selected="${producto.materialArmazon == 'ALUMINIO'}">Aluminio</option>
+                                <option value="MONEL"            th:selected="${producto.materialArmazon == 'MONEL'}">Monel</option>
+                                <option value="ACETATO"          th:selected="${producto.materialArmazon == 'ACETATO'}">Acetato</option>
+                                <option value="TR90"             th:selected="${producto.materialArmazon == 'TR90'}">TR-90</option>
+                                <option value="INYECTADO"        th:selected="${producto.materialArmazon == 'INYECTADO'}">Inyectado</option>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Unidad de Medida</label>
                             <select id="vUnidadA" class="form-select">
                                 <option value="Unidad"  th:selected="${producto.unidadMedida == null or producto.unidadMedida == 'Unidad'}">Unidad</option>
                                 <option value="Par"     th:selected="${producto.unidadMedida == 'Par'}">Par</option>
                                 <option value="Caja"    th:selected="${producto.unidadMedida == 'Caja'}">Caja</option>
-                                <option value="Paquete" th:selected="${producto.unidadMedida == 'Paquete'}">Paquete</option>
                                 <option value="Docena"  th:selected="${producto.unidadMedida == 'Docena'}">Docena</option>
-                                <option value="Frasco"  th:selected="${producto.unidadMedida == 'Frasco'}">Frasco</option>
-                                <option value="Tubo"    th:selected="${producto.unidadMedida == 'Tubo'}">Tubo</option>
-                                <option value="Estuche" th:selected="${producto.unidadMedida == 'Estuche'}">Estuche</option>
-                                <option value="Kit"     th:selected="${producto.unidadMedida == 'Kit'}">Kit</option>
-                                <option value="Rollo"   th:selected="${producto.unidadMedida == 'Rollo'}">Rollo</option>
                             </select>
                         </div>
                     </div>
+
+                    <!-- Fila 4: Familia + Forma -->
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Familia / Tipo de Aro</label>
+                            <select id="vFamiliaA" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="COMPLETO"  th:selected="${producto.familiaArmazon == 'COMPLETO'}">Completo (Full Frame)</option>
+                                <option value="RANURADO"  th:selected="${producto.familiaArmazon == 'RANURADO'}">Ranurado (Semi Rimless)</option>
+                                <option value="AEREO"     th:selected="${producto.familiaArmazon == 'AEREO'}">Aéreo (Rimless)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Forma</label>
+                            <select id="vFormaA" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="CUADRADO"    th:selected="${producto.formaArmazon == 'CUADRADO'}">Cuadrado</option>
+                                <option value="OVALADO"     th:selected="${producto.formaArmazon == 'OVALADO'}">Ovalado</option>
+                                <option value="RECTANGULAR" th:selected="${producto.formaArmazon == 'RECTANGULAR'}">Rectangular</option>
+                                <option value="AVIADOR"     th:selected="${producto.formaArmazon == 'AVIADOR'}">Aviador</option>
+                                <option value="CAT_EYES"    th:selected="${producto.formaArmazon == 'CAT_EYES'}">Cat Eyes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fila 5: Segmento + Gama -->
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Segmento / Género</label>
+                            <select id="vSegmentoA" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="CABALLERO" th:selected="${producto.segmentoArmazon == 'CABALLERO'}">Caballero</option>
+                                <option value="DAMA"      th:selected="${producto.segmentoArmazon == 'DAMA'}">Dama</option>
+                                <option value="NIÑO"      th:selected="${producto.segmentoArmazon == 'NIÑO'}">Niño</option>
+                                <option value="UNISEX"    th:selected="${producto.segmentoArmazon == 'UNISEX'}">Unisex</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gama</label>
+                            <select id="vGamaA" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="BASICA" th:selected="${producto.gamaArmazon == 'BASICA'}">Básica</option>
+                                <option value="MEDIA"  th:selected="${producto.gamaArmazon == 'MEDIA'}">Media</option>
+                                <option value="ALTA"   th:selected="${producto.gamaArmazon == 'ALTA'}">Alta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fila 6: Medidas -->
+                    <div style="margin-top:4px">
+                        <label class="form-label">Medidas (mm)</label>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:12px;color:var(--text-gris)">Horizontal</label>
+                            <input type="number" id="vMedHorizA" class="form-control" min="0" step="0.1"
+                                   placeholder="52" th:value="${producto.medHorizontal}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:12px;color:var(--text-gris)">Vertical</label>
+                            <input type="number" id="vMedVertA" class="form-control" min="0" step="0.1"
+                                   placeholder="38" th:value="${producto.medVertical}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:12px;color:var(--text-gris)">Diagonal</label>
+                            <input type="number" id="vMedDiagA" class="form-control" min="0" step="0.1"
+                                   placeholder="55" th:value="${producto.medDiagonal}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:12px;color:var(--text-gris)">Puente</label>
+                            <input type="number" id="vMedPuenteA" class="form-control" min="0" step="0.1"
+                                   placeholder="18" th:value="${producto.medPuente}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:12px;color:var(--text-gris)">Varilla</label>
+                            <input type="number" id="vMedVarrillaA" class="form-control" min="0" step="0.1"
+                                   placeholder="140" th:value="${producto.medVarrilla}">
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
                     <div class="form-group">
                         <label class="form-label">Descripción (opcional)</label>
-                        <textarea id="vDescA" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
+                        <textarea id="vDescA" class="form-control" rows="2"
+                                  placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
                     </div>
+
                 </div>
             </div>
+
+            <!-- Stock inicial Armazón -->
             <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title"> Stock Inicial por Sucursal</div></div>
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                        </svg>
+                        Stock Inicial por Sucursal
+                    </div>
+                </div>
                 <div class="card-body" style="padding:20px">
-                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                    <div th:each="s : ${sucursales}"
+                         style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
-                            <input type="checkbox" th:id="'chkA'+${s.idSucursal}" onchange="toggleStock(this,'divA'+this.id.slice(4))">
+                            <input type="checkbox"
+                                   th:id="'chkA'+${s.idSucursal}"
+                                   th:attr="data-suc=${s.idSucursal}"
+                                   onchange="toggleStockArmazon(this)">
                             <span class="fw-600" th:text="${s.nombre}"></span>
                         </label>
                         <div th:id="'divA'+${s.idSucursal}" style="display:none">
                             <div class="form-row form-row-3">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number"  class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number"  class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group">
+                                    <label class="form-label">Existencia</label>
+                                    <input type="number" th:id="'existA_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Costo (Q)</label>
+                                    <input type="number" th:id="'costoA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Precio Venta (Q)</label>
+                                    <input type="number" th:id="'precioA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" form="formPrincipal" class="btn btn-primary"> <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+                <button type="submit" form="formPrincipal" class="btn btn-primary">
+                    <span th:text="${editando} ? 'Guardar Cambios' : 'Crear Producto'"></span>
+                </button>
             </div>
         </div>
- 
-        <!-- ═══ PANEL LENTE ════════════════════════════════════════ -->
+
+        <!-- ═══ PANEL LENTE ═══════════════════════════════════════ -->
         <div id="panelLente" style="display:none">
             <div class="card mb-3">
                 <div class="card-header">
-                    <div class="card-title">🔬 Datos del Lente</div>
+                    <div class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px">
+                            <circle cx="11" cy="11" r="7"/>
+                            <line x1="16.5" y1="16.5" x2="22" y2="22"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                            <line x1="11" y1="8" x2="11" y2="14"/>
+                        </svg>
+                        Datos del Lente
+                    </div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
                 </div>
                 <div class="card-body" style="padding:20px">
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Código *</label>
-                            <input type="text" id="vCodigoL" class="form-control" placeholder="Ej: LT-MONO-PC-AR" th:value="${producto.codigo}">
+                            <input type="text" id="vCodigoL" class="form-control"
+                                   placeholder="Ej: LT-MONO-PC-AR" th:value="${producto.codigo}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nombre / Detalle *</label>
-                            <input type="text" id="vDetalleL" class="form-control" placeholder="Ej: Lente Monofocal Policarbonato" th:value="${producto.detalle}">
+                            <input type="text" id="vDetalleL" class="form-control"
+                                   placeholder="Ej: Lente Monofocal Policarbonato" th:value="${producto.detalle}">
                         </div>
                     </div>
                     <div class="form-row form-row-3">
@@ -217,65 +402,95 @@
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Color (opcional)</label>
-                            <input type="text" id="vColorL" class="form-control" placeholder="Ej: Transparente" th:value="${producto.color}">
+                            <input type="text" id="vColorL" class="form-control"
+                                   placeholder="Ej: Transparente" th:value="${producto.color}">
                         </div>
                     </div>
                     <div id="precioAutoBox" style="display:none;margin-top:16px;padding:20px;background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.25);border-radius:10px">
-                        <div class="fw-600" style="color:var(--turquesa);margin-bottom:12px"> Precio según combinación</div>
+                        <div class="fw-600" style="color:var(--turquesa);margin-bottom:12px">✅ Precio según combinación</div>
                         <div style="display:flex;gap:32px">
                             <div><div class="text-gris text-sm">Costo</div><div class="fw-600" style="font-size:22px" id="lblCosto">—</div></div>
                             <div><div class="text-gris text-sm">Precio Venta</div><div class="fw-600" style="font-size:22px;color:var(--turquesa)" id="lblPrecio">—</div></div>
                         </div>
                     </div>
                     <div id="precioNoEncontrado" style="display:none;margin-top:12px;padding:12px 16px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;font-size:13px;color:var(--amarillo)">
-                         No hay precio configurado para esta combinación. Puedes guardarlo y configurarlo después.
+                        ⚠ No hay precio configurado para esta combinación.
                     </div>
                     <div class="form-group" style="margin-top:16px">
                         <label class="form-label">Descripción (opcional)</label>
-                        <textarea id="vDescL" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
+                        <textarea id="vDescL" class="form-control" rows="2"
+                                  placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
                     </div>
                 </div>
             </div>
+
+            <!-- Stock inicial Lente -->
             <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title"> Stock Inicial por Sucursal</div></div>
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                        </svg>
+                        Stock Inicial por Sucursal
+                    </div>
+                </div>
                 <div class="card-body" style="padding:20px">
-                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                    <div th:each="s : ${sucursales}"
+                         style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
-                            <input type="checkbox" th:id="'chkL'+${s.idSucursal}" onchange="toggleStock(this,'divL'+this.id.slice(4))">
+                            <input type="checkbox"
+                                   th:id="'chkL'+${s.idSucursal}"
+                                   th:attr="data-suc=${s.idSucursal}"
+                                   onchange="toggleStockLente(this)">
                             <span class="fw-600" th:text="${s.nombre}"></span>
                         </label>
                         <div th:id="'divL'+${s.idSucursal}" style="display:none">
                             <div class="form-row form-row-3">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group">
+                                    <label class="form-label">Existencia</label>
+                                    <input type="number" th:id="'existL_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Costo (Q)</label>
+                                    <input type="number" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Precio Venta (Q)</label>
+                                    <input type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" form="formPrincipal" class="btn btn-primary"> <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+                <button type="submit" form="formPrincipal" class="btn btn-primary">
+                    <span th:text="${editando} ? 'Guardar Cambios' : 'Crear Producto'"></span>
+                </button>
             </div>
         </div>
- 
+
         <!-- ═══ PANEL LIMPIEZA / ACCESORIO ════════════════════════ -->
         <div id="panelOtro" style="display:none">
             <div class="card mb-3">
                 <div class="card-header">
-                    <div class="card-title" id="tituloOtro"> Datos del Producto</div>
+                    <div class="card-title" id="tituloOtro">Datos del Producto</div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
                 </div>
                 <div class="card-body" style="padding:20px">
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Código *</label>
-                            <input type="text" id="vCodigoO" class="form-control" placeholder="Ej: LMP-001" th:value="${producto.codigo}">
+                            <input type="text" id="vCodigoO" class="form-control"
+                                   placeholder="Ej: LMP-001" th:value="${producto.codigo}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nombre / Detalle *</label>
-                            <input type="text" id="vDetalleO" class="form-control" placeholder="Ej: Líquido limpiador" th:value="${producto.detalle}">
+                            <input type="text" id="vDetalleO" class="form-control"
+                                   placeholder="Ej: Líquido limpiador" th:value="${producto.detalle}">
                         </div>
                     </div>
                     <div class="form-row form-row-2">
@@ -292,7 +507,8 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Color (opcional)</label>
-                            <input type="text" id="vColorO" class="form-control" placeholder="Ej: Azul" th:value="${producto.color}">
+                            <input type="text" id="vColorO" class="form-control"
+                                   placeholder="Ej: Azul" th:value="${producto.color}">
                         </div>
                     </div>
                     <div class="form-row form-row-2">
@@ -303,72 +519,140 @@
                                 <option value="Par"     th:selected="${producto.unidadMedida == 'Par'}">Par</option>
                                 <option value="Caja"    th:selected="${producto.unidadMedida == 'Caja'}">Caja</option>
                                 <option value="Paquete" th:selected="${producto.unidadMedida == 'Paquete'}">Paquete</option>
-                                <option value="Docena"  th:selected="${producto.unidadMedida == 'Docena'}">Docena</option>
                                 <option value="Frasco"  th:selected="${producto.unidadMedida == 'Frasco'}">Frasco</option>
                                 <option value="Tubo"    th:selected="${producto.unidadMedida == 'Tubo'}">Tubo</option>
                                 <option value="Estuche" th:selected="${producto.unidadMedida == 'Estuche'}">Estuche</option>
                                 <option value="Kit"     th:selected="${producto.unidadMedida == 'Kit'}">Kit</option>
-                                <option value="Rollo"   th:selected="${producto.unidadMedida == 'Rollo'}">Rollo</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Descripción (opcional)</label>
-                        <textarea id="vDescO" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
+                        <textarea id="vDescO" class="form-control" rows="2"
+                                  placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea>
                     </div>
                 </div>
             </div>
+
+            <!-- Stock inicial Otro -->
             <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title"> Stock Inicial por Sucursal</div></div>
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                        </svg>
+                        Stock Inicial por Sucursal
+                    </div>
+                </div>
                 <div class="card-body" style="padding:20px">
-                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                    <div th:each="s : ${sucursales}"
+                         style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
-                            <input type="checkbox" th:id="'chkO'+${s.idSucursal}" onchange="toggleStock(this,'divO'+this.id.slice(4))">
+                            <input type="checkbox"
+                                   th:id="'chkO'+${s.idSucursal}"
+                                   th:attr="data-suc=${s.idSucursal}"
+                                   onchange="toggleStockOtro(this)">
                             <span class="fw-600" th:text="${s.nombre}"></span>
                         </label>
                         <div th:id="'divO'+${s.idSucursal}" style="display:none">
                             <div class="form-row form-row-3">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" class="form-control" min="0" step="1" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" class="form-control" min="0" step="0.01" value="0" form="formPrincipal"></div>
+                                <div class="form-group">
+                                    <label class="form-label">Existencia</label>
+                                    <input type="number" th:id="'existO_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Costo (Q)</label>
+                                    <input type="number" th:id="'costoO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Precio Venta (Q)</label>
+                                    <input type="number" th:id="'precioO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" form="formPrincipal" class="btn btn-primary"> <span th:text="${editando}?'Guardar Cambios':'Crear Producto'"></span></button>
+                <button type="submit" form="formPrincipal" class="btn btn-primary">
+                    <span th:text="${editando} ? 'Guardar Cambios' : 'Crear Producto'"></span>
+                </button>
             </div>
         </div>
- 
-    </div>
-</div>
- 
+
+    </div><!-- /page-body -->
+</div><!-- /main-content -->
+
 <style>
-.tipo-card { cursor:pointer; padding:24px 20px; border-radius:12px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); text-align:center; min-width:130px; flex:1; max-width:170px; transition:all 0.2s; }
-.tipo-card:hover { border-color:rgba(39,194,201,0.5); background:rgba(39,194,201,0.07); transform:translateY(-2px); }
-.tipo-card.activo { border-color:var(--turquesa); background:rgba(39,194,201,0.12); }
+.tipo-card {
+    cursor: pointer;
+    padding: 24px 20px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    text-align: center;
+    min-width: 130px;
+    flex: 1;
+    max-width: 170px;
+    transition: all 0.2s;
+}
+.tipo-card:hover {
+    border-color: rgba(39,194,201,0.5);
+    background: rgba(39,194,201,0.07);
+    transform: translateY(-2px);
+}
+.tipo-card.activo {
+    border-color: var(--turquesa);
+    background: rgba(39,194,201,0.12);
+}
+.tipo-card svg {
+    transition: transform 0.2s;
+}
+.tipo-card:hover svg {
+    transform: scale(1.1);
+}
 </style>
- 
+
 <script th:inline="javascript">
 const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
- 
+
 const TITULOS = {
-    ARMAZON:  ' Armazón',
-    LENTE:    ' Lente',
-    LIMPIEZA: ' Producto de Limpieza',
-    ACCESORIO:' Accesorio'
+    ARMAZON:   'Armazón',
+    LENTE:     'Lente',
+    LIMPIEZA:  'Producto de Limpieza',
+    ACCESORIO: 'Accesorio'
 };
- 
+
 const CAMPOS = {
-    ARMAZON:  { codigo:'vCodigoA', detalle:'vDetalleA', desc:'vDescA', color:'vColorA', unidad:'vUnidadA', marca:'vMarcaA', categoria:null, modelo:'vModeloA', tipoL:null, matL:null, tratL:null },
-    LENTE:    { codigo:'vCodigoL', detalle:'vDetalleL', desc:'vDescL', color:'vColorL', unidad:null,       marca:null,      categoria:null, modelo:null,       tipoL:'vTipoL', matL:'vMaterialL', tratL:'vTratamientoL' },
-    LIMPIEZA: { codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO', color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO', categoria:null, modelo:null,       tipoL:null, matL:null, tratL:null },
-    ACCESORIO:{ codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO', color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO', categoria:null, modelo:null,       tipoL:null, matL:null, tratL:null },
+    ARMAZON: {
+        codigo:'vCodigoA', detalle:'vDetalleA', desc:'vDescA',
+        color:'vColorA', unidad:'vUnidadA', marca:'vMarcaA',
+        categoria:null, modelo:'vModeloA', tipoL:null, matL:null, tratL:null,
+        materialA:'vMaterialA', familiaA:'vFamiliaA', formaA:'vFormaA',
+        segmentoA:'vSegmentoA', gamaA:'vGamaA',
+        medHoriz:'vMedHorizA', medVert:'vMedVertA', medDiag:'vMedDiagA',
+        medPuente:'vMedPuenteA', medVar:'vMedVarrillaA'
+    },
+    LENTE: {
+        codigo:'vCodigoL', detalle:'vDetalleL', desc:'vDescL',
+        color:'vColorL', unidad:null, marca:null, categoria:null,
+        modelo:null, tipoL:'vTipoL', matL:'vMaterialL', tratL:'vTratamientoL'
+    },
+    LIMPIEZA: {
+        codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO',
+        color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO',
+        categoria:null, modelo:null, tipoL:null, matL:null, tratL:null
+    },
+    ACCESORIO: {
+        codigo:'vCodigoO', detalle:'vDetalleO', desc:'vDescO',
+        color:'vColorO', unidad:'vUnidadO', marca:'vMarcaO',
+        categoria:null, modelo:null, tipoL:null, matL:null, tratL:null
+    }
 };
- 
-// DESPUÉS
+
 document.addEventListener('DOMContentLoaded', () => {
     if (tipoInicial && tipoInicial !== '' && tipoInicial !== 'GENERAL') {
         seleccionarTipo(tipoInicial);
@@ -376,28 +660,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('panelTipos').style.display = 'block';
     }
 });
- 
+
 function seleccionarTipo(tipo) {
     document.getElementById('panelTipos').style.display   = 'none';
     document.getElementById('panelArmazon').style.display = 'none';
     document.getElementById('panelLente').style.display   = 'none';
     document.getElementById('panelOtro').style.display    = 'none';
- 
+
     document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('activo'));
-    document.getElementById('card-' + tipo)?.classList.add('activo');
+    const card = document.getElementById('card-' + tipo);
+    if (card) card.classList.add('activo');
     document.getElementById('hTipo').value = tipo;
- 
+
     if (tipo === 'ARMAZON') {
         document.getElementById('panelArmazon').style.display = 'block';
     } else if (tipo === 'LENTE') {
         document.getElementById('panelLente').style.display = 'block';
         consultarPrecio();
     } else {
-        document.getElementById('tituloOtro').textContent = (TITULOS[tipo] ? TITULOS[tipo] + ' — Datos' : ' Datos del Producto');
+        document.getElementById('tituloOtro').textContent = TITULOS[tipo] + ' — Datos';
         document.getElementById('panelOtro').style.display = 'block';
     }
 }
- 
+
 function cambiarTipo() {
     document.getElementById('panelTipos').style.display   = 'block';
     document.getElementById('panelArmazon').style.display = 'none';
@@ -405,26 +690,51 @@ function cambiarTipo() {
     document.getElementById('panelOtro').style.display    = 'none';
     document.getElementById('hTipo').value = '';
 }
- 
+
+// ── Toggle stock por prefijo ─────────────────────────────
+function toggleStockArmazon(chk) { _toggleStock(chk, 'A'); }
+function toggleStockLente(chk)   { _toggleStock(chk, 'L'); }
+function toggleStockOtro(chk)    { _toggleStock(chk, 'O'); }
+
+function _toggleStock(chk, pre) {
+    const sid = chk.getAttribute('data-suc');
+    const div = document.getElementById('div' + pre + sid);
+    if (!div) return;
+    div.style.display = chk.checked ? 'block' : 'none';
+    const hidden = document.getElementById('sucActiva_' + sid);
+    if (hidden) hidden.value = chk.checked ? '1' : '0';
+}
+
+// ── Sincronizar y validar al enviar ─────────────────────
 function sincronizarYValidar() {
-    
     const tipo   = document.getElementById('hTipo').value;
     const alerta = document.getElementById('alertaValidacion');
- 
+
     if (!tipo) {
-        alerta.textContent = ' Debes seleccionar un tipo de producto.';
+        alerta.textContent = '⚠ Debes seleccionar un tipo de producto.';
         alerta.style.display = 'block';
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
         return false;
     }
- 
+
     const c = CAMPOS[tipo];
     const codigo  = document.getElementById(c.codigo)?.value?.trim();
     const detalle = document.getElementById(c.detalle)?.value?.trim();
- 
-    if (!codigo)  { alerta.textContent = ' El código es obligatorio.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
-    if (!detalle) { alerta.textContent = ' El nombre / detalle es obligatorio.'; alerta.style.display='block'; document.getElementById(c.detalle).focus(); return false; }
- 
+
+    if (!codigo) {
+        alerta.textContent = '⚠ El código es obligatorio.';
+        alerta.style.display = 'block';
+        document.getElementById(c.codigo).focus();
+        return false;
+    }
+    if (!detalle) {
+        alerta.textContent = '⚠ El nombre / detalle es obligatorio.';
+        alerta.style.display = 'block';
+        document.getElementById(c.detalle).focus();
+        return false;
+    }
+
+    // Campos comunes
     document.getElementById('hCodigo').value    = codigo;
     document.getElementById('hDetalle').value   = detalle;
     document.getElementById('hDesc').value      = document.getElementById(c.desc)?.value    || '';
@@ -436,30 +746,51 @@ function sincronizarYValidar() {
     document.getElementById('hTipoL').value     = c.tipoL    ? (document.getElementById(c.tipoL)?.value    || '') : '';
     document.getElementById('hMaterialL').value = c.matL     ? (document.getElementById(c.matL)?.value     || '') : '';
     document.getElementById('hTratL').value     = c.tratL    ? (document.getElementById(c.tratL)?.value    || '') : '';
- 
+
+    // Campos extra Armazón
+    if (tipo === 'ARMAZON') {
+        document.getElementById('hMaterialA').value  = document.getElementById(c.materialA)?.value  || '';
+        document.getElementById('hFamiliaA').value   = document.getElementById(c.familiaA)?.value   || '';
+        document.getElementById('hFormaA').value     = document.getElementById(c.formaA)?.value     || '';
+        document.getElementById('hSegmentoA').value  = document.getElementById(c.segmentoA)?.value  || '';
+        document.getElementById('hGamaA').value      = document.getElementById(c.gamaA)?.value      || '';
+        document.getElementById('hMedHorizA').value  = document.getElementById(c.medHoriz)?.value   || '';
+        document.getElementById('hMedVertA').value   = document.getElementById(c.medVert)?.value    || '';
+        document.getElementById('hMedDiagA').value   = document.getElementById(c.medDiag)?.value    || '';
+        document.getElementById('hMedPuenteA').value = document.getElementById(c.medPuente)?.value  || '';
+        document.getElementById('hMedVarA').value    = document.getElementById(c.medVar)?.value     || '';
+    }
+
     alerta.style.display = 'none';
-        // Copiar valores de stock del panel activo a los hiddens
+
+    // Prefijo según tipo
+    const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
+    const pre = prefijos[tipo] || 'O';
+
+    // Stock por sucursal (máximo 2)
     [1, 2].forEach(sid => {
-        const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
-        const pre = prefijos[tipo] || 'O';
-        const divId = 'div' + pre + sid;
-        const div = document.getElementById(divId);
+        const div = document.getElementById('div' + pre + sid);
+        const hidden = document.getElementById('sucActiva_' + sid);
         if (div) {
-            const exEl = div.querySelector('input[type="number"]:nth-child(1)');
-            const coEl = div.querySelector('.form-row input:nth-child(1)');
-            
-            // Buscar por posición dentro del div
-            const nums = div.querySelectorAll('input[type="number"]');
-            if (nums.length >= 3) {
-                document.getElementById('hExistencia_' + sid).value = nums[0].value || 0;
-                document.getElementById('hCosto_' + sid).value      = nums[1].value || 0;
-                document.getElementById('hPrecio_' + sid).value     = nums[2].value || 0;
+            const activo = div.style.display !== 'none';
+            if (hidden) hidden.value = activo ? '1' : '0';
+            if (activo) {
+                const exist = document.getElementById('exist' + pre + '_' + sid);
+                const costo = document.getElementById('costo' + pre + '_' + sid);
+                const precio = document.getElementById('precio' + pre + '_' + sid);
+                document.getElementById('hExistencia_' + sid).value = exist?.value  || 0;
+                document.getElementById('hCosto_'      + sid).value = costo?.value  || 0;
+                document.getElementById('hPrecio_'     + sid).value = precio?.value || 0;
             }
+        } else {
+            if (hidden) hidden.value = '0';
         }
     });
+
     return true;
 }
- 
+
+// ── Consultar precio de lente ────────────────────────────
 async function consultarPrecio() {
     const idTipo        = document.getElementById('vTipoL')?.value;
     const idMaterial    = document.getElementById('vMaterialL')?.value;
@@ -481,43 +812,36 @@ async function consultarPrecio() {
         }
     } catch(e) { console.error(e); }
 }
- 
-function toggleStock(chk, divId) {
-    const div = document.getElementById(divId);
-    div.style.display = chk.checked ? 'block' : 'none';
-    
-    // Mover inputs fuera del div oculto al form directamente
-    const sid = chk.id.replace(/chk[ALO]/, '');
-    const hidden = document.getElementById('sucActiva_' + sid);
-    if (hidden) hidden.value = chk.checked ? '1' : '0';
-    
-    // Forzar que los inputs se incluyan en el submit
-    const inputs = div.querySelectorAll('input[type="number"]');
-    inputs.forEach(input => {
-        input.disabled = false; // Asegurarse que nunca estén disabled
-    });
-}
- 
-async function agregarCategoria(selectId) {
-    const nombre = prompt('Nombre de la nueva categoría:');
-    if (!nombre?.trim()) return;
-    const csrf = document.querySelector('[name="_csrf"]').value;
-    const r = await fetch('/productos/api/categoria', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
-    const data = await r.json();
-    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
-    else alert('Error: ' + data.error);
-}
- 
+
+// ── Agregar marca/categoría dinámica ────────────────────
 async function agregarMarca(selectId) {
     const nombre = prompt('Nombre de la nueva marca:');
     if (!nombre?.trim()) return;
     const csrf = document.querySelector('[name="_csrf"]').value;
-    const r = await fetch('/productos/api/marca', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
+    const r = await fetch('/productos/api/marca', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}`
+    });
+    const data = await r.json();
+    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
+    else alert('Error: ' + data.error);
+}
+
+async function agregarCategoria(selectId) {
+    const nombre = prompt('Nombre de la nueva categoría:');
+    if (!nombre?.trim()) return;
+    const csrf = document.querySelector('[name="_csrf"]').value;
+    const r = await fetch('/productos/api/categoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}`
+    });
     const data = await r.json();
     if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
     else alert('Error: ' + data.error);
 }
 </script>
- 
+
 </body>
 </html>

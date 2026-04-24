@@ -36,7 +36,6 @@ INSERT IGNORE INTO sucursales (id_sucursal, nombre, direccion) VALUES
 (2, 'Zona 18',        '15 Calle 25-10, Zona 18, Guatemala');
 
 -- ─── USUARIOS ─────────────────────────────────────────────────────
--- password_hash es BCrypt de "admin123" — cámbialo en producción
 CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario      INT           AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(100)  NOT NULL,
@@ -75,25 +74,58 @@ CREATE TABLE IF NOT EXISTS marcas (
 );
 
 INSERT IGNORE INTO marcas (nombre) VALUES
+('Baron'), ('Amadeus'), ('Sebastia'), ('Hastagh'), ('Seima'),
+('Inter Eyeware'), ('Nike'), ('Adidas'), ('Puma'),
 ('Essilor'), ('Hoya'), ('Zeiss'), ('Transitions'),
 ('Ray-Ban'), ('Oakley'), ('Acuvue'), ('Bausch+Lomb'),
 ('Alcon'), ('Sin marca');
 
 -- ─── PRODUCTOS ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS productos (
-    id_producto   INT          AUTO_INCREMENT PRIMARY KEY,
-    codigo        VARCHAR(50)  NOT NULL UNIQUE,
-    detalle       VARCHAR(200) NOT NULL,
-    id_categoria  INT,
-    id_marca      INT,
-    descripcion   TEXT,
-    unidad_medida VARCHAR(30)  DEFAULT 'Unidad',
-    activo        BOOLEAN      NOT NULL DEFAULT TRUE,
+    id_producto      INT          AUTO_INCREMENT PRIMARY KEY,
+    codigo           VARCHAR(50)  NOT NULL UNIQUE,
+    detalle          VARCHAR(200) NOT NULL,
+    id_categoria     INT,
+    id_marca         INT,
+    descripcion      TEXT,
+    unidad_medida    VARCHAR(30)  DEFAULT 'Unidad',
+    activo           BOOLEAN      NOT NULL DEFAULT TRUE,
+
+    -- Tipo de producto
+    tipo_producto    VARCHAR(20)  DEFAULT 'GENERAL'
+                     COMMENT 'GENERAL | ARMAZON | LENTE | LIMPIEZA | ACCESORIO',
+
+    -- Campos generales
+    color            VARCHAR(50)  DEFAULT NULL,
+    modelo           VARCHAR(80)  DEFAULT NULL,
+
+    -- Clasificación de Armazón
+    material_armazon VARCHAR(30)  DEFAULT NULL
+                     COMMENT 'ACERO_INOXIDABLE | TITANIUM | ALUMINIO | MONEL | ACETATO | TR90 | INYECTADO',
+    familia_armazon  VARCHAR(20)  DEFAULT NULL
+                     COMMENT 'COMPLETO | RANURADO | AEREO',
+    forma_armazon    VARCHAR(20)  DEFAULT NULL
+                     COMMENT 'CUADRADO | OVALADO | RECTANGULAR | AVIADOR | CAT_EYES',
+    segmento_armazon VARCHAR(20)  DEFAULT NULL
+                     COMMENT 'CABALLERO | DAMA | NIÑO | UNISEX',
+    gama_armazon     VARCHAR(15)  DEFAULT NULL
+                     COMMENT 'BASICA | MEDIA | ALTA',
+
+    -- Medidas del Armazón (mm)
+    med_horizontal   DECIMAL(5,1) DEFAULT NULL,
+    med_vertical     DECIMAL(5,1) DEFAULT NULL,
+    med_diagonal     DECIMAL(5,1) DEFAULT NULL,
+    med_puente       DECIMAL(5,1) DEFAULT NULL,
+    med_varrilla     DECIMAL(5,1) DEFAULT NULL,
+
+    -- FK relaciones lente
+    id_tipo_lente        INT DEFAULT NULL,
+    id_material_lente    INT DEFAULT NULL,
+    id_tratamiento_lente INT DEFAULT NULL,
+
     FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
     FOREIGN KEY (id_marca)     REFERENCES marcas(id_marca)
 );
-
-
 
 -- ─── INVENTARIO ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS inventario (
@@ -110,18 +142,19 @@ CREATE TABLE IF NOT EXISTS inventario (
 
 -- ─── KARDEX ───────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS kardex (
-    id_kardex          INT           AUTO_INCREMENT PRIMARY KEY,
-    id_producto        INT           NOT NULL,
-    id_sucursal        INT           NOT NULL,
-    tipo_movimiento    VARCHAR(30)   NOT NULL COMMENT 'Entrada|Salida|Traslado_Entrada|Traslado_Salida|Ajuste',
-    referencia         VARCHAR(50),
-    fecha              DATE          NOT NULL,
-    cantidad           DECIMAL(10,2) NOT NULL,
-    precio_unitario    DECIMAL(10,2) DEFAULT 0,
+    id_kardex           INT           AUTO_INCREMENT PRIMARY KEY,
+    id_producto         INT           NOT NULL,
+    id_sucursal         INT           NOT NULL,
+    tipo_movimiento     VARCHAR(30)   NOT NULL
+                        COMMENT 'Entrada|Salida|Traslado_Entrada|Traslado_Salida|Ajuste',
+    referencia          VARCHAR(50),
+    fecha               DATE          NOT NULL,
+    cantidad            DECIMAL(10,2) NOT NULL,
+    precio_unitario     DECIMAL(10,2) DEFAULT 0,
     existencia_anterior DECIMAL(10,2) DEFAULT 0,
     existencia_nueva    DECIMAL(10,2) DEFAULT 0,
-    observacion        VARCHAR(200),
-    id_usuario         INT,
+    observacion         VARCHAR(200),
+    id_usuario          INT,
     FOREIGN KEY (id_producto) REFERENCES productos(id_producto),
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario)
@@ -154,12 +187,10 @@ CREATE TABLE IF NOT EXISTS fichas_clinicas (
     id_optometrista   INT            NOT NULL,
     fecha             DATE           NOT NULL,
     motivo_consulta   TEXT,
-    -- Graduación
     od_esfera         DECIMAL(5,2), od_cilindro DECIMAL(5,2), od_eje INT, od_adicion DECIMAL(5,2),
     oi_esfera         DECIMAL(5,2), oi_cilindro DECIMAL(5,2), oi_eje INT, oi_adicion DECIMAL(5,2),
-    av_od_sc         VARCHAR(20),  av_oi_sc  VARCHAR(20),
-    av_od_cc         VARCHAR(20),  av_oi_cc  VARCHAR(20),
-    -- Pedido
+    av_od_sc          VARCHAR(20),   av_oi_sc   VARCHAR(20),
+    av_od_cc          VARCHAR(20),   av_oi_cc   VARCHAR(20),
     armazon           VARCHAR(200),
     detalle_lentes    TEXT,
     total             DECIMAL(10,2) DEFAULT 0,
@@ -176,35 +207,35 @@ CREATE TABLE IF NOT EXISTS fichas_clinicas (
 
 -- ─── PROVEEDORES ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS proveedores (
-    id_proveedor     INT          AUTO_INCREMENT PRIMARY KEY,
-    nombre           VARCHAR(100) NOT NULL,
-    empresa          VARCHAR(100),
-    contacto         VARCHAR(100),
-    telefono         VARCHAR(20),
-    telefono2        VARCHAR(20),
-    correo           VARCHAR(100),
-    nit              VARCHAR(20),
-    pais             VARCHAR(50)  DEFAULT 'Guatemala',
-    direccion        VARCHAR(200),
-    condicion_pago   VARCHAR(30)  DEFAULT 'Contado',
-    dias_credito     INT          DEFAULT 0,
-    notas            TEXT,
-    activo           BOOLEAN      NOT NULL DEFAULT TRUE
+    id_proveedor   INT          AUTO_INCREMENT PRIMARY KEY,
+    nombre         VARCHAR(100) NOT NULL,
+    empresa        VARCHAR(100),
+    contacto       VARCHAR(100),
+    telefono       VARCHAR(20),
+    telefono2      VARCHAR(20),
+    correo         VARCHAR(100),
+    nit            VARCHAR(20),
+    pais           VARCHAR(50)  DEFAULT 'Guatemala',
+    direccion      VARCHAR(200),
+    condicion_pago VARCHAR(30)  DEFAULT 'Contado',
+    dias_credito   INT          DEFAULT 0,
+    notas          TEXT,
+    activo         BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
 -- ─── VENTAS ───────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ventas (
-    id_venta        INT            AUTO_INCREMENT PRIMARY KEY,
-    id_sucursal     INT            NOT NULL,
-    id_usuario      INT            NOT NULL,
-    id_cliente      INT,
-    numero_factura  VARCHAR(20)    UNIQUE,
-    fecha           DATE           NOT NULL,
-    subtotal        DECIMAL(10,2)  DEFAULT 0,
-    descuento       DECIMAL(10,2)  DEFAULT 0,
-    total           DECIMAL(10,2)  DEFAULT 0,
-    estado          VARCHAR(20)    DEFAULT 'Pagada',
-    observacion     TEXT,
+    id_venta       INT            AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal    INT            NOT NULL,
+    id_usuario     INT            NOT NULL,
+    id_cliente     INT,
+    numero_factura VARCHAR(20)    UNIQUE,
+    fecha          DATE           NOT NULL,
+    subtotal       DECIMAL(10,2)  DEFAULT 0,
+    descuento      DECIMAL(10,2)  DEFAULT 0,
+    total          DECIMAL(10,2)  DEFAULT 0,
+    estado         VARCHAR(20)    DEFAULT 'Pagada',
+    observacion    TEXT,
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente)
@@ -224,16 +255,16 @@ CREATE TABLE IF NOT EXISTS detalle_ventas (
 
 -- ─── RECIBOS DE CAJA ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS recibos_caja (
-    id_recibo      INT            AUTO_INCREMENT PRIMARY KEY,
-    id_sucursal    INT            NOT NULL,
-    id_usuario     INT            NOT NULL,
-    id_cliente     INT,
-    numero_recibo  VARCHAR(20)    UNIQUE,
-    fecha          DATE           NOT NULL,
-    monto          DECIMAL(10,2)  NOT NULL,
-    forma_pago     VARCHAR(30)    DEFAULT 'Contado',
-    concepto       VARCHAR(200),
-    id_venta       INT,
+    id_recibo     INT            AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal   INT            NOT NULL,
+    id_usuario    INT            NOT NULL,
+    id_cliente    INT,
+    numero_recibo VARCHAR(20)    UNIQUE,
+    fecha         DATE           NOT NULL,
+    monto         DECIMAL(10,2)  NOT NULL,
+    forma_pago    VARCHAR(30)    DEFAULT 'Contado',
+    concepto      VARCHAR(200),
+    id_venta      INT,
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente),
@@ -266,46 +297,46 @@ CREATE TABLE IF NOT EXISTS detalle_traslados (
 
 -- ─── INGRESOS DE MERCADERÍA ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ingresos_mercaderia (
-    id_ingreso         INT            AUTO_INCREMENT PRIMARY KEY,
-    id_sucursal        INT            NOT NULL,
-    id_usuario         INT            NOT NULL,
-    id_proveedor       INT,
-    numero_ingreso     VARCHAR(20)    UNIQUE,
-    factura_proveedor  VARCHAR(50),
-    fecha              DATE           NOT NULL,
-    total              DECIMAL(10,2)  DEFAULT 0,
-    nota               TEXT,
+    id_ingreso        INT            AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal       INT            NOT NULL,
+    id_usuario        INT            NOT NULL,
+    id_proveedor      INT,
+    numero_ingreso    VARCHAR(20)    UNIQUE,
+    factura_proveedor VARCHAR(50),
+    fecha             DATE           NOT NULL,
+    total             DECIMAL(10,2)  DEFAULT 0,
+    nota              TEXT,
     FOREIGN KEY (id_sucursal)  REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)   REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor)
 );
 
 CREATE TABLE IF NOT EXISTS detalle_ingresos (
-    id           INT            AUTO_INCREMENT PRIMARY KEY,
-    id_ingreso   INT            NOT NULL,
-    id_producto  INT            NOT NULL,
-    cantidad     DECIMAL(10,2)  NOT NULL,
-    costo_unitario DECIMAL(10,2) NOT NULL,
-    precio_venta   DECIMAL(10,2) DEFAULT 0,
-    subtotal       DECIMAL(10,2) NOT NULL,
+    id             INT            AUTO_INCREMENT PRIMARY KEY,
+    id_ingreso     INT            NOT NULL,
+    id_producto    INT            NOT NULL,
+    cantidad       DECIMAL(10,2)  NOT NULL,
+    costo_unitario DECIMAL(10,2)  NOT NULL,
+    precio_venta   DECIMAL(10,2)  DEFAULT 0,
+    subtotal       DECIMAL(10,2)  NOT NULL,
     FOREIGN KEY (id_ingreso)  REFERENCES ingresos_mercaderia(id_ingreso),
     FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
 -- ─── COTIZACIONES ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS cotizaciones (
-    id_cotizacion      INT            AUTO_INCREMENT PRIMARY KEY,
-    id_sucursal        INT            NOT NULL,
-    id_usuario         INT            NOT NULL,
-    id_cliente         INT,
-    numero_cotizacion  VARCHAR(20)    UNIQUE,
-    fecha              DATE           NOT NULL,
-    fecha_vencimiento  DATE,
-    subtotal           DECIMAL(10,2)  DEFAULT 0,
-    descuento          DECIMAL(10,2)  DEFAULT 0,
-    total              DECIMAL(10,2)  DEFAULT 0,
-    nota               TEXT,
-    estado             VARCHAR(20)    DEFAULT 'Pendiente',
+    id_cotizacion     INT            AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal       INT            NOT NULL,
+    id_usuario        INT            NOT NULL,
+    id_cliente        INT,
+    numero_cotizacion VARCHAR(20)    UNIQUE,
+    fecha             DATE           NOT NULL,
+    fecha_vencimiento DATE,
+    subtotal          DECIMAL(10,2)  DEFAULT 0,
+    descuento         DECIMAL(10,2)  DEFAULT 0,
+    total             DECIMAL(10,2)  DEFAULT 0,
+    nota              TEXT,
+    estado            VARCHAR(20)    DEFAULT 'Pendiente',
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente)
@@ -325,10 +356,11 @@ CREATE TABLE IF NOT EXISTS detalle_cotizaciones (
 
 -- ─── CORRELATIVOS ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS correlativos (
-    id            INT         AUTO_INCREMENT PRIMARY KEY,
-    id_sucursal   INT         NOT NULL,
-    tipo          VARCHAR(30) NOT NULL COMMENT 'Factura|Recibo|Ingreso|Traslado|Cotizacion',
-    valor_actual  INT         NOT NULL DEFAULT 0,
+    id           INT         AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal  INT         NOT NULL,
+    tipo         VARCHAR(30) NOT NULL
+                 COMMENT 'Factura|Recibo|Ingreso|Traslado|Cotizacion',
+    valor_actual INT         NOT NULL DEFAULT 0,
     UNIQUE KEY uq_suc_tipo (id_sucursal, tipo),
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal)
 );
