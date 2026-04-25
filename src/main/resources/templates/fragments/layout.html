@@ -27,12 +27,111 @@
             }
         });
     </script>
+    <script>
+        (function () {
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+            let rafId = null;
+            let blinkTimer = null;
+
+            function updatePupil() {
+                rafId = null;
+
+                const eye = document.getElementById('brand-eye');
+                const pupil = document.getElementById('pupil');
+                if (!eye || !pupil) return;
+
+                const rect = eye.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+
+                const dx = lastMouseX - cx;
+                const dy = lastMouseY - cy;
+                const angle = Math.atan2(dy, dx);
+
+                const distance = Math.hypot(dx, dy);
+                const maxRadius = rect.width * 0.12;
+                const r = Math.min(maxRadius, distance * 0.12);
+
+                const tx = Math.cos(angle) * r;
+                const ty = Math.sin(angle) * r;
+
+                pupil.style.transform = `translate(${tx}px, ${ty}px)`;
+            }
+
+            function scheduleBlink() {
+                const eye = document.getElementById('brand-eye');
+                if (!eye) return;
+
+                const nextInMs = 2600 + Math.random() * 5200; // 2.6s–7.8s
+                blinkTimer = window.setTimeout(function () {
+                    eye.classList.add('is-blinking');
+
+                    window.setTimeout(function () {
+                        eye.classList.remove('is-blinking');
+                        scheduleBlink();
+                    }, 140);
+                }, nextInMs);
+            }
+
+            window.addEventListener('mousemove', function (e) {
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                if (rafId == null) rafId = window.requestAnimationFrame(updatePupil);
+            }, { passive: true });
+
+            window.addEventListener('resize', function () {
+                if (rafId == null) rafId = window.requestAnimationFrame(updatePupil);
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Posición inicial agradable (centrada) hasta el primer mousemove
+                if (rafId == null) rafId = window.requestAnimationFrame(updatePupil);
+                if (blinkTimer == null) scheduleBlink();
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            function enableHorizontalWheelScroll(container) {
+                if (!container) return;
+
+                container.addEventListener('wheel', function (e) {
+                    // Si el usuario ya está haciendo scroll horizontal (trackpad/shift), no interferimos
+                    const absX = Math.abs(e.deltaX || 0);
+                    const absY = Math.abs(e.deltaY || 0);
+                    if (absX > absY) return;
+
+                    const canScroll = container.scrollWidth > container.clientWidth + 1;
+                    if (!canScroll) return;
+
+                    e.preventDefault();
+                    container.scrollLeft += e.deltaY;
+                }, { passive: false });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                enableHorizontalWheelScroll(document.querySelector('.sidebar-nav'));
+            });
+        })();
+    </script>
 </head>
 
 <div th:fragment="sidebar" class="sidebar">
 
     <div class="sidebar-logo">
-        <div class="sidebar-logo-icon"></div>
+        <div class="sidebar-logo-icon" aria-hidden="true">
+            <svg id="brand-eye" class="brand-eye" viewBox="0 0 40 40" role="img" focusable="false">
+                <g class="eye-graphics">
+                    <!-- Esclerótica (forma exterior) -->
+                    <path class="eye-outline" d="M2.2 20 C 8.2 8.2, 31.8 8.2, 37.8 20 C 31.8 31.8, 8.2 31.8, 2.2 20 Z"/>
+                    <!-- Iris -->
+                    <circle class="eye-iris" cx="20" cy="20" r="7.2"/>
+                    <!-- Pupila (elemento móvil) -->
+                    <circle id="pupil" class="eye-pupil" cx="20" cy="20" r="2.4"/>
+                </g>
+            </svg>
+        </div>
         <div class="sidebar-logo-text">
             <div class="sidebar-logo-title">Mi Óptica</div>
             <div class="sidebar-logo-sub">mi mejor visión</div>
@@ -133,14 +232,18 @@
     </nav>
 
     <div class="sidebar-footer">
-        <form th:action="@{/logout}" method="post" style="margin:0">
+        <form th:action="@{/logout}" method="post" class="logout-form">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <button type="submit"
-                    style="width:100%;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--gris-texto);font-size:12px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .12s ease;font-family:var(--font)"
-                    onmouseover="this.style.background='rgba(234,84,85,0.1)';this.style.color='#EA5455'"
-                    onmouseout="this.style.background='none';this.style.color='var(--gris-texto)'">
-                <span></span>
-                <span>Cerrar sesión</span>
+            <button type="submit" class="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión">
+                <svg class="logout-icon" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                    <!-- Marco de la puerta (estático) -->
+                    <path class="door-frame" d="M6 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/>
+                    <!-- Panel de la puerta (se abre en hover) -->
+                    <rect class="door-panel" x="7.25" y="5" width="7.75" height="14" rx="1.1"/>
+                    <!-- Picaporte -->
+                    <circle class="door-knob" cx="13.3" cy="12" r="0.8"/>
+                </svg>
+                <span class="logout-text">Cerrar sesión</span>
             </button>
         </form>
     </div>
