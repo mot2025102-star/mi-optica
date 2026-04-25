@@ -2,11 +2,15 @@ package com.mioptica.service;
 
 import com.mioptica.dto.ReporteFilaDTO;
 import com.mioptica.dto.VentaDetalleDTO;
+import com.mioptica.model.CorteCaja;
+import com.mioptica.model.GastoCaja;
 import com.mioptica.model.ReciboCaja;
 import com.mioptica.model.Venta;
 import com.mioptica.repository.ReporteRepository;
 import com.mioptica.repository.ReciboCajaRepository;
 import com.mioptica.repository.VentaRepository;
+import com.mioptica.repository.CorteCajaRepository;
+import com.mioptica.repository.GastoCajaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,8 @@ public class ReporteService {
     private final ReporteRepository    reporteRepo;
     private final VentaRepository      ventaRepo;
     private final ReciboCajaRepository reciboRepo;
+    private final CorteCajaRepository  corteCajaRepo;  // ── NUEVO
+    private final GastoCajaRepository  gastoCajaRepo;  // ── NUEVO
 
     // ─── Helper: Object[] → ReporteFilaDTO ───────────────────────
     private List<ReporteFilaDTO> toDTO(List<Object[]> rows, BigDecimal totalGeneral) {
@@ -110,8 +116,10 @@ public class ReporteService {
     }
 
     // ─── Corte de Caja ────────────────────────────────────────────
+    // ── ACTUALIZADO: ahora incluye saldo inicial, gastos y diferencia
     public Map<String, Object> corteDeCaja(LocalDate fecha, Integer idSucursal) {
 
+        // Ventas del día
         List<Venta> ventas = ventaRepo.findByPeriodoYSucursal(fecha, fecha, idSucursal);
         ventas = ventas.stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
 
@@ -126,6 +134,7 @@ public class ReporteService {
         long ventasAnuladas = ventaRepo.findByPeriodoYSucursal(fecha, fecha, idSucursal)
                 .stream().filter(v -> "Anulada".equals(v.getEstado())).count();
 
+        // Recibos del día
         List<ReciboCaja> recibos = reciboRepo.findAll().stream()
                 .filter(r -> fecha.equals(r.getFecha())
                           && r.getSucursal().getIdSucursal().equals(idSucursal))
@@ -141,6 +150,28 @@ public class ReporteService {
             porFormaPago.merge(forma, r.getMonto(), BigDecimal::add);
         });
 
+        // ── NUEVO: Gastos del día ──────────────────────────────────
+        List<GastoCaja> gastos = gastoCajaRepo
+                .findByFechaYSucursal(fecha, idSucursal);
+        BigDecimal totalGastos = gastoCajaRepo
+                .totalGastosDia(fecha, idSucursal);
+        if (totalGastos == null) totalGastos = BigDecimal.ZERO;
+
+        // ── NUEVO: Corte guardado (saldo inicial, diferencia, etc.) ─
+        Optional<CorteCaja> corteGuardado = corteCajaRepo
+                .findByIdSucursalAndFecha(idSucursal, fecha);
+
+        BigDecimal saldoInicial  = corteGuardado.map(CorteCaja::getSaldoInicial)
+                                                 .orElse(BigDecimal.ZERO);
+        BigDecimal saldoFisico   = corteGuardado.map(CorteCaja::getSaldoFisico)
+                                                 .orElse(null);
+        BigDecimal saldoEsperado = saldoInicial.add(totalRecibos).subtract(totalGastos);
+        BigDecimal diferencia    = saldoFisico != null
+                                 ? saldoFisico.subtract(saldoEsperado)
+                                 : BigDecimal.ZERO;
+        boolean    cerrado       = corteGuardado.map(CorteCaja::getCerrado).orElse(false);
+        Integer    idCorte       = corteGuardado.map(CorteCaja::getIdCorte).orElse(null);
+
         Map<String, Object> corte = new LinkedHashMap<>();
         corte.put("fecha",           fecha);
         corte.put("ventas",          ventas);
@@ -152,6 +183,15 @@ public class ReporteService {
         corte.put("totalRecibos",    totalRecibos);
         corte.put("porFormaPago",    porFormaPago);
         corte.put("totalEfectivo",   porFormaPago.getOrDefault("Contado", BigDecimal.ZERO));
+        // ── NUEVO ──────────────────────────────────────────────────
+        corte.put("gastos",          gastos);
+        corte.put("totalGastos",     totalGastos);
+        corte.put("saldoInicial",    saldoInicial);
+        corte.put("saldoFisico",     saldoFisico);
+        corte.put("saldoEsperado",   saldoEsperado);
+        corte.put("diferencia",      diferencia);
+        corte.put("cerrado",         cerrado);
+        corte.put("idCorte",         idCorte);
         return corte;
     }
 }
