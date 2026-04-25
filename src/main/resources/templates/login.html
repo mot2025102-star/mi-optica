@@ -417,23 +417,20 @@
         document.getElementById('wrapperPass').classList.toggle('has-value', this.value.length > 0);
     });
 
-    /* ── REFRESCO DE CSRF DESDE COOKIE ANTES DEL SUBMIT ────────── */
+    /* ── REFRESCO DE CSRF ───────────────────────────────────────── */
     /*
-     * Con CookieCsrfTokenRepository el servidor pone el token en la cookie
-     * XSRF-TOKEN. Si la sesión se destruyó y se creó una nueva, el servidor
-     * manda una cookie nueva. Este código la lee y actualiza el input hidden
-     * antes de enviar el formulario, así el token siempre está fresco.
+     * Con XorCsrfTokenRequestAttributeHandler + CookieCsrfTokenRepository,
+     * Thymeleaf ya inyecta el token correcto en el input hidden (th:value).
+     * NO se debe sobreescribir con la cookie cruda (XSRF-TOKEN), porque
+     * esa cookie contiene el valor RAW sin el XOR aplicado, y Spring Security
+     * esperará el valor XOR-eado que Thymeleaf pone automáticamente.
+     *
+     * Por eso este bloque simplemente NO toca el input; el formulario ya
+     * tiene el token correcto desde el primer intento.
      */
-    function getCookie(name) {
-        var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-        return match ? decodeURIComponent(match[1]) : null;
-    }
-
     document.getElementById('loginForm').addEventListener('submit', function () {
-        var token = getCookie('XSRF-TOKEN');
-        if (token) {
-            document.getElementById('csrfInput').value = token;
-        }
+        // Token ya está correcto gracias a Thymeleaf + XorCsrfTokenRequestAttributeHandler.
+        // No se modifica.
     });
 </script>
 

@@ -51,10 +51,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         /*
-         * CSRF con cookie en vez de sesión HTTP.
-         * Así cuando el logout destruye la sesión, el CSRF token
-         * sigue disponible en la cookie y el formulario de login
-         * puede submittear correctamente con el nuevo token.
+         * CSRF con cookie.
+         * El token se fuerza a cargar en AuthController.login() (GET /login)
+         * para que la cookie XSRF-TOKEN esté presente antes del primer submit.
          */
         CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
