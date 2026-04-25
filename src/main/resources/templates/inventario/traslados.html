@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Traslados')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Traslados</div>
+            <div class="topbar-sub">Movimiento de stock entre sucursales</div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/inventario}" class="btn btn-secondary">Volver a inventario</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div th:if="${mensajeOk}" class="alert alert-success" style="margin-bottom:16px">
+            <span th:text="${mensajeOk}"></span>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger" style="margin-bottom:16px">
+            <span th:text="${mensajeError}"></span>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Nuevo traslado</div>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/traslados/guardar}" method="post" id="frmTraslado">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Sucursal origen</label>
+                            <select class="form-select" id="selOrigen" name="idSucursalOrigen" required>
+                                <option value="">Selecciona origen</option>
+                                <option th:each="s : ${sucursales}"
+                                        th:value="${s.idSucursal}"
+                                        th:text="${s.nombre}"
+                                        th:selected="${ori > 0 and s.idSucursal == ori}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Producto</label>
+                            <select class="form-select" id="selProducto" name="idProducto" required disabled>
+                                <option value="">Selecciona un producto</option>
+                            </select>
+                            <div class="text-gris text-sm" id="stockHint" style="margin-top:6px;display:none"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sucursal destino</label>
+                            <select class="form-select" id="selDestino" name="idSucursalDestino" required disabled>
+                                <option value="">Selecciona destino</option>
+                                <option th:each="s : ${sucursales}"
+                                        th:value="${s.idSucursal}"
+                                        th:text="${s.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Cantidad</label>
+                            <input class="form-control" id="inpCantidad" name="cantidad" type="number" min="0.01" step="0.01" placeholder="0" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Referencia</label>
+                            <input class="form-control" id="inpReferencia" name="referencia" type="text" maxlength="20" placeholder="Ej: TR-000123">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Observación</label>
+                            <input class="form-control" id="inpObs" name="observacion" type="text" maxlength="200" placeholder="Opcional">
+                        </div>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px">
+                        <a th:href="@{/inventario}" class="btn btn-secondary">Cancelar</a>
+                        <button class="btn btn-primary" id="btnGuardar" type="submit" disabled>Guardar traslado</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const selOrigen = document.getElementById('selOrigen');
+    const selProducto = document.getElementById('selProducto');
+    const selDestino = document.getElementById('selDestino');
+    const inpCantidad = document.getElementById('inpCantidad');
+    const btnGuardar = document.getElementById('btnGuardar');
+    const stockHint = document.getElementById('stockHint');
+
+    function csrfHeader() {
+        const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+        return token && header ? { [header]: token } : {};
+    }
+
+    function enable(el, on) {
+        el.disabled = !on;
+        if (!on) el.value = '';
+    }
+
+    function fillDestinos(excludeId) {
+        [...selDestino.options].forEach(opt => {
+            if (!opt.value) return;
+            opt.hidden = (opt.value === String(excludeId));
+        });
+        selDestino.value = '';
+    }
+
+    function setStock(existencia) {
+        const ex = Number(existencia ?? 0);
+        if (Number.isFinite(ex)) {
+            inpCantidad.max = String(ex);
+            inpCantidad.value = '';
+            stockHint.style.display = 'block';
+            stockHint.textContent = `Stock disponible en origen: ${ex}`;
+        } else {
+            inpCantidad.removeAttribute('max');
+            stockHint.style.display = 'none';
+            stockHint.textContent = '';
+        }
+    }
+
+    function refreshSaveEnabled() {
+        const ok = !!selOrigen.value && !!selProducto.value && !!selDestino.value && !inpCantidad.disabled && Number(inpCantidad.value) > 0;
+        btnGuardar.disabled = !ok;
+    }
+
+    async function loadProductosConStock(idSucursal) {
+        enable(selProducto, false);
+        enable(selDestino, !!idSucursal);
+        enable(inpCantidad, false);
+        btnGuardar.disabled = true;
+        stockHint.style.display = 'none';
+        stockHint.textContent = '';
+
+        if (!idSucursal) return;
+        fillDestinos(idSucursal);
+
+        const r = await fetch(`/api/traslados/productos?ori=${encodeURIComponent(idSucursal)}`, {
+            headers: { ...csrfHeader() }
+        });
+        const data = await r.json();
+
+        selProducto.innerHTML = '<option value="">Selecciona un producto</option>';
+        data.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.idProducto;
+            opt.textContent = `${p.label} (stock: ${p.existencia})`;
+            opt.dataset.existencia = p.existencia;
+            selProducto.appendChild(opt);
+        });
+        enable(selProducto, true);
+    }
+
+    selOrigen.addEventListener('change', async function () {
+        await loadProductosConStock(selOrigen.value);
+    });
+
+    selProducto.addEventListener('change', async function () {
+        const ex = selProducto.selectedOptions[0]?.dataset?.existencia;
+        if (!selProducto.value) {
+            enable(inpCantidad, false);
+            setStock(0);
+            refreshSaveEnabled();
+            return;
+        }
+        enable(inpCantidad, true);
+        setStock(ex);
+        refreshSaveEnabled();
+    });
+
+    selDestino.addEventListener('change', refreshSaveEnabled);
+    inpCantidad.addEventListener('input', function () {
+        const max = Number(inpCantidad.max || 0);
+        const v = Number(inpCantidad.value || 0);
+        if (max && v > max) inpCantidad.value = String(max);
+        refreshSaveEnabled();
+    });
+
+    // Pre-carga si viene ori por query
+    document.addEventListener('DOMContentLoaded', async function () {
+        if (selOrigen.value) {
+            await loadProductosConStock(selOrigen.value);
+        }
+        if (selOrigen.value) enable(selDestino, true);
+        refreshSaveEnabled();
+    });
+</script>
+
+</body>
+</html>
+
