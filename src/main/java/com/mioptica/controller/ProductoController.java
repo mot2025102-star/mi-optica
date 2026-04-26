@@ -1,5 +1,5 @@
 package com.mioptica.controller;
-
+ 
 import com.mioptica.model.*;
 import com.mioptica.service.ProductoService;
 import jakarta.validation.Valid;
@@ -11,17 +11,17 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+ 
 import java.util.List;
 import java.util.Map;
-
+ 
 @Controller
 @RequestMapping("/productos")
 @RequiredArgsConstructor
 public class ProductoController {
-
+ 
     private final ProductoService productoService;
-
+ 
     // ─── LISTA ────────────────────────────────────────────────────
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR','CONTADOR','BODEGUERO','OPTOMETRISTA')")
@@ -32,21 +32,21 @@ public class ProductoController {
             @RequestParam(defaultValue = "activo") String  est,
             @RequestParam(defaultValue = "tabla")  String  vista,
             Model model) {
-
+ 
         var productos = q.isBlank() ? productoService.listarTodos()
                                      : productoService.buscar(q);
-
+ 
         if (cat > 0) { int c = cat; productos = productos.stream().filter(p -> p.getCategoria() != null && p.getCategoria().getIdCategoria().equals(c)).toList(); }
         if (mar > 0) { int m = mar; productos = productos.stream().filter(p -> p.getMarca()     != null && p.getMarca().getIdMarca().equals(m)).toList(); }
         if ("activo".equals(est))   productos = productos.stream().filter(Producto::getActivo).toList();
         else if ("inactivo".equals(est)) productos = productos.stream().filter(p -> !p.getActivo()).toList();
-
+ 
         long activos   = productos.stream().filter(Producto::getActivo).count();
         long inactivos = productos.size() - activos;
-
+ 
         var stockMap = new java.util.HashMap<Integer, java.math.BigDecimal>();
         productos.forEach(p -> stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto())));
-
+ 
         model.addAttribute("productos",   productos);
         model.addAttribute("stockMap",    stockMap);
         model.addAttribute("categorias",  productoService.listarCategorias());
@@ -61,7 +61,7 @@ public class ProductoController {
         model.addAttribute("activePage",  "productos");
         return "productos/lista";
     }
-
+ 
     // ─── FORMULARIO NUEVO ─────────────────────────────────────────
     @GetMapping("/nuevo")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
@@ -72,11 +72,15 @@ public class ProductoController {
         model.addAttribute("categorias", productoService.listarCategorias());
         model.addAttribute("marcas",     productoService.listarMarcas());
         model.addAttribute("sucursales", productoService.listarSucursales());
+        // ── NUEVO: datos para el panel lente ──────────────────────
+        model.addAttribute("tiposLente",    productoService.listarTiposLente());
+        model.addAttribute("materiales",    productoService.listarMateriales());
+        model.addAttribute("tratamientos",  productoService.listarTratamientos());
         model.addAttribute("editando",   false);
         model.addAttribute("activePage", "productos");
         return "productos/formulario";
     }
-
+ 
     // ─── FORMULARIO EDITAR ────────────────────────────────────────
     @GetMapping("/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
@@ -86,6 +90,10 @@ public class ProductoController {
             model.addAttribute("categorias", productoService.listarCategorias());
             model.addAttribute("marcas",     productoService.listarMarcas());
             model.addAttribute("sucursales", productoService.listarSucursales());
+            // ── NUEVO: datos para el panel lente ──────────────────
+            model.addAttribute("tiposLente",    productoService.listarTiposLente());
+            model.addAttribute("materiales",    productoService.listarMateriales());
+            model.addAttribute("tratamientos",  productoService.listarTratamientos());
             model.addAttribute("editando",   true);
             model.addAttribute("activePage", "productos");
             return "productos/formulario";
@@ -94,7 +102,7 @@ public class ProductoController {
             return "redirect:/productos";
         });
     }
-
+ 
     // ─── ELIMINAR ─────────────────────────────────────────────────
     @PostMapping("/eliminar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -107,7 +115,7 @@ public class ProductoController {
         }
         return "redirect:/productos";
     }
-
+ 
     // ─── GUARDAR ──────────────────────────────────────────────────
     @PostMapping("/guardar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
@@ -117,16 +125,19 @@ public class ProductoController {
             @RequestParam Map<String, String> allParams,
             Model model,
             RedirectAttributes ra) {
-
+ 
         if (result.hasErrors()) {
-            model.addAttribute("categorias", productoService.listarCategorias());
-            model.addAttribute("marcas",     productoService.listarMarcas());
-            model.addAttribute("sucursales", productoService.listarSucursales());
-            model.addAttribute("editando",   producto.getIdProducto() != null);
-            model.addAttribute("activePage", "productos");
+            model.addAttribute("categorias",   productoService.listarCategorias());
+            model.addAttribute("marcas",       productoService.listarMarcas());
+            model.addAttribute("sucursales",   productoService.listarSucursales());
+            model.addAttribute("tiposLente",   productoService.listarTiposLente());
+            model.addAttribute("materiales",   productoService.listarMateriales());
+            model.addAttribute("tratamientos", productoService.listarTratamientos());
+            model.addAttribute("editando",     producto.getIdProducto() != null);
+            model.addAttribute("activePage",   "productos");
             return "productos/formulario";
         }
-
+ 
         try {
             boolean esNuevo = (producto.getIdProducto() == null);
             productoService.guardar(producto, allParams);
@@ -138,14 +149,17 @@ public class ProductoController {
             model.addAttribute("categorias",   productoService.listarCategorias());
             model.addAttribute("marcas",       productoService.listarMarcas());
             model.addAttribute("sucursales",   productoService.listarSucursales());
+            model.addAttribute("tiposLente",   productoService.listarTiposLente());
+            model.addAttribute("materiales",   productoService.listarMateriales());
+            model.addAttribute("tratamientos", productoService.listarTratamientos());
             model.addAttribute("editando",     producto.getIdProducto() != null);
             model.addAttribute("activePage",   "productos");
             return "productos/formulario";
         }
-
+ 
         return "redirect:/productos";
     }
-
+ 
     // ─── TOGGLE ACTIVO ────────────────────────────────────────────
     @PostMapping("/toggle/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -157,7 +171,7 @@ public class ProductoController {
         }
         return "redirect:/productos";
     }
-
+ 
     // ─── REST API ─────────────────────────────────────────────────
     @PostMapping("/api/categoria")
     @ResponseBody
@@ -170,7 +184,7 @@ public class ProductoController {
             return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
         }
     }
-
+ 
     @PostMapping("/api/marca")
     @ResponseBody
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
@@ -182,12 +196,27 @@ public class ProductoController {
             return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
         }
     }
-
+ 
     @GetMapping("/api/buscar")
     @ResponseBody
     public List<Map<String, Object>> buscarApi(@RequestParam(defaultValue = "") String q) {
         return productoService.buscar(q).stream().limit(15).map(p ->
                 Map.<String, Object>of("id", p.getIdProducto(), "codigo", p.getCodigo(), "detalle", p.getDetalle())
         ).toList();
+    }
+ 
+    // ─── NUEVO: API precio de lente por combinación ───────────────
+    @GetMapping("/api/precio-lente")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> precioLente(
+            @RequestParam Integer idTipo,
+            @RequestParam Integer idMaterial,
+            @RequestParam Integer idTratamiento) {
+        return productoService.consultarPrecio(idTipo, idMaterial, idTratamiento)
+                .map(p -> ResponseEntity.ok(Map.<String, Object>of(
+                        "ok", true,
+                        "costo", p.getCosto(),
+                        "precioVenta", p.getPrecioVenta())))
+                .orElse(ResponseEntity.ok(Map.of("ok", false)));
     }
 }

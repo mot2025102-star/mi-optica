@@ -364,3 +364,40 @@ CREATE TABLE IF NOT EXISTS correlativos (
     UNIQUE KEY uq_suc_tipo (id_sucursal, tipo),
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal)
 );
+
+-- =====================================================
+-- TABLA: cortes_caja
+-- Registra el arqueo diario de caja por sucursal
+-- =====================================================
+CREATE TABLE IF NOT EXISTS cortes_caja (
+    id_corte      INT AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal   INT NOT NULL,
+    id_usuario    INT NOT NULL,
+    fecha         DATE NOT NULL,
+    saldo_inicial DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    saldo_fisico  DECIMAL(10,2) NULL COMMENT 'Lo que el cajero contó físicamente',
+    total_ventas  DECIMAL(10,2) NULL DEFAULT 0.00,
+    total_gastos  DECIMAL(10,2) NULL DEFAULT 0.00,
+    saldo_esperado DECIMAL(10,2) NULL DEFAULT 0.00 COMMENT 'saldo_inicial + ingresos - gastos',
+    diferencia    DECIMAL(10,2) NULL DEFAULT 0.00 COMMENT 'saldo_fisico - saldo_esperado',
+    observacion   TEXT NULL,
+    cerrado       TINYINT(1) NOT NULL DEFAULT 0,
+    UNIQUE KEY uq_suc_fecha (id_sucursal, fecha),
+    FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
+    FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- TABLA: gastos_caja
+-- Registra los gastos menores del día por sucursal
+-- =====================================================
+CREATE TABLE IF NOT EXISTS gastos_caja (
+    id_gasto    INT AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal INT NOT NULL,
+    id_usuario  INT NOT NULL,
+    fecha       DATE NOT NULL,
+    concepto    VARCHAR(200) NOT NULL,
+    monto       DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
+    FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

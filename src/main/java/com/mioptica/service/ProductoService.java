@@ -1,5 +1,5 @@
 package com.mioptica.service;
-
+ 
 import com.mioptica.model.*;
 import com.mioptica.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -7,18 +7,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+ 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+ 
 @Service
 @RequiredArgsConstructor
 public class ProductoService {
-
+ 
     private final ProductoRepository          productoRepo;
     private final CategoriaRepository         categoriaRepo;
     private final MarcaRepository             marcaRepo;
@@ -28,9 +28,9 @@ public class ProductoService {
     private final Material_lenteRepository    materialLenteRepo;
     private final Tratamiento_lenteRepository tratamientoLenteRepo;
     private final Precio_lenteRepository      precioLenteRepo;
-    private final KardexRepository            kardexRepo;      // ── NUEVO
-    private final UsuarioRepository           usuarioRepo;     // ── NUEVO
-
+    private final KardexRepository            kardexRepo;
+    private final UsuarioRepository           usuarioRepo;
+ 
     // ─── Listas ───────────────────────────────────────────────────
     public List<Producto>          listarTodos()          { return productoRepo.findAll(); }
     public List<Producto>          listarActivos()        { return productoRepo.findByActivoTrueOrderByDetalleAsc(); }
@@ -42,25 +42,25 @@ public class ProductoService {
     public List<Material_lente>    listarMateriales()     { return materialLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Tratamiento_lente> listarTratamientos()   { return tratamientoLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Precio_lente>      listarPreciosLente()   { return precioLenteRepo.findAllByOrderByTipoNombreAscMaterialNombreAsc(); }
-
+ 
     // ─── Obtener uno ──────────────────────────────────────────────
     public Optional<Producto> findById(Integer id) { return productoRepo.findById(id); }
-
+ 
     // ─── Consultar precio automático por combinación ──────────────
     public Optional<Precio_lente> consultarPrecio(Integer idTipo, Integer idMaterial, Integer idTratamiento) {
         return precioLenteRepo.findByCombinacion(idTipo, idMaterial, idTratamiento);
     }
-
+ 
     // ─── Guardar producto (sin stock inicial) ─────────────────────
     @Transactional
     public Producto guardar(Producto producto) throws Exception {
         return guardar(producto, new HashMap<>());
     }
-
+ 
     // ─── Guardar producto (con stock inicial por sucursal) ────────
     @Transactional
     public Producto guardar(Producto producto, Map<String, String> stockParams) throws Exception {
-
+ 
         // ── Resolver entidades relacionadas desde BD ──────────────
         if (producto.getCategoria() != null && producto.getCategoria().getIdCategoria() != null) {
             producto.setCategoria(categoriaRepo.findById(producto.getCategoria().getIdCategoria()).orElse(null));
@@ -87,17 +87,17 @@ public class ProductoService {
         } else {
             producto.setTratamientoLente(null);
         }
-
+ 
         // ── Validar código duplicado ──────────────────────────────
         Optional<Producto> existente = productoRepo.findByCodigo(producto.getCodigo());
         if (existente.isPresent()
                 && !existente.get().getIdProducto().equals(producto.getIdProducto())) {
             throw new Exception("Ya existe un producto con el código: " + producto.getCodigo());
         }
-
+ 
         boolean esNuevo = (producto.getIdProducto() == null);
         Producto guardado = productoRepo.save(producto);
-
+ 
         // ── Obtener usuario actual para kardex ────────────────────
         Usuario usuarioActual = null;
         try {
@@ -106,17 +106,28 @@ public class ProductoService {
                 usuarioActual = usuarioRepo.findByUsername(ud.getUsername()).orElse(null);
             }
         } catch (Exception ignored) {}
-
+ 
         if (esNuevo) {
             for (Sucursal suc : sucursalRepo.findByActivoTrue()) {
                 String sid = String.valueOf(suc.getIdSucursal());
-
+ 
                 String activa = stockParams.getOrDefault("sucActiva_" + sid, "0");
                 if (!"1".equals(activa)) continue;
-
+ 
                 BigDecimal existencia = parseBD(stockParams.get("existencia_" + sid));
-                BigDecimal costo      = parseBD(stockParams.get("costo_"      + sid));
-                BigDecimal precio     = parseBD(stockParams.get("precio_"     + sid));
+ 
+                // ── Para LENTE: costo y precio vienen del panel Precios ──
+                BigDecimal costo;
+                BigDecimal precio;
+                if ("LENTE".equals(guardado.getTipoProducto())) {
+                    // Tomar del propio objeto guardado (viene del hidden hCostoL / hPrecioVentaL)
+                    costo  = guardado.getCostoLente()       != null ? guardado.getCostoLente()       : parseBD(stockParams.get("costo_"  + sid));
+                    precio = guardado.getPrecioVentaLente() != null ? guardado.getPrecioVentaLente() : parseBD(stockParams.get("precio_" + sid));
+                } else {
+                    costo  = parseBD(stockParams.get("costo_"  + sid));
+                    precio = parseBD(stockParams.get("precio_" + sid));
+                }
+ 
                 // ── Guardar en inventario ─────────────────────────
                 boolean yaExiste = inventarioRepo
                         .findByProductoAndSucursal(guardado, suc).isPresent();
@@ -129,8 +140,8 @@ public class ProductoService {
                     inv.setPrecioVenta(precio);
                     inventarioRepo.save(inv);
                 }
-
-                // ── NUEVO: Guardar en kardex ──────────────────────
+ 
+                // ── Guardar en kardex ─────────────────────────────
                 if (existencia.compareTo(BigDecimal.ZERO) > 0) {
                     Kardex k = new Kardex();
                     k.setProducto(guardado);
@@ -149,15 +160,15 @@ public class ProductoService {
                 }
             }
         }
-
+ 
         return guardado;
     }
-
+ 
     private BigDecimal parseBD(String val) {
         try { return val != null && !val.isBlank() ? new BigDecimal(val) : BigDecimal.ZERO; }
         catch (Exception e) { return BigDecimal.ZERO; }
     }
-
+ 
     // ─── Toggle activo/inactivo ───────────────────────────────────
     @Transactional
     public void toggleActivo(Integer id) throws Exception {
@@ -166,7 +177,7 @@ public class ProductoService {
         p.setActivo(!p.getActivo());
         productoRepo.save(p);
     }
-
+ 
     // ─── Eliminar producto ────────────────────────────────────────
     @Transactional
     public void eliminar(Integer id) throws Exception {
@@ -176,22 +187,22 @@ public class ProductoService {
                 .filter(i -> i.getProducto().getIdProducto().equals(id))
                 .forEach(inventarioRepo::delete);
         kardexRepo.findByProducto(id)
-                .forEach(kardexRepo::delete);   // ── NUEVO: limpiar kardex al eliminar
+                .forEach(kardexRepo::delete);
         productoRepo.delete(p);
     }
-
+ 
     // ─── Guardar categoría ────────────────────────────────────────
     @Transactional
     public Categoria guardarCategoria(String nombre) {
         return categoriaRepo.save(new Categoria() {{ setNombre(nombre.trim()); }});
     }
-
+ 
     // ─── Guardar marca ────────────────────────────────────────────
     @Transactional
     public Marca guardarMarca(String nombre) {
         return marcaRepo.save(new Marca() {{ setNombre(nombre.trim()); }});
     }
-
+ 
     // ─── Guardar tipo de lente ────────────────────────────────────
     @Transactional
     public Tipo_lente guardarTipoLente(String nombre) throws Exception {
@@ -199,7 +210,7 @@ public class ProductoService {
         t.setNombre(nombre.trim());
         return tipoLenteRepo.save(t);
     }
-
+ 
     // ─── Guardar material ─────────────────────────────────────────
     @Transactional
     public Material_lente guardarMaterial(String nombre) throws Exception {
@@ -207,7 +218,7 @@ public class ProductoService {
         m.setNombre(nombre.trim());
         return materialLenteRepo.save(m);
     }
-
+ 
     // ─── Guardar tratamiento ──────────────────────────────────────
     @Transactional
     public Tratamiento_lente guardarTratamiento(String nombre) throws Exception {
@@ -215,7 +226,7 @@ public class ProductoService {
         t.setNombre(nombre.trim());
         return tratamientoLenteRepo.save(t);
     }
-
+ 
     // ─── Guardar / actualizar precio de lente ─────────────────────
     @Transactional
     public Precio_lente guardarPrecioLente(Integer idTipo, Integer idMaterial,
@@ -227,11 +238,11 @@ public class ProductoService {
                 .orElseThrow(() -> new Exception("Material no encontrado."));
         Tratamiento_lente tratamiento = tratamientoLenteRepo.findById(idTratamiento)
                 .orElseThrow(() -> new Exception("Tratamiento no encontrado."));
-
+ 
         Precio_lente precio = precioLenteRepo
                 .findByCombinacion(idTipo, idMaterial, idTratamiento)
                 .orElse(new Precio_lente());
-
+ 
         precio.setTipo(tipo);
         precio.setMaterial(material);
         precio.setTratamiento(tratamiento);
@@ -239,12 +250,30 @@ public class ProductoService {
         precio.setPrecioVenta(precioVenta);
         return precioLenteRepo.save(precio);
     }
-
+ 
     // ─── Stock total por producto ─────────────────────────────────
+    // Para LENTE: usa stockLente del propio modelo (campo directo)
+    // Para otros: suma inventario por sucursales
     public BigDecimal stockTotal(Integer idProducto) {
-        return inventarioRepo.findAll().stream()
-                .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
-                .map(Inventario::getExistencia)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return productoRepo.findById(idProducto).map(p -> {
+            if ("LENTE".equals(p.getTipoProducto())) {
+                // Primero intentar desde inventario (más preciso si ya existe)
+                BigDecimal stockInv = inventarioRepo.findAll().stream()
+                        .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
+                        .map(Inventario::getExistencia)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                // Si hay inventario registrado, usarlo; si no, usar stockLente
+                if (stockInv.compareTo(BigDecimal.ZERO) > 0) return stockInv;
+                return p.getStockLente() != null
+                        ? new BigDecimal(p.getStockLente())
+                        : BigDecimal.ZERO;
+            }
+            // Para armazón, limpieza, accesorio: sumar desde inventario
+            return inventarioRepo.findAll().stream()
+                    .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
+                    .map(Inventario::getExistencia)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }).orElse(BigDecimal.ZERO);
     }
 }
+ 

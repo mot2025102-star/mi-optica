@@ -27,8 +27,8 @@
  
     <div class="page-body">
  
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert-success"><span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger"> <span th:text="${mensajeError}"></span></div>
  
         <!-- Stats -->
         <div class="stats-grid">
@@ -135,9 +135,9 @@
                                 <th>Producto</th>
                                 <th>Tipo</th>
                                 <th>Marca</th>
-                                <th>Modelo</th>
                                 <th>Color</th>
                                 <th style="text-align:center">Stock</th>
+                                <th style="text-align:right">Precio Venta</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -153,26 +153,40 @@
                                 </td>
                             </tr>
                             <tr th:each="p : ${productos}">
+                                <!-- Código -->
                                 <td class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></td>
+ 
+                                <!-- Nombre + info extra lente -->
                                 <td>
                                     <div class="fw-600" th:text="${p.detalle}"></div>
-                                    <div th:if="${p.descripcion != null and !p.descripcion.isEmpty()}"
+                                    <!-- Código interno si es lente -->
+                                    <div th:if="${p.tipoProducto == 'LENTE' and p.codigoInternoLente != null and !p.codigoInternoLente.isEmpty()}"
+                                         class="text-gris text-sm"
+                                         th:text="${p.codigoInternoLente}"></div>
+                                    <!-- Descripción para otros tipos -->
+                                    <div th:if="${p.tipoProducto != 'LENTE' and p.descripcion != null and !p.descripcion.isEmpty()}"
                                          class="text-gris text-sm"
                                          th:text="${#strings.abbreviate(p.descripcion, 50)}"></div>
                                 </td>
+ 
                                 <!-- Tipo -->
                                 <td>
                                     <span th:if="${p.tipoProducto == 'ARMAZON'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa)"> Armazón</span>
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa)">Armazón</span>
                                     <span th:if="${p.tipoProducto == 'LENTE'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.12);color:#64b4ff"> Lente</span>
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.12);color:#64b4ff">Lente</span>
                                     <span th:if="${p.tipoProducto == 'LIMPIEZA'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"> Limpieza</span>
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)">Limpieza</span>
                                     <span th:if="${p.tipoProducto == 'ACCESORIO'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(180,100,255,0.12);color:#b464ff"> Accesorio</span>
+                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(180,100,255,0.12);color:#b464ff">Accesorio</span>
                                     <span th:if="${p.tipoProducto == null or p.tipoProducto == 'GENERAL'}"
-                                          class="text-gris text-sm"> General</span>
+                                          class="text-gris text-sm">General</span>
+                                    <!-- Sub-info lente -->
+                                    <div th:if="${p.tipoProducto == 'LENTE' and p.clasificacionLente != null}"
+                                         class="text-gris" style="font-size:10px;margin-top:3px"
+                                         th:text="${p.clasificacionLente}"></div>
                                 </td>
+ 
                                 <!-- Marca -->
                                 <td>
                                     <span th:if="${p.marca != null}"
@@ -180,10 +194,10 @@
                                           th:text="${p.marca.nombre}"></span>
                                     <span th:if="${p.marca == null}" class="text-gris text-sm">—</span>
                                 </td>
-                                <!-- Modelo -->
-                                <td class="text-sm" th:text="${p.modelo != null and !p.modelo.isEmpty() ? p.modelo : '—'}"></td>
+ 
                                 <!-- Color -->
                                 <td class="text-sm" th:text="${p.color != null and !p.color.isEmpty() ? p.color : '—'}"></td>
+ 
                                 <!-- Stock -->
                                 <td style="text-align:center">
                                     <th:block th:with="stock=${stockMap[p.idProducto]}">
@@ -198,11 +212,37 @@
                                               style="font-size:13px;padding:5px 12px"></span>
                                     </th:block>
                                 </td>
+ 
+                                <!-- Precio Venta -->
+                                <td style="text-align:right">
+                                    <!-- Lente: usar precioVentaLente -->
+                                    <span th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente != null}"
+                                          class="fw-600 text-turquesa"
+                                          style="font-size:13px"
+                                          th:text="'Q ' + ${#numbers.formatDecimal(p.precioVentaLente, 1, 2)}">
+                                    </span>
+                                    <!-- Lente sin precio -->
+                                    <span th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente == null}"
+                                          class="text-gris text-sm">—</span>
+                                    <!-- Otros tipos: usar precio del inventario (primera sucursal) -->
+                                    <th:block th:if="${p.tipoProducto != 'LENTE'}">
+                                        <th:block th:with="inv=${precioMap != null ? precioMap[p.idProducto] : null}">
+                                            <span th:if="${inv != null}"
+                                                  class="fw-600"
+                                                  style="font-size:13px"
+                                                  th:text="'Q ' + ${#numbers.formatDecimal(inv, 1, 2)}">
+                                            </span>
+                                            <span th:if="${inv == null}" class="text-gris text-sm">—</span>
+                                        </th:block>
+                                    </th:block>
+                                </td>
+ 
                                 <!-- Estado -->
                                 <td>
                                     <span th:if="${p.activo}"  class="badge badge-success">Activo</span>
                                     <span th:if="${!p.activo}" class="badge badge-danger">Inactivo</span>
                                 </td>
+ 
                                 <!-- Acciones -->
                                 <td>
                                     <div class="d-flex gap-1">
@@ -249,7 +289,11 @@
                         <span th:if="${p.activo}"  class="badge badge-success">Activo</span>
                         <span th:if="${!p.activo}" class="badge badge-danger">Inactivo</span>
                     </div>
-                    <div class="fw-600" style="margin-bottom:6px;line-height:1.3" th:text="${p.detalle}"></div>
+                    <div class="fw-600" style="margin-bottom:4px;line-height:1.3" th:text="${p.detalle}"></div>
+                    <!-- Código interno para lentes -->
+                    <div th:if="${p.tipoProducto == 'LENTE' and p.codigoInternoLente != null and !p.codigoInternoLente.isEmpty()}"
+                         class="text-gris text-sm" style="margin-bottom:6px"
+                         th:text="${p.codigoInternoLente}"></div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
                         <span th:if="${p.tipoProducto != null and p.tipoProducto != 'GENERAL'}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.1);color:var(--turquesa)"
@@ -257,12 +301,13 @@
                         <span th:if="${p.marca != null}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"
                               th:text="${p.marca.nombre}"></span>
-                        <span th:if="${p.modelo != null and !p.modelo.isEmpty()}"
-                              style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--gris-texto)"
-                              th:text="${p.modelo}"></span>
                         <span th:if="${p.color != null and !p.color.isEmpty()}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--gris-texto)"
                               th:text="${p.color}"></span>
+                        <!-- Rango lente -->
+                        <span th:if="${p.tipoProducto == 'LENTE' and p.rangoLente != null}"
+                              style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.1);color:#64b4ff"
+                              th:text="${p.rangoLente}"></span>
                     </div>
                     <div class="d-flex justify-between align-center">
                         <div>
@@ -278,6 +323,17 @@
                                       class="badge badge-success" th:text="${stock}"
                                       style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
                             </th:block>
+                        </div>
+                        <!-- Precio venta en tarjeta -->
+                        <div style="text-align:right">
+                            <div class="text-gris text-sm">Precio</div>
+                            <div th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente != null}"
+                                 class="fw-600 text-turquesa" style="font-size:14px"
+                                 th:text="'Q ' + ${#numbers.formatDecimal(p.precioVentaLente, 1, 2)}"></div>
+                            <div th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente == null}"
+                                 class="text-gris text-sm">—</div>
+                            <div th:if="${p.tipoProducto != 'LENTE'}"
+                                 class="text-gris text-sm">—</div>
                         </div>
                         <div class="d-flex gap-1">
                             <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
