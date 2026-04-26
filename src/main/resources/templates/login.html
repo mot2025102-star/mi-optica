@@ -4,275 +4,248 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Óptica | Iniciar Sesión</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --accent:      #d4b27a;
+            --accent-glow: rgba(212,178,122,.18);
+            --bg:          #0a0a0b;
+            --bg-1:        #111114;
+            --text:        #f5f3ee;
+            --text-muted:  #74716a;
+            --border:      rgba(255,255,255,.08);
+            --border-h:    rgba(255,255,255,.18);
+            --danger:      #e07a6b;
+            --success:     #6ec19a;
+            --warning:     #e2b86b;
+            --ease-out:    cubic-bezier(.16,1,.3,1);
+            --font:        'Inter Tight', system-ui, sans-serif;
+            --font-d:      'Fraunces', serif;
+            --t-theme:     0.5s cubic-bezier(.16,1,.3,1);
         }
 
         body {
             height: 100vh;
-            background-color: #000;
+            background-color: var(--bg);
             overflow: hidden;
+            font-family: var(--font);
+            transition: background-color var(--t-theme);
         }
 
+        /* ══ LAYOUT ══ */
         .main-container {
             display: flex;
-            width: 100vw;
-            height: 100vh;
+            width: 100vw; height: 100vh;
         }
 
-        /* ── IMAGEN ──────────────────────────────────────────────── */
+        /* ══ IMAGEN ══ */
         .image-side {
-            flex: 1;
-            width: 50%;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-            background-color: #000;
-            animation: slideInLeft 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+            flex: 1; position: relative;
+            overflow: hidden; background: #000;
+            animation: slideInLeft .9s var(--ease-out) both;
         }
-
         .full-image {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: absolute; inset: 0;
+            transition: opacity .8s var(--ease-out), transform 1s var(--ease-out);
+        }
+        .full-image.img-a { opacity:1; transform:scale(1);    z-index:1; }
+        .full-image.img-b { opacity:0; transform:scale(1.04); z-index:2; }
+        .image-side.alt .img-a { opacity:0; transform:scale(1.04); }
+        .image-side.alt .img-b { opacity:1; transform:scale(1); }
+        .image-side::after {
+            content:""; position:absolute; inset:0; z-index:3;
+            background: linear-gradient(to right, transparent 65%, rgba(0,0,0,.55));
+            pointer-events:none;
         }
 
-        /* ── FORMULARIO ──────────────────────────────────────────── */
+        /* Botón cambiar fondo */
+        .btn-toggle-bg {
+            position: absolute; bottom:24px; right:24px; z-index:10;
+            display: flex; align-items:center; gap:8px;
+            padding: 9px 16px;
+            background: rgba(10,10,11,.65);
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 999px;
+            color: rgba(255,255,255,.6);
+            font-family: var(--font); font-size:10px;
+            font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all .25s var(--ease-out);
+        }
+        .btn-toggle-bg:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent-glow);
+        }
+        .btn-toggle-bg svg {
+            width:13px; height:13px;
+            stroke:currentColor; stroke-width:1.8;
+            fill:none; stroke-linecap:round; stroke-linejoin:round;
+            transition: transform .5s var(--ease-out);
+        }
+        .btn-toggle-bg:hover svg { transform: rotate(180deg); }
+
+        /* ══ FORMULARIO ══ */
         .form-side {
             flex: 1;
-            width: 50%;
-            height: 100vh;
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: slideInRight 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+            display: flex; align-items:center; justify-content:center;
+            position: relative;
+            animation: slideInRight .9s var(--ease-out) both;
+            /* fondo y borde controlados por JS directo */
+            border-left: 1px solid var(--border);
+            transition: background-color var(--t-theme), border-color var(--t-theme);
+        }
+        .form-side::before {
+            content:""; position:absolute; inset:0;
+            pointer-events:none;
+            /* el gradiente también lo controla JS */
         }
 
         .login-box {
-            width: 100%;
-            max-width: 400px;
-            padding: 3rem 2.5rem;
-            background-color: transparent;
-            color: #fff;
-            animation: fadeUp 0.7s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+            width:100%; max-width:400px;
+            padding:3rem 2.5rem;
+            position:relative; z-index:1;
+            animation: fadeUp .7s .25s var(--ease-out) both;
         }
 
-        .login-header {
-            margin-bottom: 2.5rem;
+        /* ══ OJO ══ */
+        .login-brand { text-align:center; margin-bottom:2.5rem; }
+        .eye-container {
+            width:64px; height:64px;
+            margin:0 auto 16px;
+            cursor:none; position:relative;
+        }
+        .eye-svg {
+            width:64px; height:64px;
+            overflow:visible;
+        }
+        .eye-outline, .eye-iris {
+            fill:none; stroke-width:1.4;
+            stroke-linecap:round; stroke-linejoin:round;
         }
 
-        .login-header h2 {
-            color: #fff;
-            font-size: 2.2rem;
-            font-weight: 300;
-            margin-bottom: 0.5rem;
-            letter-spacing: 1px;
+        .login-brand-title {
+            font-family: var(--font-d);
+            font-size:28px; font-weight:400;
+            color:#fafaf7; letter-spacing:-.02em; line-height:1.1;
+        }
+        .login-brand-sub {
+            font-size:9px; font-weight:500;
+            text-transform:uppercase; letter-spacing:.28em;
+            margin-top:6px;
         }
 
-        .subtitle {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.95rem;
-            font-weight: 300;
+        .login-heading {
+            margin-bottom:2rem; padding-bottom:1.5rem;
+            border-bottom: 1px solid var(--border);
         }
-
-        /* ── INPUTS ──────────────────────────────────────────────── */
-        .input-wrapper {
-            position: relative;
-            margin-bottom: 2rem;
+        .login-heading h2 {
+            font-family:var(--font-d);
+            font-size:22px; font-weight:400;
+            color:#fafaf7; letter-spacing:-.01em;
         }
+        .login-heading p { font-size:12px; margin-top:4px; }
 
+        /* Alertas */
+        .alert {
+            display:flex; align-items:flex-start; gap:10px;
+            padding:12px 14px; border-radius:8px; font-size:13px;
+            border:1px solid transparent; margin-bottom:1.5rem;
+            animation: alertIn .4s var(--ease-out) both;
+        }
+        .alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+        .alert-error   { color:var(--danger);  background:rgba(224,122,107,.10); border-color:rgba(224,122,107,.25); border-left:2px solid var(--danger); }
+        .alert-success { color:var(--success); background:rgba(110,193,154,.10); border-color:rgba(110,193,154,.25); border-left:2px solid var(--success); }
+        .alert-warning { color:var(--warning); background:rgba(226,184,107,.10); border-color:rgba(226,184,107,.25); border-left:2px solid var(--warning); }
+
+        /* Inputs */
+        .input-wrapper { position:relative; margin-bottom:1.75rem; }
         .input-field {
-            width: 100%;
-            padding: 0.8rem 0;
-            padding-right: 2rem;
-            background: transparent !important;
-            border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff !important;
-            font-size: 1rem;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.3s;
-            caret-color: #27C2C9;
+            width:100%; padding:.85rem 0; padding-right:2rem;
+            background:transparent !important;
+            border:none; border-bottom:1px solid rgba(255,255,255,.18);
+            color:var(--text) !important;
+            font-size:14px; font-family:var(--font);
+            outline:none;
+            transition: border-color .25s;
         }
-
         .input-field:-webkit-autofill,
         .input-field:-webkit-autofill:hover,
-        .input-field:-webkit-autofill:focus,
-        .input-field:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 1000px #000 inset !important;
-            -webkit-text-fill-color: #fff !important;
-            caret-color: #27C2C9;
+        .input-field:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text) !important;
+            caret-color: var(--accent);
             transition: background-color 9999s ease;
         }
 
-        .input-field:focus {
-            border-bottom-color: #27C2C9;
-        }
-
         .input-label {
-            position: absolute;
-            left: 0;
-            top: 0.8rem;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 1rem;
-            transition: all 0.25s ease;
-            pointer-events: none;
+            position:absolute; left:0; top:.85rem;
+            font-size:13px; letter-spacing:.02em;
+            transition: all .22s var(--ease-out);
+            pointer-events:none;
         }
-
         .input-field:focus ~ .input-label,
         .input-field:not(:placeholder-shown) ~ .input-label,
         .input-field:-webkit-autofill ~ .input-label,
         .input-wrapper.has-value .input-label {
-            top: -1rem;
-            font-size: 0.8rem;
-            color: #27C2C9;
+            top:-.9rem; font-size:10px;
+            letter-spacing:.14em;
+            text-transform:uppercase; font-weight:600;
         }
 
-        /* ── BOTÓN OJO ───────────────────────────────────────────── */
         .toggle-pass {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.2rem;
-            color: rgba(255, 255, 255, 0.35);
-            transition: color 0.25s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position:absolute; right:0; top:50%; transform:translateY(-50%);
+            background:none; border:none; cursor:pointer;
+            padding:.2rem; transition:color .2s; display:flex;
         }
-
-        .toggle-pass:hover { color: #27C2C9; }
-
         .toggle-pass svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            pointer-events: none;
+            width:16px; height:16px; fill:none;
+            stroke:currentColor; stroke-width:2;
+            stroke-linecap:round; stroke-linejoin:round;
         }
 
-        /* ── BOTÓN INGRESAR ──────────────────────────────────────── */
+        /* Botón ingresar */
         .login-button {
-            width: 100%;
-            padding: 1rem;
-            background: transparent;
-            border: 1px solid #27C2C9;
-            border-radius: 30px;
-            color: #27C2C9;
-            font-size: 1rem;
-            font-weight: 400;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 2rem 0;
+            width:100%; padding:.95rem;
+            border-radius:999px;
+            color:#0a0a0b;
+            font-size:11px; font-weight:700;
+            font-family:var(--font);
+            letter-spacing:.2em; text-transform:uppercase;
+            cursor:pointer; border:none;
+            transition: filter .2s, box-shadow .2s, transform .1s;
+            margin: 1.75rem 0 1rem;
         }
+        .login-button:hover  { filter:brightness(1.12); }
+        .login-button:active { transform:scale(.98); }
 
-        .login-button:hover {
-            background: rgba(39, 194, 201, 0.1);
-            box-shadow: 0 0 20px rgba(39, 194, 201, 0.2);
-            color: #fff;
-        }
-
-        .login-button:active { transform: scale(0.98); }
-
-        /* ── ALERTAS ─────────────────────────────────────────────── */
-        .alert {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.85rem 1rem;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            line-height: 1.4;
-            margin-bottom: 1.5rem;
-            animation: alertIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-
-        .alert-icon { font-size: 1rem; flex-shrink: 0; }
-
-        .alert-error {
-            color: #ff5c6c;
-            background: rgba(255, 92, 108, 0.1);
-            border: 1px solid rgba(255, 92, 108, 0.3);
-            border-left: 3px solid #ff5c6c;
-        }
-
-        .alert-success {
-            color: #27C2C9;
-            background: rgba(39, 194, 201, 0.1);
-            border: 1px solid rgba(39, 194, 201, 0.3);
-            border-left: 3px solid #27C2C9;
-        }
-
-        .alert-warning {
-            color: #f0a500;
-            background: rgba(240, 165, 0, 0.1);
-            border: 1px solid rgba(240, 165, 0, 0.3);
-            border-left: 3px solid #f0a500;
-        }
-
-        /* ── FOOTER ──────────────────────────────────────────────── */
-        .footer-links { text-align: center; }
-
+        .footer-links { text-align:center; }
         .footer-link {
-            color: rgba(255, 255, 255, 0.3);
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: color 0.3s;
+            font-size:11px; letter-spacing:.06em;
+            transition: color .2s;
         }
 
-        .footer-link:hover { color: #27C2C9; }
+        /* Animaciones */
+        @keyframes slideInLeft  { from{opacity:0;transform:translateX(-32px);} to{opacity:1;transform:translateX(0);} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(32px);}  to{opacity:1;transform:translateX(0);} }
+        @keyframes fadeUp       { from{opacity:0;transform:translateY(16px);}  to{opacity:1;transform:translateY(0);} }
+        @keyframes alertIn      { from{opacity:0;transform:translateY(-6px);}  to{opacity:1;transform:translateY(0);} }
 
-        /* ── ANIMACIONES ─────────────────────────────────────────── */
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-40px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(40px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes alertIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── RESPONSIVE ──────────────────────────────────────────── */
+        /* ══ RESPONSIVE ══ */
         @media (max-width: 768px) {
-            body { overflow: auto; }
-            .main-container { flex-direction: column; }
-            .image-side, .form-side {
-                width: 100%;
-                height: 50vh;
-                animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-            }
-            .login-box { padding: 2rem; animation: none; }
+            body { overflow:auto; height:auto; min-height:100vh; }
+            .main-container { flex-direction:column; height:auto; min-height:100vh; }
+            .image-side { height:45vh; flex:none; }
+            .form-side  { flex:1; min-height:55vh; }
+            .btn-toggle-bg { bottom:14px; right:14px; }
+            .login-box { padding:2rem 1.5rem; }
         }
     </style>
 </head>
@@ -281,78 +254,82 @@
 <div class="main-container">
 
     <!-- IMAGEN -->
-    <div class="image-side">
-        <img th:src="@{/img/login-bg.png}"
-             src="/img/login-bg.png"
-             alt="Mi Óptica"
-             class="full-image">
+    <div class="image-side" id="imageSide">
+       <img th:src="@{/img/login-bg alernative.png}" src="/img/login-bg alernative.png"
+     alt="Mi Óptica" class="full-image img-a" id="imgA">
+<img th:src="@{/img/login-bg.png}" src="/img/login-bg.png"
+     alt="Mi Óptica Alternativo" class="full-image img-b" id="imgB">
+
+        <button class="btn-toggle-bg" id="btnToggleBg" title="Cambiar imagen de fondo">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="14" rx="2"/>
+                <path d="M3 9l4-4 4 4 4-4 4 4"/>
+            </svg>
+            <span id="toggleLabel">Cambiar fondo</span>
+        </button>
     </div>
 
     <!-- FORMULARIO -->
-    <div class="form-side">
+    <div class="form-side" id="formSide">
         <div class="login-box">
 
-            <div class="login-header">
-                <h2>Iniciar sesión</h2>
-                <p class="subtitle">Ingresa tus credenciales</p>
+            <!-- OJO ANIMADO -->
+            <div class="login-brand">
+                <div class="eye-container" id="eyeContainer">
+                    <svg class="eye-svg" id="eyeSvg" viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg">
+                        <clipPath id="eyeClip">
+                            <ellipse cx="32" cy="20" rx="30" ry="18"/>
+                        </clipPath>
+                        <path class="eye-outline" id="eyeOutline"
+                            d="M2 20 C 10 4, 54 4, 62 20 C 54 36, 10 36, 2 20 Z"/>
+                        <circle class="eye-iris" id="eyeIris" cx="32" cy="20" r="9"/>
+                        <circle id="eyePupil" cx="32" cy="20" r="3.5"/>
+                        <rect id="eyeLid" x="1" y="-40" width="62" height="40"
+                              clip-path="url(#eyeClip)"/>
+                    </svg>
+                </div>
+                <div class="login-brand-title" id="brandTitle">Mi Óptica</div>
+                <div class="login-brand-sub" id="brandSub">mi mejor visión</div>
             </div>
 
-            <!-- Mensajes Thymeleaf -->
+            <div class="login-heading" id="loginHeading">
+                <h2>Iniciar sesión</h2>
+                <p id="loginSubtext">Ingresa tus credenciales</p>
+            </div>
+
+            <!-- Mensajes -->
             <div th:if="${mensajeError}" class="alert alert-error">
                 <span class="alert-icon">&#9888;</span>
                 <span th:text="${mensajeError}"></span>
             </div>
-
             <div th:if="${mensajeLogout}" class="alert alert-success">
                 <span class="alert-icon">&#10003;</span>
                 <span th:text="${mensajeLogout}"></span>
             </div>
-
             <div th:if="${mensajeExpired}" class="alert alert-warning">
                 <span class="alert-icon">&#9200;</span>
                 <span th:text="${mensajeExpired}"></span>
             </div>
 
             <form th:action="@{/login}" method="post" autocomplete="on" id="loginForm">
-
-                <!--
-                    Con CookieCsrfTokenRepository el token viene de la cookie XSRF-TOKEN.
-                    Thymeleaf lo sigue inyectando igual con th:name y th:value.
-                    El JS lo refresca desde la cookie antes de cada submit por si acaso.
-                -->
-                <input type="hidden"
-                       id="csrfInput"
+                <input type="hidden" id="csrfInput"
                        th:name="${_csrf.parameterName}"
                        th:value="${_csrf.token}"/>
 
-                <!-- Usuario -->
                 <div class="input-wrapper" id="wrapperUser">
-                    <input type="text"
-                           id="username"
-                           name="username"
-                           class="input-field"
-                           placeholder=" "
-                           required
-                           autofocus
-                           autocomplete="username">
-                    <label for="username" class="input-label">Usuario</label>
+                    <input type="text" id="username" name="username"
+                           class="input-field" placeholder=" "
+                           required autofocus autocomplete="username">
+                    <label for="username" class="input-label" id="labelUser">Usuario</label>
                 </div>
 
-                <!-- Contraseña + ojo -->
                 <div class="input-wrapper" id="wrapperPass">
-                    <input type="password"
-                           id="password"
-                           name="password"
-                           class="input-field"
-                           placeholder=" "
-                           required
-                           autocomplete="current-password">
-                    <label for="password" class="input-label">Contraseña</label>
-                    <button type="button"
-                            class="toggle-pass"
-                            id="togglePass"
-                            tabindex="-1"
-                            aria-label="Mostrar contraseña">
+                    <input type="password" id="password" name="password"
+                           class="input-field" placeholder=" "
+                           required autocomplete="current-password">
+                    <label for="password" class="input-label" id="labelPass">Contraseña</label>
+                    <button type="button" class="toggle-pass" id="togglePass"
+                            tabindex="-1" aria-label="Mostrar contraseña">
                         <svg id="iconoOjo" viewBox="0 0 24 24">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
@@ -360,78 +337,248 @@
                     </button>
                 </div>
 
-                <button type="submit" class="login-button">Ingresar</button>
-
+                <button type="submit" class="login-button" id="loginBtn">Ingresar</button>
             </form>
 
             <div class="footer-links">
-                <a href="#" class="footer-link"
+                <a href="#" class="footer-link" id="footerLink"
                    onclick="alert('Contacta al administrador del sistema.'); return false;">
                     ¿Olvidaste tu contraseña?
                 </a>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
-    /* ── TOGGLE OJO ─────────────────────────────────────────────── */
-    const toggleBtn = document.getElementById('togglePass');
-    const passInput = document.getElementById('password');
-    const iconoOjo  = document.getElementById('iconoOjo');
+/* ════════════════════════════════════════
+   TEMAS
+   ════════════════════════════════════════ */
+const TEMAS = {
+    gold: {
+        accent:      '#d4b27a',
+        accentGlow:  'rgba(212,178,122,.18)',
+        bg:          '#0a0a0b',
+        bg1:         '#111114',
+        textMuted:   '#74716a',
+        border:      'rgba(255,255,255,.08)',
+        borderH:     'rgba(255,255,255,.18)',
+    },
+    blue: {
+        accent:      '#27c2f5',
+        accentGlow:  'rgba(39,194,245,.18)',
+        bg:          '#040d1a',
+        bg1:         '#040d1a',
+        textMuted:   '#4a7a9b',
+        border:      'rgba(39,194,245,.10)',
+        borderH:     'rgba(39,194,245,.28)',
+    }
+};
 
-    const SVG_ABIERTO = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    const SVG_CERRADO = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>' +
-                        '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>' +
-                        '<line x1="1" y1="1" x2="23" y2="23"/>';
+/* Referencias DOM */
+const formSide     = document.getElementById('formSide');
+const imageSide    = document.getElementById('imageSide');
+const btnToggleBg  = document.getElementById('btnToggleBg');
+const toggleLabel  = document.getElementById('toggleLabel');
+const eyeOutline   = document.getElementById('eyeOutline');
+const eyeIris      = document.getElementById('eyeIris');
+const eyePupil     = document.getElementById('eyePupil');
+const eyeLid       = document.getElementById('eyeLid');
+const eyeSvg       = document.getElementById('eyeSvg');
+const brandTitle   = document.getElementById('brandTitle');
+const brandSub     = document.getElementById('brandSub');
+const loginHeading = document.getElementById('loginHeading');
+const loginSubtext = document.getElementById('loginSubtext');
+const loginBtn     = document.getElementById('loginBtn');
+const footerLink   = document.getElementById('footerLink');
+const labelUser    = document.getElementById('labelUser');
+const labelPass    = document.getElementById('labelPass');
+const togglePass   = document.getElementById('togglePass');
+const inputs       = document.querySelectorAll('.input-field');
 
-    toggleBtn.addEventListener('click', function () {
-        if (passInput.type === 'password') {
-            passInput.type = 'text';
-            iconoOjo.innerHTML = SVG_CERRADO;
-            toggleBtn.setAttribute('aria-label', 'Ocultar contraseña');
-        } else {
-            passInput.type = 'password';
-            iconoOjo.innerHTML = SVG_ABIERTO;
-            toggleBtn.setAttribute('aria-label', 'Mostrar contraseña');
-        }
-    });
+let isAlt = localStorage.getItem('loginBgAlt') === 'true';
 
-    /* ── FIX AUTOFILL: subir labels cuando el browser rellena ───── */
-    function checkAutofill() {
-        if (document.getElementById('username').value.length > 0)
-            document.getElementById('wrapperUser').classList.add('has-value');
-        if (document.getElementById('password').value.length > 0)
-            document.getElementById('wrapperPass').classList.add('has-value');
+function applyTheme() {
+    const t = isAlt ? TEMAS.blue : TEMAS.gold;
+
+    /* Imagen lateral */
+    imageSide.classList.toggle('alt', isAlt);
+    toggleLabel.textContent = isAlt ? 'Fondo original' : 'Cambiar fondo';
+
+    /* Body */
+    document.body.style.backgroundColor = t.bg;
+
+    /* Form side */
+    formSide.style.backgroundColor = t.bg1;
+    formSide.style.borderLeftColor  = t.border;
+
+    /* Gradiente superior del form */
+    formSide.style.setProperty('--glow-before',
+        `radial-gradient(ellipse 70% 50% at 50% -10%, ${t.accentGlow}, transparent 60%)`);
+
+    /* Aplicar el ::before via un elemento interno si no funciona */
+    const pseudo = formSide.querySelector('.form-glow');
+    if (pseudo) {
+        pseudo.style.background = `radial-gradient(ellipse 70% 50% at 50% -10%, ${t.accentGlow}, transparent 60%)`;
     }
 
-    checkAutofill();
-    setTimeout(checkAutofill, 300);
-    setTimeout(checkAutofill, 800);
+    /* Ojo SVG */
+    const eyeFilter = `drop-shadow(0 0 8px ${t.accentGlow})`;
+    eyeSvg.style.filter        = eyeFilter;
+    eyeOutline.style.stroke    = t.accent;
+    eyeIris.style.stroke       = t.accent;
+    eyePupil.style.fill        = t.accent;
+    eyeLid.style.fill          = t.bg1;
+    eyeLid.setAttribute('fill', t.bg1);
 
-    document.getElementById('username').addEventListener('input', function () {
-        document.getElementById('wrapperUser').classList.toggle('has-value', this.value.length > 0);
-    });
-    document.getElementById('password').addEventListener('input', function () {
-        document.getElementById('wrapperPass').classList.toggle('has-value', this.value.length > 0);
+    /* Marca */
+    brandTitle.style.setProperty('--after-color', t.accent);
+    brandSub.style.color = t.accent;
+
+    /* Hack para ::after del título */
+    let styleTag = document.getElementById('dynamicStyle');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'dynamicStyle';
+        document.head.appendChild(styleTag);
+    }
+    styleTag.textContent = `
+        .login-brand-title::after { color: ${t.accent} !important; }
+        .input-field:focus { border-bottom-color: ${t.accent} !important; caret-color: ${t.accent}; }
+        .input-field:focus ~ .input-label,
+        .input-field:not(:placeholder-shown) ~ .input-label,
+        .input-wrapper.has-value .input-label { color: ${t.accent} !important; }
+        .toggle-pass:hover { color: ${t.accent} !important; }
+        .footer-link:hover { color: ${t.accent} !important; }
+        .form-side::before { background: radial-gradient(ellipse 70% 50% at 50% -10%, ${t.accentGlow}, transparent 60%) !important; }
+        .input-field:-webkit-autofill,
+        .input-field:-webkit-autofill:hover,
+        .input-field:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px ${t.bg1} inset !important;
+        }
+    `;
+
+    /* Inputs borde y color */
+    inputs.forEach(inp => {
+        inp.style.borderBottomColor = t.borderH;
+        inp.style.caretColor = t.accent;
     });
 
-    /* ── REFRESCO DE CSRF ───────────────────────────────────────── */
-    /*
-     * Con XorCsrfTokenRequestAttributeHandler + CookieCsrfTokenRepository,
-     * Thymeleaf ya inyecta el token correcto en el input hidden (th:value).
-     * NO se debe sobreescribir con la cookie cruda (XSRF-TOKEN), porque
-     * esa cookie contiene el valor RAW sin el XOR aplicado, y Spring Security
-     * esperará el valor XOR-eado que Thymeleaf pone automáticamente.
-     *
-     * Por eso este bloque simplemente NO toca el input; el formulario ya
-     * tiene el token correcto desde el primer intento.
-     */
-    document.getElementById('loginForm').addEventListener('submit', function () {
-        // Token ya está correcto gracias a Thymeleaf + XorCsrfTokenRequestAttributeHandler.
-        // No se modifica.
-    });
+    /* Labels muted */
+    labelUser.style.color  = t.textMuted;
+    labelPass.style.color  = t.textMuted;
+    togglePass.style.color = t.textMuted;
+    loginSubtext.style.color = t.textMuted;
+    loginHeading.style.borderBottomColor = t.border;
+    footerLink.style.color = t.textMuted;
+
+    /* Botón */
+    loginBtn.style.backgroundColor = t.accent;
+    loginBtn.style.boxShadow = `0 8px 24px -10px ${t.accentGlow}`;
+}
+
+applyTheme();
+
+btnToggleBg.addEventListener('click', function() {
+    isAlt = !isAlt;
+    localStorage.setItem('loginBgAlt', isAlt);
+    applyTheme();
+});
+
+/* ════════════════════════════════════════
+   TOGGLE CONTRASEÑA
+   ════════════════════════════════════════ */
+const passInput = document.getElementById('password');
+const iconoOjo  = document.getElementById('iconoOjo');
+const SVG_OPEN   = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+const SVG_CLOSED = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+document.getElementById('togglePass').addEventListener('click', function() {
+    if (passInput.type === 'password') {
+        passInput.type = 'text';
+        iconoOjo.innerHTML = SVG_CLOSED;
+        this.setAttribute('aria-label','Ocultar contraseña');
+    } else {
+        passInput.type = 'password';
+        iconoOjo.innerHTML = SVG_OPEN;
+        this.setAttribute('aria-label','Mostrar contraseña');
+    }
+});
+
+/* ════════════════════════════════════════
+   AUTOFILL FIX
+   ════════════════════════════════════════ */
+function checkAutofill() {
+    if (document.getElementById('username').value.length > 0)
+        document.getElementById('wrapperUser').classList.add('has-value');
+    if (document.getElementById('password').value.length > 0)
+        document.getElementById('wrapperPass').classList.add('has-value');
+}
+checkAutofill();
+setTimeout(checkAutofill, 300);
+setTimeout(checkAutofill, 800);
+
+document.getElementById('username').addEventListener('input', function() {
+    document.getElementById('wrapperUser').classList.toggle('has-value', this.value.length > 0);
+});
+document.getElementById('password').addEventListener('input', function() {
+    document.getElementById('wrapperPass').classList.toggle('has-value', this.value.length > 0);
+});
+
+/* ════════════════════════════════════════
+   OJO QUE SIGUE EL MOUSE
+   ════════════════════════════════════════ */
+const eyeContainer = document.getElementById('eyeContainer');
+const EYE_CX = 32, EYE_CY = 20, MAX_MOVE = 5;
+
+document.addEventListener('mousemove', function(e) {
+    const rect    = eyeContainer.getBoundingClientRect();
+    const centerX = rect.left + rect.width  / 2;
+    const centerY = rect.top  + rect.height / 2;
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+    const dist    = Math.sqrt(dx*dx + dy*dy);
+    const maxDist = Math.max(window.innerWidth, window.innerHeight) * 0.4;
+    const factor  = Math.min(dist / maxDist, 1);
+    const angle   = Math.atan2(dy, dx);
+    const mx = Math.cos(angle) * MAX_MOVE * factor;
+    const my = Math.sin(angle) * MAX_MOVE * factor;
+
+    eyePupil.setAttribute('cx', EYE_CX + mx);
+    eyePupil.setAttribute('cy', EYE_CY + my);
+    eyeIris.setAttribute('cx',  EYE_CX + mx * 0.5);
+    eyeIris.setAttribute('cy',  EYE_CY + my * 0.5);
+});
+
+/* ════════════════════════════════════════
+   PARPADEO ALEATORIO
+   ════════════════════════════════════════ */
+function blink() {
+    let pos = -40;
+    const down = setInterval(() => {
+        pos += 4;
+        eyeLid.setAttribute('y', pos);
+        if (pos >= 2) {
+            clearInterval(down);
+            setTimeout(() => {
+                const up = setInterval(() => {
+                    pos -= 4;
+                    eyeLid.setAttribute('y', pos);
+                    if (pos <= -40) {
+                        clearInterval(up);
+                        eyeLid.setAttribute('y', -40);
+                        /* Re-aplicar color del párpado por si el parpadeo lo resetea */
+                        const t = isAlt ? TEMAS.blue : TEMAS.gold;
+                        eyeLid.style.fill = t.bg1;
+                        eyeLid.setAttribute('fill', t.bg1);
+                    }
+                }, 12);
+            }, 80);
+        }
+    }, 12);
+    setTimeout(blink, 2500 + Math.random() * 3500);
+}
+setTimeout(blink, 1500 + Math.random() * 2000);
 </script>
 
 </body>

@@ -515,13 +515,21 @@ h4{ font-size:18px; }
   position:relative;
 }
 .stat-icon::before{
-  content:""; width:22px; height:22px;
-  background:currentColor;
-  -webkit-mask:center/contain no-repeat;
-          mask:center/contain no-repeat;
-  -webkit-mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/></svg>");
-          mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/></svg>");
+  display:none;
 }
+.stat-icon svg{
+  width:22px; height:22px;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:transform var(--t-med) var(--ease-out), opacity var(--t-fast);
+}
+.stat-card:hover .stat-icon svg{ transform:scale(1.18); }
+.acceso-rapido .stat-icon svg{ opacity:.7; }
+.acceso-rapido:hover .stat-icon{ box-shadow:0 0 0 3px var(--gold-glow); }
+.acceso-rapido:hover .stat-icon svg{ transform:scale(1.22); opacity:1; }
 .stat-icon.turquesa{ color:var(--gold);    background:var(--gold-glow);    border-color:transparent; }
 .stat-icon.verde   { color:var(--success); background:var(--success-dim); border-color:transparent; }
 .stat-icon.amarillo{ color:var(--warning); background:var(--warning-dim); border-color:transparent; }

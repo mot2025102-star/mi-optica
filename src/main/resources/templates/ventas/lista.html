@@ -26,21 +26,21 @@
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon verde"></div>
+                <div class="stat-icon verde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="'Q' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">Q0.00</div>
                     <div class="stat-label">Total período</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon turquesa"></div>
+                <div class="stat-icon turquesa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${cantPeriodo}">0</div>
                     <div class="stat-label">Facturas período</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo"></div>
+                <div class="stat-icon amarillo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${cantPeriodo > 0} ? 'Q' + ${#numbers.formatDecimal(totalPeriodo / cantPeriodo, 1,'COMMA',2,'POINT')} : 'Q0.00'">Q0.00</div>
                     <div class="stat-label">Promedio por venta</div>
@@ -72,7 +72,7 @@
                         </select>
                     </div>
                     <div style="display:flex;gap:8px;align-items:flex-end">
-                        <button type="submit" class="btn btn-primary"></button>
+                        <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Filtrar</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
                     </div>
