@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Mi Perfil')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Mi Perfil</div>
+            <div class="topbar-sub">Información de tu cuenta</div>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div th:if="${mensajeOk}"    class="alert alert-success"><span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert-danger"> <span th:text="${mensajeError}"></span></div>
+
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+
+            <!-- ── FOTO DE PERFIL ─────────────────────────────── -->
+            <div class="card">
+                <div class="card-body" style="display:flex;flex-direction:column;align-items:center;padding:32px 24px;gap:20px">
+
+                    <!-- Avatar -->
+                    <div id="avatarWrap" style="position:relative;width:140px;height:140px">
+                        <!-- Si tiene foto -->
+                        <img th:if="${usuario.fotoPerfil != null and !#strings.isEmpty(usuario.fotoPerfil)}"
+                             th:src="@{'/img/perfiles/' + ${usuario.fotoPerfil}}"
+                             id="avatarImg"
+                             style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:3px solid var(--gold)"
+                             alt="Foto de perfil">
+                        <!-- Si NO tiene foto: iniciales -->
+                        <div th:unless="${usuario.fotoPerfil != null and !#strings.isEmpty(usuario.fotoPerfil)}"
+                             id="avatarImg"
+                             style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-deep));display:grid;place-items:center;border:3px solid var(--gold)">
+                            <span style="font-family:var(--font-display);font-size:52px;font-weight:500;color:#0a0a0b"
+                                  th:text="${#strings.toUpperCase(#strings.substring(usuario.nombreCompleto,0,1))}">U</span>
+                        </div>
+
+                        <!-- Botón de cámara encima -->
+                        <label for="inputFoto"
+                               title="Cambiar foto"
+                               style="position:absolute;bottom:4px;right:4px;
+                                      width:36px;height:36px;border-radius:50%;
+                                      background:var(--gold);color:#0a0a0b;
+                                      display:grid;place-items:center;cursor:pointer;
+                                      border:2px solid var(--bg-elev-1);
+                                      transition:transform .15s">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                        </label>
+                    </div>
+
+                    <!-- Nombre y rol -->
+                    <div style="text-align:center">
+                        <div style="font-family:var(--font-display);font-size:20px;font-weight:500;color:var(--texto-titulo)"
+                             th:text="${usuario.nombreCompleto}"></div>
+                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.18em;
+                                    color:var(--gold);margin-top:4px"
+                             th:text="${usuario.rol.nombre}"></div>
+                    </div>
+
+                    <!-- Badge activo -->
+                    <span th:if="${usuario.activo}"  class="badge badge-success">Cuenta activa</span>
+                    <span th:unless="${usuario.activo}" class="badge badge-danger">Cuenta inactiva</span>
+
+                    <!-- Form subida de foto (oculto, se activa con el label de cámara) -->
+                    <form th:action="@{/perfil/foto}" method="post" enctype="multipart/form-data"
+                          id="formFoto" style="width:100%">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="file" id="inputFoto" name="foto"
+                               accept="image/jpeg,image/png,image/webp"
+                               style="display:none"
+                               onchange="previewYEnviar(this)">
+                    </form>
+
+                    <div style="font-size:11px;color:var(--text-muted);text-align:center">
+                        JPG, PNG o WEBP · máx. 2 MB
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── DATOS DEL USUARIO ──────────────────────────── -->
+            <div style="display:flex;flex-direction:column;gap:16px">
+
+                <!-- Información personal -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Información Personal</div>
+                    </div>
+                    <div class="card-body" style="padding:20px">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+                            <div class="form-group">
+                                <label class="form-label">Nombre completo</label>
+                                <div class="perfil-campo" th:text="${usuario.nombreCompleto}"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Usuario (login)</label>
+                                <div class="perfil-campo mono" th:text="${usuario.username}"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Puesto</label>
+                                <div class="perfil-campo"
+                                     th:text="${usuario.puesto != null and !#strings.isEmpty(usuario.puesto)} ? ${usuario.puesto} : '—'">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Rol</label>
+                                <div class="perfil-campo" th:text="${usuario.rol.nombre}"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sucursal -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Sucursal Asignada</div>
+                    </div>
+                    <div class="card-body" style="padding:20px">
+                        <div th:if="${usuario.sucursal != null}"
+                             style="display:flex;align-items:center;gap:16px">
+                            <div style="width:48px;height:48px;border-radius:var(--r-sm);
+                                        background:var(--gold-glow);border:1px solid var(--gold-glow);
+                                        display:grid;place-items:center;flex-shrink:0">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                     stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9 22 9 12 15 12 15 22"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:16px;color:var(--texto-titulo)"
+                                     th:text="${usuario.sucursal.nombre}"></div>
+                                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">
+                                    Sucursal asignada por el administrador
+                                </div>
+                            </div>
+                        </div>
+                        <div th:unless="${usuario.sucursal != null}"
+                             style="color:var(--text-muted);font-size:13px">
+                            Sin sucursal asignada
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nota informativa -->
+                <div style="padding:14px 18px;border-radius:var(--r-sm);
+                            background:rgba(212,178,122,.06);border:1px solid rgba(212,178,122,.2);
+                            font-size:13px;color:var(--text-muted);display:flex;gap:10px;align-items:flex-start">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         style="flex-shrink:0;margin-top:1px">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>
+                        Los datos de tu perfil son administrados por el administrador del sistema.
+                        Si necesitas actualizar tu información, comunícate con él.
+                        La única acción disponible para ti es cambiar tu foto de perfil.
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.perfil-campo {
+    padding: 10px 14px;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-size: 13px;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+}
+.perfil-campo.mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+}
+#avatarWrap label:hover {
+    transform: scale(1.12);
+}
+</style>
+
+<script>
+function previewYEnviar(input) {
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+
+    // Preview instantáneo
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const wrap = document.getElementById('avatarWrap');
+        const oldImg = document.getElementById('avatarImg');
+
+        // Si era un div de iniciales, lo reemplazamos por img
+        if (oldImg.tagName === 'DIV') {
+            const img = document.createElement('img');
+            img.id = 'avatarImg';
+            img.style.cssText = 'width:140px;height:140px;border-radius:50%;object-fit:cover;border:3px solid var(--gold)';
+            img.alt = 'Foto de perfil';
+            wrap.insertBefore(img, oldImg);
+            oldImg.remove();
+            img.src = e.target.result;
+        } else {
+            oldImg.src = e.target.result;
+        }
+    };
+    reader.readAsDataURL(file);
+
+    // Enviar el formulario automáticamente
+    document.getElementById('formFoto').submit();
+}
+</script>
+
+</body>
+</html>

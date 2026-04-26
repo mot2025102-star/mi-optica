@@ -84,9 +84,27 @@
                             <!-- Nombre + avatar -->
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px">
-                                    <div style="width:38px;height:38px;border-radius:50%;background:rgba(39,194,201,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
-                                        <span th:text="${u.rol.idRol == 1 ? '' : (u.rol.idRol == 2 ? '' : (u.rol.idRol == 3 ? '' : (u.rol.idRol == 4 ? '' : '')))}"></span>
+
+                                    <!-- Avatar: foto si existe, iniciales si no -->
+                                    <div style="width:38px;height:38px;border-radius:50%;
+                                                overflow:hidden;flex-shrink:0;position:relative;
+                                                background:rgba(212,178,122,0.15);
+                                                display:grid;place-items:center">
+
+                                        <!-- Con foto -->
+                                        <img th:if="${u.fotoPerfil != null and !#strings.isEmpty(u.fotoPerfil)}"
+                                             th:src="@{'/img/perfiles/' + ${u.fotoPerfil}}"
+                                             style="width:38px;height:38px;object-fit:cover;border-radius:50%"
+                                             alt="Foto">
+
+                                        <!-- Sin foto: inicial del nombre -->
+                                        <span th:unless="${u.fotoPerfil != null and !#strings.isEmpty(u.fotoPerfil)}"
+                                              style="font-family:var(--font-display);font-size:16px;
+                                                     font-weight:600;color:var(--gold);line-height:1"
+                                              th:text="${#strings.toUpperCase(#strings.substring(u.nombreCompleto,0,1))}">
+                                        </span>
                                     </div>
+
                                     <div class="fw-600" th:text="${u.nombreCompleto}"></div>
                                 </div>
                             </td>
@@ -119,7 +137,7 @@
                                 </span>
                             </td>
 
-                            <!-- Acciones — solo Admin accede a esta página -->
+                            <!-- Acciones -->
                             <td>
                                 <div class="d-flex gap-1">
                                     <a th:href="@{/usuarios/editar/{id}(id=${u.idUsuario})}"

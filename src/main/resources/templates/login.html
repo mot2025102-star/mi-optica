@@ -26,7 +26,6 @@
             --ease-out:    cubic-bezier(.16,1,.3,1);
             --font:        'Inter Tight', system-ui, sans-serif;
             --font-d:      'Fraunces', serif;
-            --t-theme:     0.5s cubic-bezier(.16,1,.3,1);
         }
 
         body {
@@ -34,7 +33,6 @@
             background-color: var(--bg);
             overflow: hidden;
             font-family: var(--font);
-            transition: background-color var(--t-theme);
         }
 
         /* ══ LAYOUT ══ */
@@ -53,60 +51,26 @@
             width: 100%; height: 100%;
             object-fit: cover;
             position: absolute; inset: 0;
-            transition: opacity .8s var(--ease-out), transform 1s var(--ease-out);
         }
-        .full-image.img-a { opacity:1; transform:scale(1);    z-index:1; }
-        .full-image.img-b { opacity:0; transform:scale(1.04); z-index:2; }
-        .image-side.alt .img-a { opacity:0; transform:scale(1.04); }
-        .image-side.alt .img-b { opacity:1; transform:scale(1); }
         .image-side::after {
             content:""; position:absolute; inset:0; z-index:3;
             background: linear-gradient(to right, transparent 65%, rgba(0,0,0,.55));
             pointer-events:none;
         }
 
-        /* Botón cambiar fondo */
-        .btn-toggle-bg {
-            position: absolute; bottom:24px; right:24px; z-index:10;
-            display: flex; align-items:center; gap:8px;
-            padding: 9px 16px;
-            background: rgba(10,10,11,.65);
-            border: 1px solid rgba(255,255,255,.18);
-            border-radius: 999px;
-            color: rgba(255,255,255,.6);
-            font-family: var(--font); font-size:10px;
-            font-weight:600; letter-spacing:.16em; text-transform:uppercase;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all .25s var(--ease-out);
-        }
-        .btn-toggle-bg:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            box-shadow: 0 0 0 1px var(--accent-glow);
-        }
-        .btn-toggle-bg svg {
-            width:13px; height:13px;
-            stroke:currentColor; stroke-width:1.8;
-            fill:none; stroke-linecap:round; stroke-linejoin:round;
-            transition: transform .5s var(--ease-out);
-        }
-        .btn-toggle-bg:hover svg { transform: rotate(180deg); }
-
         /* ══ FORMULARIO ══ */
         .form-side {
             flex: 1;
             display: flex; align-items:center; justify-content:center;
             position: relative;
-            animation: slideInRight .9s var(--ease-out) both;
-            /* fondo y borde controlados por JS directo */
+            background-color: var(--bg-1);
             border-left: 1px solid var(--border);
-            transition: background-color var(--t-theme), border-color var(--t-theme);
+            animation: slideInRight .9s var(--ease-out) both;
         }
         .form-side::before {
             content:""; position:absolute; inset:0;
+            background: radial-gradient(ellipse 70% 50% at 50% -10%, var(--accent-glow), transparent 60%);
             pointer-events:none;
-            /* el gradiente también lo controla JS */
         }
 
         .login-box {
@@ -123,24 +87,26 @@
             margin:0 auto 16px;
             cursor:none; position:relative;
         }
-        .eye-svg {
-            width:64px; height:64px;
-            overflow:visible;
-        }
+        .eye-svg { width:64px; height:64px; overflow:visible; }
         .eye-outline, .eye-iris {
             fill:none; stroke-width:1.4;
+            stroke: var(--accent);
             stroke-linecap:round; stroke-linejoin:round;
         }
+        #eyePupil  { fill: var(--accent); }
+        #eyeLid    { fill: var(--bg-1); }
 
         .login-brand-title {
             font-family: var(--font-d);
             font-size:28px; font-weight:400;
             color:#fafaf7; letter-spacing:-.02em; line-height:1.1;
         }
+        .login-brand-title::after { content:"."; color: var(--accent); }
         .login-brand-sub {
             font-size:9px; font-weight:500;
             text-transform:uppercase; letter-spacing:.28em;
             margin-top:6px;
+            color: var(--accent);
         }
 
         .login-heading {
@@ -152,7 +118,7 @@
             font-size:22px; font-weight:400;
             color:#fafaf7; letter-spacing:-.01em;
         }
-        .login-heading p { font-size:12px; margin-top:4px; }
+        .login-heading p { font-size:12px; margin-top:4px; color: var(--text-muted); }
 
         /* Alertas */
         .alert {
@@ -171,23 +137,25 @@
         .input-field {
             width:100%; padding:.85rem 0; padding-right:2rem;
             background:transparent !important;
-            border:none; border-bottom:1px solid rgba(255,255,255,.18);
+            border:none; border-bottom:1px solid var(--border-h);
             color:var(--text) !important;
             font-size:14px; font-family:var(--font);
-            outline:none;
+            outline:none; caret-color: var(--accent);
             transition: border-color .25s;
         }
+        .input-field:focus { border-bottom-color: var(--accent); }
         .input-field:-webkit-autofill,
         .input-field:-webkit-autofill:hover,
         .input-field:-webkit-autofill:focus {
             -webkit-text-fill-color: var(--text) !important;
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-1) inset !important;
             caret-color: var(--accent);
-            transition: background-color 9999s ease;
         }
 
         .input-label {
             position:absolute; left:0; top:.85rem;
             font-size:13px; letter-spacing:.02em;
+            color: var(--text-muted);
             transition: all .22s var(--ease-out);
             pointer-events:none;
         }
@@ -196,25 +164,29 @@
         .input-field:-webkit-autofill ~ .input-label,
         .input-wrapper.has-value .input-label {
             top:-.9rem; font-size:10px;
-            letter-spacing:.14em;
-            text-transform:uppercase; font-weight:600;
+            letter-spacing:.14em; text-transform:uppercase;
+            font-weight:600; color: var(--accent);
         }
 
         .toggle-pass {
             position:absolute; right:0; top:50%; transform:translateY(-50%);
             background:none; border:none; cursor:pointer;
-            padding:.2rem; transition:color .2s; display:flex;
+            padding:.2rem; color: var(--text-muted);
+            transition:color .2s; display:flex;
         }
+        .toggle-pass:hover { color: var(--accent); }
         .toggle-pass svg {
             width:16px; height:16px; fill:none;
             stroke:currentColor; stroke-width:2;
             stroke-linecap:round; stroke-linejoin:round;
         }
 
-        /* Botón ingresar */
+        /* Botón */
         .login-button {
             width:100%; padding:.95rem;
             border-radius:999px;
+            background-color: var(--accent);
+            box-shadow: 0 8px 24px -10px var(--accent-glow);
             color:#0a0a0b;
             font-size:11px; font-weight:700;
             font-family:var(--font);
@@ -229,8 +201,10 @@
         .footer-links { text-align:center; }
         .footer-link {
             font-size:11px; letter-spacing:.06em;
+            color: var(--text-muted);
             transition: color .2s;
         }
+        .footer-link:hover { color: var(--accent); }
 
         /* Animaciones */
         @keyframes slideInLeft  { from{opacity:0;transform:translateX(-32px);} to{opacity:1;transform:translateX(0);} }
@@ -244,8 +218,7 @@
             .main-container { flex-direction:column; height:auto; min-height:100vh; }
             .image-side { height:45vh; flex:none; }
             .form-side  { flex:1; min-height:55vh; }
-            .btn-toggle-bg { bottom:14px; right:14px; }
-            .login-box { padding:2rem 1.5rem; }
+            .login-box  { padding:2rem 1.5rem; }
         }
     </style>
 </head>
@@ -253,24 +226,15 @@
 
 <div class="main-container">
 
-    <!-- IMAGEN -->
-    <div class="image-side" id="imageSide">
-       <img th:src="@{/img/login-bg alernative.png}" src="/img/login-bg alernative.png"
-     alt="Mi Óptica" class="full-image img-a" id="imgA">
-<img th:src="@{/img/login-bg.png}" src="/img/login-bg.png"
-     alt="Mi Óptica Alternativo" class="full-image img-b" id="imgB">
-
-        <button class="btn-toggle-bg" id="btnToggleBg" title="Cambiar imagen de fondo">
-            <svg viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="14" rx="2"/>
-                <path d="M3 9l4-4 4 4 4-4 4 4"/>
-            </svg>
-            <span id="toggleLabel">Cambiar fondo</span>
-        </button>
+    <!-- IMAGEN FIJA -->
+    <div class="image-side">
+        <img th:src="@{/img/login-bg alernative.png}"
+             src="/img/login-bg alernative.png"
+             alt="Mi Óptica" class="full-image">
     </div>
 
     <!-- FORMULARIO -->
-    <div class="form-side" id="formSide">
+    <div class="form-side">
         <div class="login-box">
 
             <!-- OJO ANIMADO -->
@@ -288,13 +252,13 @@
                               clip-path="url(#eyeClip)"/>
                     </svg>
                 </div>
-                <div class="login-brand-title" id="brandTitle">Mi Óptica</div>
-                <div class="login-brand-sub" id="brandSub">mi mejor visión</div>
+                <div class="login-brand-title">Mi Óptica</div>
+                <div class="login-brand-sub">mi mejor visión</div>
             </div>
 
-            <div class="login-heading" id="loginHeading">
+            <div class="login-heading">
                 <h2>Iniciar sesión</h2>
-                <p id="loginSubtext">Ingresa tus credenciales</p>
+                <p>Ingresa tus credenciales</p>
             </div>
 
             <!-- Mensajes -->
@@ -312,22 +276,20 @@
             </div>
 
             <form th:action="@{/login}" method="post" autocomplete="on" id="loginForm">
-                <input type="hidden" id="csrfInput"
-                       th:name="${_csrf.parameterName}"
-                       th:value="${_csrf.token}"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <div class="input-wrapper" id="wrapperUser">
                     <input type="text" id="username" name="username"
                            class="input-field" placeholder=" "
                            required autofocus autocomplete="username">
-                    <label for="username" class="input-label" id="labelUser">Usuario</label>
+                    <label for="username" class="input-label">Usuario</label>
                 </div>
 
                 <div class="input-wrapper" id="wrapperPass">
                     <input type="password" id="password" name="password"
                            class="input-field" placeholder=" "
                            required autocomplete="current-password">
-                    <label for="password" class="input-label" id="labelPass">Contraseña</label>
+                    <label for="password" class="input-label">Contraseña</label>
                     <button type="button" class="toggle-pass" id="togglePass"
                             tabindex="-1" aria-label="Mostrar contraseña">
                         <svg id="iconoOjo" viewBox="0 0 24 24">
@@ -337,11 +299,11 @@
                     </button>
                 </div>
 
-                <button type="submit" class="login-button" id="loginBtn">Ingresar</button>
+                <button type="submit" class="login-button">Ingresar</button>
             </form>
 
             <div class="footer-links">
-                <a href="#" class="footer-link" id="footerLink"
+                <a href="#" class="footer-link"
                    onclick="alert('Contacta al administrador del sistema.'); return false;">
                     ¿Olvidaste tu contraseña?
                 </a>
@@ -351,140 +313,6 @@
 </div>
 
 <script>
-/* ════════════════════════════════════════
-   TEMAS
-   ════════════════════════════════════════ */
-const TEMAS = {
-    gold: {
-        accent:      '#d4b27a',
-        accentGlow:  'rgba(212,178,122,.18)',
-        bg:          '#0a0a0b',
-        bg1:         '#111114',
-        textMuted:   '#74716a',
-        border:      'rgba(255,255,255,.08)',
-        borderH:     'rgba(255,255,255,.18)',
-    },
-    blue: {
-        accent:      '#27c2f5',
-        accentGlow:  'rgba(39,194,245,.18)',
-        bg:          '#040d1a',
-        bg1:         '#040d1a',
-        textMuted:   '#4a7a9b',
-        border:      'rgba(39,194,245,.10)',
-        borderH:     'rgba(39,194,245,.28)',
-    }
-};
-
-/* Referencias DOM */
-const formSide     = document.getElementById('formSide');
-const imageSide    = document.getElementById('imageSide');
-const btnToggleBg  = document.getElementById('btnToggleBg');
-const toggleLabel  = document.getElementById('toggleLabel');
-const eyeOutline   = document.getElementById('eyeOutline');
-const eyeIris      = document.getElementById('eyeIris');
-const eyePupil     = document.getElementById('eyePupil');
-const eyeLid       = document.getElementById('eyeLid');
-const eyeSvg       = document.getElementById('eyeSvg');
-const brandTitle   = document.getElementById('brandTitle');
-const brandSub     = document.getElementById('brandSub');
-const loginHeading = document.getElementById('loginHeading');
-const loginSubtext = document.getElementById('loginSubtext');
-const loginBtn     = document.getElementById('loginBtn');
-const footerLink   = document.getElementById('footerLink');
-const labelUser    = document.getElementById('labelUser');
-const labelPass    = document.getElementById('labelPass');
-const togglePass   = document.getElementById('togglePass');
-const inputs       = document.querySelectorAll('.input-field');
-
-let isAlt = localStorage.getItem('loginBgAlt') === 'true';
-
-function applyTheme() {
-    const t = isAlt ? TEMAS.blue : TEMAS.gold;
-
-    /* Imagen lateral */
-    imageSide.classList.toggle('alt', isAlt);
-    toggleLabel.textContent = isAlt ? 'Fondo original' : 'Cambiar fondo';
-
-    /* Body */
-    document.body.style.backgroundColor = t.bg;
-
-    /* Form side */
-    formSide.style.backgroundColor = t.bg1;
-    formSide.style.borderLeftColor  = t.border;
-
-    /* Gradiente superior del form */
-    formSide.style.setProperty('--glow-before',
-        `radial-gradient(ellipse 70% 50% at 50% -10%, ${t.accentGlow}, transparent 60%)`);
-
-    /* Aplicar el ::before via un elemento interno si no funciona */
-    const pseudo = formSide.querySelector('.form-glow');
-    if (pseudo) {
-        pseudo.style.background = `radial-gradient(ellipse 70% 50% at 50% -10%, ${t.accentGlow}, transparent 60%)`;
-    }
-
-    /* Ojo SVG */
-    const eyeFilter = `drop-shadow(0 0 8px ${t.accentGlow})`;
-    eyeSvg.style.filter        = eyeFilter;
-    eyeOutline.style.stroke    = t.accent;
-    eyeIris.style.stroke       = t.accent;
-    eyePupil.style.fill        = t.accent;
-    eyeLid.style.fill          = t.bg1;
-    eyeLid.setAttribute('fill', t.bg1);
-
-    /* Marca */
-    brandTitle.style.setProperty('--after-color', t.accent);
-    brandSub.style.color = t.accent;
-
-    /* Hack para ::after del título */
-    let styleTag = document.getElementById('dynamicStyle');
-    if (!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = 'dynamicStyle';
-        document.head.appendChild(styleTag);
-    }
-    styleTag.textContent = `
-        .login-brand-title::after { color: ${t.accent} !important; }
-        .input-field:focus { border-bottom-color: ${t.accent} !important; caret-color: ${t.accent}; }
-        .input-field:focus ~ .input-label,
-        .input-field:not(:placeholder-shown) ~ .input-label,
-        .input-wrapper.has-value .input-label { color: ${t.accent} !important; }
-        .toggle-pass:hover { color: ${t.accent} !important; }
-        .footer-link:hover { color: ${t.accent} !important; }
-        .form-side::before { background: radial-gradient(ellipse 70% 50% at 50% -10%, ${t.accentGlow}, transparent 60%) !important; }
-        .input-field:-webkit-autofill,
-        .input-field:-webkit-autofill:hover,
-        .input-field:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0 1000px ${t.bg1} inset !important;
-        }
-    `;
-
-    /* Inputs borde y color */
-    inputs.forEach(inp => {
-        inp.style.borderBottomColor = t.borderH;
-        inp.style.caretColor = t.accent;
-    });
-
-    /* Labels muted */
-    labelUser.style.color  = t.textMuted;
-    labelPass.style.color  = t.textMuted;
-    togglePass.style.color = t.textMuted;
-    loginSubtext.style.color = t.textMuted;
-    loginHeading.style.borderBottomColor = t.border;
-    footerLink.style.color = t.textMuted;
-
-    /* Botón */
-    loginBtn.style.backgroundColor = t.accent;
-    loginBtn.style.boxShadow = `0 8px 24px -10px ${t.accentGlow}`;
-}
-
-applyTheme();
-
-btnToggleBg.addEventListener('click', function() {
-    isAlt = !isAlt;
-    localStorage.setItem('loginBgAlt', isAlt);
-    applyTheme();
-});
-
 /* ════════════════════════════════════════
    TOGGLE CONTRASEÑA
    ════════════════════════════════════════ */
@@ -529,6 +357,8 @@ document.getElementById('password').addEventListener('input', function() {
    OJO QUE SIGUE EL MOUSE
    ════════════════════════════════════════ */
 const eyeContainer = document.getElementById('eyeContainer');
+const eyePupil     = document.getElementById('eyePupil');
+const eyeIris      = document.getElementById('eyeIris');
 const EYE_CX = 32, EYE_CY = 20, MAX_MOVE = 5;
 
 document.addEventListener('mousemove', function(e) {
@@ -553,6 +383,8 @@ document.addEventListener('mousemove', function(e) {
 /* ════════════════════════════════════════
    PARPADEO ALEATORIO
    ════════════════════════════════════════ */
+const eyeLid = document.getElementById('eyeLid');
+
 function blink() {
     let pos = -40;
     const down = setInterval(() => {
@@ -567,10 +399,6 @@ function blink() {
                     if (pos <= -40) {
                         clearInterval(up);
                         eyeLid.setAttribute('y', -40);
-                        /* Re-aplicar color del párpado por si el parpadeo lo resetea */
-                        const t = isAlt ? TEMAS.blue : TEMAS.gold;
-                        eyeLid.style.fill = t.bg1;
-                        eyeLid.setAttribute('fill', t.bg1);
                     }
                 }, 12);
             }, 80);

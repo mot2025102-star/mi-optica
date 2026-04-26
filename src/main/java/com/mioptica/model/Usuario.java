@@ -44,6 +44,10 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
+    // ── NUEVO: foto de perfil ──
+    @Column(name = "foto_perfil", length = 200)
+    private String fotoPerfil;
+
     // Métodos de conveniencia
     public boolean esAdmin() {
         return rol != null && rol.getIdRol() == 1;
@@ -69,5 +73,3 @@ public class Usuario {
         return nombreCompleto;
     }
 }
-
-
