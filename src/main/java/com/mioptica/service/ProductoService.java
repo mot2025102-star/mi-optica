@@ -116,11 +116,10 @@ public class ProductoService {
  
                 BigDecimal existencia = parseBD(stockParams.get("existencia_" + sid));
  
-                // ── Para LENTE: costo y precio vienen del panel Precios ──
+                // Para LENTE: costo y precio vienen del panel Precios (campo directo del modelo)
                 BigDecimal costo;
                 BigDecimal precio;
                 if ("LENTE".equals(guardado.getTipoProducto())) {
-                    // Tomar del propio objeto guardado (viene del hidden hCostoL / hPrecioVentaL)
                     costo  = guardado.getCostoLente()       != null ? guardado.getCostoLente()       : parseBD(stockParams.get("costo_"  + sid));
                     precio = guardado.getPrecioVentaLente() != null ? guardado.getPrecioVentaLente() : parseBD(stockParams.get("precio_" + sid));
                 } else {
@@ -252,28 +251,42 @@ public class ProductoService {
     }
  
     // ─── Stock total por producto ─────────────────────────────────
-    // Para LENTE: usa stockLente del propio modelo (campo directo)
-    // Para otros: suma inventario por sucursales
+    // LENTE: primero inventario, si no hay usa stockLente del modelo
+    // Otros: suma existencias de inventario por sucursal
     public BigDecimal stockTotal(Integer idProducto) {
         return productoRepo.findById(idProducto).map(p -> {
             if ("LENTE".equals(p.getTipoProducto())) {
-                // Primero intentar desde inventario (más preciso si ya existe)
                 BigDecimal stockInv = inventarioRepo.findAll().stream()
                         .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
                         .map(Inventario::getExistencia)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-                // Si hay inventario registrado, usarlo; si no, usar stockLente
                 if (stockInv.compareTo(BigDecimal.ZERO) > 0) return stockInv;
-                return p.getStockLente() != null
-                        ? new BigDecimal(p.getStockLente())
-                        : BigDecimal.ZERO;
+                return p.getStockLente() != null ? new BigDecimal(p.getStockLente()) : BigDecimal.ZERO;
             }
-            // Para armazón, limpieza, accesorio: sumar desde inventario
             return inventarioRepo.findAll().stream()
                     .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
                     .map(Inventario::getExistencia)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }).orElse(BigDecimal.ZERO);
+    }
+ 
+    // ─── NUEVO: Precio de venta por producto (para lista) ─────────
+    // LENTE: usa precioVentaLente del modelo
+    // Otros: toma el precio de la primera sucursal en inventario
+    public BigDecimal precioVenta(Integer idProducto) {
+        return productoRepo.findById(idProducto).map(p -> {
+            if ("LENTE".equals(p.getTipoProducto())) {
+                return p.getPrecioVentaLente() != null ? p.getPrecioVentaLente() : null;
+            }
+            // Para armazón/limpieza/accesorio: precio de la primera sucursal
+            return inventarioRepo.findAll().stream()
+                    .filter(i -> i.getProducto().getIdProducto().equals(idProducto)
+                              && i.getPrecioVenta() != null
+                              && i.getPrecioVenta().compareTo(BigDecimal.ZERO) > 0)
+                    .map(Inventario::getPrecioVenta)
+                    .findFirst()
+                    .orElse(null);
+        }).orElse(null);
     }
 }
  
