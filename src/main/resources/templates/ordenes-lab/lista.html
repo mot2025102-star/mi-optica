@@ -117,11 +117,17 @@
                             <!-- CELDA ACCIONES (modificada) -->
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="btn btn-sm btn-secondary"
+                                    <button class="icon-btn icon-btn--ghost has-tip"
                                         th:data-id="${o.idOrden}"
                                         th:data-num="${o.numeroOrden}"
-                                        onclick="verDetalle(this.dataset.id, this.dataset.num)">
-                                        👁️
+                                        onclick="verDetalle(this.dataset.id, this.dataset.num)"
+                                        data-tip="Ver Detalle Orden"
+                                        aria-label="Ver Detalle Orden">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M2.2 12s3.6-7 9.8-7 9.8 7 9.8 7-3.6 7-9.8 7-9.8-7-9.8-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.8"/>
+                                            <circle cx="13.1" cy="10.9" r="0.9" fill="currentColor"/>
+                                        </svg>
                                     </button>
                                     <!-- Cambio de estado rápido -->
                                     <select class="form-select form-select-sm"
@@ -136,10 +142,18 @@
                                     </select>
                                     <!-- Botón eliminar solo admin -->
                                     <div sec:authorize="hasRole('ADMINISTRADOR')">
-                                        <button class="btn btn-sm btn-danger"
+                                        <button class="icon-btn icon-btn--danger has-tip"
                                                 th:data-id="${o.idOrden}"
-                                                onclick="eliminarOrden(this.dataset.id)">
-                                            🗑️
+                                                onclick="eliminarOrden(this.dataset.id)"
+                                                data-tip="Eliminar Orden"
+                                                aria-label="Eliminar Orden">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M9 3h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                <path d="M4 7h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                <path d="M7 7l1 14h8l1-14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                                <path d="M10 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                <path d="M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            </svg>
                                         </button>
                                     </div>
                                 </div>

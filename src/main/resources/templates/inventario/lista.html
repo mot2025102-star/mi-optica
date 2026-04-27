@@ -156,27 +156,47 @@
                             <td>
                                 <div class="d-flex gap-1">
                                     <!-- Kardex rápido -->
-                                    <button class="btn btn-sm btn-secondary"
+                                    <button class="icon-btn icon-btn--info has-tip"
                                             th:data-id="${inv.producto.idProducto}"
                                             th:data-nombre="${inv.producto.detalle}"
-                                            onclick="verKardexBtn(this)">
-                                        
+                                            onclick="verKardexBtn(this)"
+                                            data-tip="Ver Detalle Inventario"
+                                            aria-label="Ver Detalle Inventario">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M2.2 12s3.6-7 9.8-7 9.8 7 9.8 7-3.6 7-9.8 7-9.8-7-9.8-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.8"/>
+                                            <circle cx="13.1" cy="10.9" r="0.9" fill="currentColor"/>
+                                        </svg>
                                     </button>
                                     <!-- Ajuste manual (solo Admin) -->
                                     <button sec:authorize="hasRole('ADMINISTRADOR')"
-                                            class="btn btn-sm btn-warning"
+                                            class="icon-btn icon-btn--metal has-tip"
                                             th:data-prod="${inv.producto.idProducto}"
                                             th:data-suc="${inv.sucursal.idSucursal}"
                                             th:data-exist="${inv.existencia ?: 0}"
                                             th:data-costo="${inv.costo ?: 0}"
                                             th:data-precio="${inv.precioVenta ?: 0}"
                                             th:data-nombre="${inv.producto.detalle}"
-                                            onclick="abrirAjusteBtn(this)">
-                                        
+                                            onclick="abrirAjusteBtn(this)"
+                                            data-tip="Editar Registro"
+                                            aria-label="Editar Registro">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M8 7h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M6 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M10 17h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M7 17c-1.2 0-2.2-1-2.2-2.2S5.8 12.6 7 12.6s2.2 1 2.2 2.2S8.2 17 7 17Z" fill="currentColor" opacity="0.9"/>
+                                        </svg>
                                     </button>
                                     <!-- Traslado rápido -->
                                     <a th:href="@{/traslados(pid=${inv.producto.idProducto},ori=${inv.sucursal.idSucursal})}"
-                                       class="btn btn-sm btn-secondary" title="Trasladar"></a>
+                                       class="icon-btn icon-btn--brand has-tip"
+                                       data-tip="Trasladar Producto"
+                                       aria-label="Trasladar Producto">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M7 7h11m0 0-3-3m3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M17 17H6m0 0 3 3m-3-3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

@@ -621,6 +621,191 @@ h4{ font-size:18px; }
 .btn-sm{ padding:7px 14px; font-size:10px; letter-spacing:.14em; }
 .btn:disabled{ opacity:.4; cursor:not-allowed; }
 
+/* ══════════════ BOTONES DE ÍCONO (TABLAS) ══════════════ */
+.icon-btn{
+  --icon-btn-size: 34px;
+  width:var(--icon-btn-size);
+  height:var(--icon-btn-size);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(120% 120% at 20% 15%, rgba(255,255,255,.14), transparent 42%),
+    linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  color:var(--text);
+  transition:transform var(--t-fast) var(--ease),
+             box-shadow var(--t-fast),
+             border-color var(--t-fast),
+             background var(--t-fast),
+             color var(--t-fast),
+             filter var(--t-fast);
+  user-select:none;
+  line-height:1;
+  padding:0;
+}
+.icon-btn:hover{
+  border-color:rgba(212,178,122,.26);
+  box-shadow:0 0 0 3px rgba(212,178,122,.10);
+}
+.icon-btn:active{ transform:scale(.96); }
+.icon-btn .icon{
+  width:16px;
+  height:16px;
+  flex-shrink:0;
+  display:block;
+}
+
+/* Marca / Neutral (Trasladar) */
+.icon-btn--brand{
+  background:rgba(212,178,122,.08);
+  border-color:rgba(212,178,122,.34);
+  color:var(--gold);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.icon-btn--brand:hover{
+  background:rgba(212,178,122,.14);
+  border-color:rgba(212,178,122,.55);
+  box-shadow:0 0 0 3px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.icon-btn--ghost{
+  background:rgba(255,255,255,.02);
+  border-color:var(--gris-borde-hover);
+  color:var(--gold);
+}
+.icon-btn--ghost:hover{
+  background:rgba(212,178,122,.06);
+  border-color:rgba(212,178,122,.45);
+  box-shadow:0 0 0 3px var(--gold-glow);
+}
+
+.icon-btn--danger{
+  background:rgba(224,122,107,.08);
+  border-color:rgba(224,122,107,.32);
+  color:rgba(224,122,107,.92);
+}
+.icon-btn--danger:hover{
+  background:rgba(224,122,107,.12);
+  border-color:rgba(224,122,107,.52);
+  box-shadow:0 0 0 3px rgba(224,122,107,.12);
+}
+
+/* Informativo (Ver detalle/inventario) */
+.icon-btn--info{
+  background:rgba(138,169,201,.10);
+  border-color:rgba(138,169,201,.34);
+  color:var(--info);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.icon-btn--info:hover{
+  background:rgba(138,169,201,.16);
+  border-color:rgba(138,169,201,.55);
+  box-shadow:0 0 0 3px rgba(138,169,201,.14), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* Toggle metálico (Editar) */
+.icon-btn--metal{
+  background:
+    radial-gradient(120% 120% at 20% 15%, rgba(255,255,255,.22), transparent 40%),
+    linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    linear-gradient(135deg, rgba(212,178,122,.30), rgba(168,134,86,.14));
+  border-color:rgba(212,178,122,.45);
+  color:rgba(245,243,238,.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.45),
+    0 10px 22px -16px rgba(212,178,122,.45);
+}
+.icon-btn--metal:hover{
+  border-color:rgba(212,178,122,.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.48),
+    0 0 0 3px var(--gold-glow),
+    0 16px 30px -18px rgba(212,178,122,.7);
+}
+.icon-btn--metal .icon{ filter:drop-shadow(0 1px 0 rgba(0,0,0,.45)); }
+
+.icon-btn--muted{
+  background:rgba(255,255,255,.03);
+  border-color:rgba(255,255,255,.16);
+  color:rgba(245,243,238,.78);
+}
+.icon-btn--muted:hover{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(212,178,122,.45);
+  color:var(--gold);
+  box-shadow:0 0 0 3px var(--gold-glow);
+}
+
+.icon-btn--success{
+  background:rgba(110,193,154,.12);
+  border-color:rgba(110,193,154,.40);
+  color:var(--success);
+}
+.icon-btn--success:hover{
+  background:rgba(110,193,154,.16);
+  border-color:rgba(110,193,154,.65);
+  box-shadow:0 0 0 3px rgba(110,193,154,.14);
+}
+
+/* Alineación de acciones compactas */
+.table td .d-flex.gap-1{ align-items:center; }
+
+/* ══════════════ TOOLTIPS (HOVER) ══════════════ */
+.has-tip{ position:relative; }
+.has-tip[data-tip]::after{
+  content:attr(data-tip);
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 10px);
+  transform:translateX(-50%) translateY(4px);
+  background:rgba(10,10,11,.92);
+  color:var(--text);
+  padding:6px 8px;
+  border-radius:8px;
+  border:1px solid rgba(212,178,122,.35);
+  font-size:10px;
+  letter-spacing:.08em;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity var(--t-fast), transform var(--t-fast);
+  box-shadow:0 10px 26px -18px rgba(0,0,0,.8);
+  z-index:30;
+}
+.has-tip[data-tip]::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 5px);
+  transform:translateX(-50%) translateY(4px);
+  width:8px;
+  height:8px;
+  background:rgba(10,10,11,.92);
+  border-left:1px solid rgba(212,178,122,.30);
+  border-top:1px solid rgba(212,178,122,.30);
+  transform-origin:center;
+  rotate:45deg;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity var(--t-fast), transform var(--t-fast);
+  z-index:29;
+}
+.has-tip:hover::after,
+.has-tip:hover::before{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.has-tip:focus-visible::after,
+.has-tip:focus-visible::before{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.has-tip:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--gold-glow); }
+
 /* ══════════════ TABLAS ══════════════ */
 .table-wrapper{
   border:1px solid var(--gris-borde);
