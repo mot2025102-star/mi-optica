@@ -248,22 +248,67 @@
                                     <div class="d-flex gap-1">
                                         <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
                                             <a th:href="@{/productos/editar/{id}(id=${p.idProducto})}"
-                                               class="btn btn-sm btn-secondary"> Editar</a>
+                                               class="icon-btn icon-btn--metal has-tip"
+                                               data-tip="Editar Registro"
+                                               aria-label="Editar Registro">
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                                </svg>
+                                            </a>
                                         </div>
                                         <a th:href="@{/inventario(pid=${p.idProducto})}"
-                                           class="btn btn-sm btn-secondary" title="Ver inventario"></a>
+                                           class="icon-btn icon-btn--info has-tip"
+                                           data-tip="Ver Detalle Inventario"
+                                           aria-label="Ver Detalle Inventario">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M3 7h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                <path d="M5 7v14h14V7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                                <path d="M9 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                <path d="M9 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            </svg>
+                                        </a>
                                         <div sec:authorize="hasRole('ADMINISTRADOR')" style="display:contents">
                                             <form th:action="@{/productos/toggle/{id}(id=${p.idProducto})}"
                                                   method="post" style="display:inline">
                                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                                <button type="submit" th:if="${p.activo}"  class="btn btn-sm btn-danger"></button>
-                                                <button type="submit" th:if="${!p.activo}" class="btn btn-sm btn-success"></button>
+                                                <button type="submit"
+                                                        th:if="${p.activo}"
+                                                        class="icon-btn icon-btn--danger has-tip"
+                                                        data-tip="Desactivar Producto"
+                                                        aria-label="Desactivar Producto">
+                                                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                        <path d="M12 2v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                        <path d="M6.2 4.9a10 10 0 1 0 11.6 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
+                                                <button type="submit"
+                                                        th:if="${!p.activo}"
+                                                        class="icon-btn icon-btn--success has-tip"
+                                                        data-tip="Activar Producto"
+                                                        aria-label="Activar Producto">
+                                                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                        <path d="M12 2v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                        <path d="M6.2 4.9a10 10 0 1 0 11.6 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
                                             </form>
                                             <form th:action="@{/productos/eliminar/{id}(id=${p.idProducto})}"
                                                   method="post" style="display:inline"
                                                   onsubmit="return confirm('¿Eliminar producto? Esta acción no se puede deshacer.')">
                                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                                <button type="submit" class="btn btn-sm btn-danger"></button>
+                                                <button type="submit" class="icon-btn icon-btn--danger has-tip"
+                                                        data-tip="Eliminar Registro"
+                                                        aria-label="Eliminar Registro">
+                                                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                        <path d="M10 4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                        <path d="M5 6h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                        <path d="M9 6v-1a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                                        <path d="M7.5 6l.8 14h7.4l.8-14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                                        <path d="M11 10.5v7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                        <path d="M13 10.5v7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
                                             </form>
                                         </div>
                                     </div>
@@ -337,9 +382,27 @@
                         </div>
                         <div class="d-flex gap-1">
                             <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
-                                <a th:href="@{/productos/editar/{id}(id=${p.idProducto})}" class="btn btn-sm btn-secondary"></a>
+                                <a th:href="@{/productos/editar/{id}(id=${p.idProducto})}"
+                                   class="icon-btn icon-btn--metal has-tip"
+                                   data-tip="Editar Registro"
+                                   aria-label="Editar Registro">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
                             </div>
-                            <a th:href="@{/inventario(pid=${p.idProducto})}" class="btn btn-sm btn-secondary"></a>
+                            <a th:href="@{/inventario(pid=${p.idProducto})}"
+                               class="icon-btn icon-btn--info has-tip"
+                               data-tip="Ver Detalle Inventario"
+                               aria-label="Ver Detalle Inventario">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M3 7h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                    <path d="M5 7v14h14V7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                    <path d="M9 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                    <path d="M9 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                            </a>
                         </div>
                     </div>
                 </div>

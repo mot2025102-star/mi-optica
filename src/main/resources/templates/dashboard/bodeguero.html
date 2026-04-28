@@ -137,7 +137,14 @@
                             </td>
                             <td>
                                 <a th:href="@{/traslados(pid=${inv.producto.idProducto})}"
-                                   class="btn btn-sm btn-warning">Trasladar</a>
+                                   class="icon-btn icon-btn--brand has-tip"
+                                   data-tip="Trasladar Producto"
+                                   aria-label="Trasladar Producto">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M7 7h11m0 0-3-3m3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M17 17H6m0 0 3 3m-3-3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
                             </td>
                         </tr>
                     </tbody>

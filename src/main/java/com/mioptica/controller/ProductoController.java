@@ -12,6 +12,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
  
@@ -38,17 +40,26 @@ public class ProductoController {
  
         if (cat > 0) { int c = cat; productos = productos.stream().filter(p -> p.getCategoria() != null && p.getCategoria().getIdCategoria().equals(c)).toList(); }
         if (mar > 0) { int m = mar; productos = productos.stream().filter(p -> p.getMarca()     != null && p.getMarca().getIdMarca().equals(m)).toList(); }
-        if ("activo".equals(est))   productos = productos.stream().filter(Producto::getActivo).toList();
+        if ("activo".equals(est))        productos = productos.stream().filter(Producto::getActivo).toList();
         else if ("inactivo".equals(est)) productos = productos.stream().filter(p -> !p.getActivo()).toList();
  
         long activos   = productos.stream().filter(Producto::getActivo).count();
         long inactivos = productos.size() - activos;
  
-        var stockMap = new java.util.HashMap<Integer, java.math.BigDecimal>();
+        // ── stockMap: stock total por producto ────────────────────
+        var stockMap = new HashMap<Integer, BigDecimal>();
         productos.forEach(p -> stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto())));
+ 
+        // ── precioMap: precio de venta por producto ───────────────
+        var precioMap = new HashMap<Integer, BigDecimal>();
+        productos.forEach(p -> {
+            BigDecimal pv = productoService.precioVenta(p.getIdProducto());
+            if (pv != null) precioMap.put(p.getIdProducto(), pv);
+        });
  
         model.addAttribute("productos",   productos);
         model.addAttribute("stockMap",    stockMap);
+        model.addAttribute("precioMap",   precioMap);   // ← NUEVO
         model.addAttribute("categorias",  productoService.listarCategorias());
         model.addAttribute("marcas",      productoService.listarMarcas());
         model.addAttribute("activos",     activos);
@@ -66,18 +77,15 @@ public class ProductoController {
     @GetMapping("/nuevo")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
     public String nuevo(Model model) {
-        Producto p = new Producto();
-        p.setTipoProducto(null);
-        model.addAttribute("producto",   new Producto());
-        model.addAttribute("categorias", productoService.listarCategorias());
-        model.addAttribute("marcas",     productoService.listarMarcas());
-        model.addAttribute("sucursales", productoService.listarSucursales());
-        // ── NUEVO: datos para el panel lente ──────────────────────
-        model.addAttribute("tiposLente",    productoService.listarTiposLente());
-        model.addAttribute("materiales",    productoService.listarMateriales());
-        model.addAttribute("tratamientos",  productoService.listarTratamientos());
-        model.addAttribute("editando",   false);
-        model.addAttribute("activePage", "productos");
+        model.addAttribute("producto",     new Producto());
+        model.addAttribute("categorias",   productoService.listarCategorias());
+        model.addAttribute("marcas",       productoService.listarMarcas());
+        model.addAttribute("sucursales",   productoService.listarSucursales());
+        model.addAttribute("tiposLente",   productoService.listarTiposLente());
+        model.addAttribute("materiales",   productoService.listarMateriales());
+        model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("editando",     false);
+        model.addAttribute("activePage",   "productos");
         return "productos/formulario";
     }
  
@@ -86,16 +94,15 @@ public class ProductoController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
     public String editar(@PathVariable Integer id, Model model, RedirectAttributes ra) {
         return productoService.findById(id).map(p -> {
-            model.addAttribute("producto",   p);
-            model.addAttribute("categorias", productoService.listarCategorias());
-            model.addAttribute("marcas",     productoService.listarMarcas());
-            model.addAttribute("sucursales", productoService.listarSucursales());
-            // ── NUEVO: datos para el panel lente ──────────────────
-            model.addAttribute("tiposLente",    productoService.listarTiposLente());
-            model.addAttribute("materiales",    productoService.listarMateriales());
-            model.addAttribute("tratamientos",  productoService.listarTratamientos());
-            model.addAttribute("editando",   true);
-            model.addAttribute("activePage", "productos");
+            model.addAttribute("producto",     p);
+            model.addAttribute("categorias",   productoService.listarCategorias());
+            model.addAttribute("marcas",       productoService.listarMarcas());
+            model.addAttribute("sucursales",   productoService.listarSucursales());
+            model.addAttribute("tiposLente",   productoService.listarTiposLente());
+            model.addAttribute("materiales",   productoService.listarMateriales());
+            model.addAttribute("tratamientos", productoService.listarTratamientos());
+            model.addAttribute("editando",     true);
+            model.addAttribute("activePage",   "productos");
             return "productos/formulario";
         }).orElseGet(() -> {
             ra.addFlashAttribute("mensajeError", "Producto no encontrado.");
@@ -205,7 +212,7 @@ public class ProductoController {
         ).toList();
     }
  
-    // ─── NUEVO: API precio de lente por combinación ───────────────
+    // ─── API precio de lente por combinación ──────────────────────
     @GetMapping("/api/precio-lente")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> precioLente(
