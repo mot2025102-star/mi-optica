@@ -1,0 +1,124 @@
+---
+description: Tokens CSS del Design System de Mi Óptica v2.0. Fuente de verdad para colores, tipografía, espaciado, forma y movimiento. El agente lee este archivo antes de escribir cualquier CSS. Nunca hardcodear valores fuera de estilos.css.
+globs:
+  - "src/main/resources/static/css/**/*.css"
+alwaysApply: true
+---
+
+# Mi Óptica — Design Tokens v2.0
+
+## 0. Verificación antes de usar
+```bash
+grep -c "\-\-navy-900" src/main/resources/static/css/estilos.css
+# Si devuelve 0 → pegar el bloque :root de la Sección 1 en estilos.css
+```
+
+## 1. Tokens completos — pegar en :root de @estilos.css
+```css
+:root {
+  /* ── DEEP NAVY ──────────────────────────────────── */
+  --navy-900: #0D1B2A; /* sidebar, texto display, btn primario  */
+  --navy-700: #1B3A5C; /* hover primario, headings              */
+  --navy-500: #2D5F8A; /* links, iconos activos                 */
+  --navy-300: #7AAECF; /* bordes navy, separadores              */
+  --navy-100: #D4E6F3; /* superficies, badges navy              */
+  --navy-50:  #EEF5FB; /* hover de fila                        */
+
+  /* ── OPTIC CYAN ─────────────────────────────────── */
+  --cyan-700: #005F85; /* texto sobre cyan  — AAA 7.2:1        */
+  --cyan-600: #0077A8; /* texto accesible   — AA  4.6:1        */
+  --cyan-400: #00B4D8; /* ⛔ SOLO decorativo — NUNCA texto     */
+  --cyan-200: #90E0EF;
+  --cyan-50:  #E0F7FC; /* fondos cyan, badges                  */
+
+  /* ── SLATE GREY ─────────────────────────────────── */
+  --slate-700: #374151; /* cuerpo principal                    */
+  --slate-500: #6B7280; /* texto secundario, captions          */
+  --slate-300: #D1D5DB; /* bordes de inputs, dividers          */
+  --slate-200: #E5E7EB; /* filas alternas de tabla             */
+  --slate-100: #F3F4F6; /* superficies neutras                 */
+  --slate-50:  #F9FAFB; /* fondo base de página               */
+
+  /* ── ESTADOS ─────────────────────────────────────── */
+  --success:     #059669; --success-bg: #D1FAE5;
+  --warning:     #D97706; --warning-bg: #FEF3C7;
+  --danger:      #DC2626; --danger-bg:  #FEE2E2;
+  --info:        #2563EB; --info-bg:    #EFF6FF;
+
+  /* ── TIPOGRAFÍA ──────────────────────────────────── */
+  --font-body: 'Urbanist', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --text-xs:   11px;  /* mínimo absoluto                      */
+  --text-sm:   12px;
+  --text-base: 14px;  /* mínimo para cuerpo                   */
+  --text-md:   15px;
+  --text-lg:   18px;
+  --text-xl:   24px;
+  --text-2xl:  32px;
+
+  /* ── ESPACIADO 8pt grid ─────────────────────────── */
+  --sp-1: 8px;  --sp-2: 16px; --sp-3: 24px;
+  --sp-4: 32px; --sp-5: 40px; --sp-6: 48px; --sp-8: 64px;
+
+  /* ── FORMA ───────────────────────────────────────── */
+  --radius-sm: 4px;   --radius-md:  8px;
+  --radius-lg: 12px;  --radius-xl:  16px;
+  --radius-full: 9999px;
+  --shadow-sm:    0 1px 3px  rgba(13,27,42,.08);
+  --shadow-md:    0 4px 12px rgba(13,27,42,.10);
+  --shadow-lg:    0 8px 24px rgba(13,27,42,.12);
+  --shadow-focus: 0 0 0 3px rgba(0,180,216,.15);
+
+  /* ── MOVIMIENTO ──────────────────────────────────── */
+  --dur-fast:   150ms; --dur-normal: 250ms; --dur-slow: 350ms;
+  --ease-std:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit:  cubic-bezier(0.4, 0, 1, 1);
+}
+```
+
+## 2. Contraste WCAG — tabla de referencia
+| Token | Ratio | Normal (≥14px) | Grande (≥18px) |
+|---|---|---|---|
+| `--navy-900` | 17.5:1 | ✅ AAA | ✅ AAA |
+| `--navy-700` | 10.4:1 | ✅ AAA | ✅ AAA |
+| `--navy-500` |  5.9:1 | ✅ AA  | ✅ AAA |
+| `--cyan-600` |  4.6:1 | ✅ AA  | ✅ AA  |
+| `--cyan-400` |  2.9:1 | ⛔ FAIL | ⛔ FAIL |
+| `--slate-500`|  4.6:1 | ✅ AA  | ✅ AA  |
+
+## 3. Prohibiciones absolutas del agente
+```css
+/* ❌ NUNCA — texto con cyan-400 */
+.mi-clase { color: var(--cyan-400); }
+.mi-clase { color: #00B4D8; }
+
+/* ✅ SIEMPRE — usar cyan-600 para texto */
+.mi-clase { color: var(--cyan-600); }
+
+/* ❌ NUNCA — hexadecimal hardcodeado fuera de estilos.css */
+.card { background-color: #1B3A5C; }
+
+/* ✅ SIEMPRE — usar tokens */
+.card { background-color: var(--navy-700); }
+
+/* ❌ NUNCA — valor de espaciado que no sea múltiplo de 4px */
+.card { padding: 13px 19px; }
+
+/* ✅ SIEMPRE — múltiplo de 8px (o 4px para ajuste fino) */
+.card { padding: var(--sp-2) var(--sp-3); }
+```
+
+## 4. Migración Dark → Light
+```
+--bg          → var(--slate-50)       --gold        → var(--cyan-400) [deco]
+--bg-elev-1   → var(--navy-900)       --gold [btn]  → var(--navy-900)
+--bg-elev-2   → #ffffff               --texto-titulo→ var(--navy-900)
+--bg-elev-3   → var(--slate-100)      --text        → var(--slate-700)
+                                       --text-soft   → var(--slate-500)
+```
+```bash
+# Detectar tokens pendientes
+grep -rn "\-\-gold\b\|\-\-bg\b\|\-\-texto-titulo\|\-\-bg-elev" \
+  src/main/resources/ --include="*.html" --include="*.css" | grep -v "estilos.css"
+```

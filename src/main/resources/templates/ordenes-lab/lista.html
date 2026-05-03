@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -100,17 +100,17 @@
                             </td>
                             <td>
                                 <span th:class="${
-                                    o.estado == 'Entregado' ? 'badge badge-success' :
-                                    o.estado == 'Enviado'   ? 'badge badge-info'    :
-                                    o.estado == 'Cancelado' ? 'badge badge-danger'  :
-                                                              'badge badge-warning'}"
+                                    o.estado == 'Entregado' ? 'badge badge--success' :
+                                    o.estado == 'Enviado'   ? 'badge badge--info'    :
+                                    o.estado == 'Cancelado' ? 'badge badge--danger'  :
+                                                              'badge badge--warning'}"
                                       th:text="${o.estado}">
                                 </span>
                             </td>
                             <!-- CELDA ORIGEN (nueva) -->
                             <td>
-                                <span th:if="${o.origen == 'FICHA_INTERNA'}"  class="badge badge-info">🏥 Ficha</span>
-                                <span th:if="${o.origen == 'RECETA_EXTERNA'}" class="badge badge-warning">📋 Externa</span>
+                                <span th:if="${o.origen == 'FICHA_INTERNA'}"  class="badge badge--info">🏥 Ficha</span>
+                                <span th:if="${o.origen == 'RECETA_EXTERNA'}" class="badge badge--warning">📋 Externa</span>
                                 <span th:if="${o.origen == 'MANUAL' or o.origen == null}" class="badge badge-secondary">✏️ Manual</span>
                             </td>
 

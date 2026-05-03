@@ -21,7 +21,7 @@
     <div class="page-body">
 
         <!-- Alerta de errores -->
-        <div id="alertaError" class="alert alert-danger" style="display:none">
+        <div id="alertaError" class="alert alert--danger" style="display:none">
              <span id="alertaMsg"></span>
         </div>
 
@@ -95,7 +95,7 @@
                         <div class="card mb-3" id="cardRecetaExterna" style="display:none;border:2px solid var(--dorado,#C9A84C)">
                             <div class="card-header">
                                 <div class="card-title">📋 Graduación del Cliente (Receta Externa)</div>
-                                <span class="badge badge-warning">⚠️ Dada por el cliente</span>
+                                <span class="badge badge--warning">⚠️ Dada por el cliente</span>
                             </div>
                             <div class="card-body" style="padding:16px 20px;overflow-x:auto">
                                 <table class="table table-sm" style="min-width:600px">
@@ -171,16 +171,16 @@
                         <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                                 <span class="text-gris">Subtotal:</span>
-                                <span class="fw-600" id="resSubtotal">Q0.00</span>
+                                <span class="fw-600" id="resSubtotal">Q 0.00</span>
                             </div>
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:var(--naranja)">
                                 <span>Descuento:</span>
-                                <span class="fw-600" id="resDescuento">- Q0.00</span>
+                                <span class="fw-600" id="resDescuento">- Q 0.00</span>
                             </div>
                             <div style="border-top:2px solid var(--turquesa);margin:10px 0"></div>
                             <div style="display:flex;justify-content:space-between;align-items:center">
                                 <span style="font-size:15px;font-weight:700">TOTAL:</span>
-                                <span style="font-size:24px;font-weight:700;color:var(--turquesa)" id="resTotal">Q0.00</span>
+                                <span style="font-size:24px;font-weight:700;color:var(--turquesa)" id="resTotal">Q 0.00</span>
                             </div>
                         </div>
                         
@@ -291,9 +291,9 @@ function calcTotal() {
     document.querySelectorAll('[id^="sub_"]').forEach(i => sub += parseFloat(i.value || 0));
     const desc  = parseFloat(document.getElementById('descGlobal').value || 0);
     const total = Math.max(0, sub - desc);
-    document.getElementById('resSubtotal').textContent = 'Q' + sub.toFixed(2);
-    document.getElementById('resDescuento').textContent = '- Q' + desc.toFixed(2);
-    document.getElementById('resTotal').textContent = 'Q' + total.toFixed(2);
+    document.getElementById('resSubtotal').textContent = 'Q ' + sub.toFixed(2);
+    document.getElementById('resDescuento').textContent = '- Q ' + desc.toFixed(2);
+    document.getElementById('resTotal').textContent = 'Q ' + total.toFixed(2);
 }
 
 // ─── Búsqueda cliente ─────────────────────────────────────────────
@@ -397,7 +397,7 @@ async function registrarVenta() {
 
     if (data.ok) {
         document.getElementById('exitoFactura').textContent = data.factura;
-        document.getElementById('exitoTotal').textContent   = 'Q' + parseFloat(data.total).toFixed(2);
+        document.getElementById('exitoTotal').textContent   = 'Q ' + parseFloat(data.total).toFixed(2);
         document.getElementById('exitoPdfLink').href        = '/ventas/factura/' + data.idVenta;
         document.getElementById('modalExito').classList.add('show');
         document.getElementById('alertaError').style.display = 'none';
@@ -421,9 +421,9 @@ function nuevaVenta() {
     document.getElementById('clienteInfo').innerHTML = 'Consumidor Final (CF) — sin cliente asignado';
     document.getElementById('descGlobal').value = '0';
     document.getElementById('observacion').value = '';
-    document.getElementById('resSubtotal').textContent = 'Q0.00';
-    document.getElementById('resDescuento').textContent = '- Q0.00';
-    document.getElementById('resTotal').textContent = 'Q0.00';
+    document.getElementById('resSubtotal').textContent = 'Q 0.00';
+    document.getElementById('resDescuento').textContent = '- Q 0.00';
+    document.getElementById('resTotal').textContent = 'Q 0.00';
     agregarFila();
     // Recargar la página para actualizar el stock
     location.reload();

@@ -1,0 +1,279 @@
+---
+description: >
+  Patrones Thymeleaf para Mi Óptica. Cubre fragmentos reutilizables,
+  integración con Spring Security, formularios con validación, HTMX para
+  actualizaciones parciales y patrones específicos del dominio óptico
+  (fichas clínicas, inventario, ventas). Requiere spring-architecture.mdc.
+globs:
+  - "src/main/resources/templates/**/*.html"
+alwaysApply: false
+agent_tools_required:
+  - terminal
+  - browser
+---
+
+# Mi Óptica — Patrones Thymeleaf
+
+## 1. Estructura de Carpetas de Templates
+```
+templates/
+├── layout.html              # Layout base con sidebar
+├── fragments/
+│   ├── sidebar.html
+│   ├── navbar.html
+│   ├── modals.html          # Modales reutilizables
+│   └── pagination.html
+├── dashboard/
+│   └── index.html
+├── ventas/
+│   ├── listado.html
+│   ├── formulario.html
+│   └── detalle.html
+├── fichas/
+│   ├── listado.html
+│   └── formulario.html      # Campos ópticos especializados
+└── error/
+    ├── 404.html
+    └── 500.html
+```
+
+## 2. Layout Base con Thymeleaf Layout Dialect
+```html
+<!-- layout.html -->
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle + ' — Mi Óptica'}">Mi Óptica</title>
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+  <!-- HTMX para actualizaciones parciales -->
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+</head>
+<body class="app-layout">
+  <nav th:replace="~{fragments/sidebar :: sidebar}"></nav>
+  <main class="main-content" layout:fragment="content">
+    <!-- El contenido de cada página va aquí -->
+  </main>
+  <!-- Toasts (flash messages de Spring) -->
+  <div th:if="${toast_success}" class="alert alert--success" role="alert"
+       th:text="${toast_success}" id="flash-toast"></div>
+  <div th:if="${toast_error}"   class="alert alert--danger"  role="alert"
+       th:text="${toast_error}"  id="flash-toast"></div>
+  <script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>
+```
+
+## 3. Vista de Listado — Patrón Estándar
+```html
+<!-- ventas/listado.html -->
+<html layout:decorate="~{layout}">
+<body>
+<div layout:fragment="content">
+
+  <div class="section-header">
+    <div>
+      <h1 class="page-title">Ventas</h1>
+      <p class="page-subtitle" th:text="${'Total: ' + page.totalElements + ' registros'}"></p>
+    </div>
+    <a th:href="@{/ventas/nueva}" class="btn btn-primary"
+       sec:authorize="hasAnyRole('ADMIN','VENDEDOR')">
+      + Nueva venta
+    </a>
+  </div>
+
+  <!-- Buscador con HTMX -->
+  <input class="form-input" type="search" name="q"
+         th:value="${q}"
+         placeholder="Buscar por cliente o NIT..."
+         hx-get="/ventas"
+         hx-target="#tabla-ventas"
+         hx-trigger="input changed delay:400ms"
+         hx-include="[name='q']">
+
+  <!-- Tabla -->
+  <div id="tabla-ventas">
+    <th:block th:replace="~{ventas/fragments/tabla :: tabla(${page})}"></th:block>
+  </div>
+
+  <!-- Paginación -->
+  <th:block th:replace="~{fragments/pagination :: pagination(${page}, '/ventas')}"></th:block>
+
+</div>
+</body>
+</html>
+```
+
+## 4. Formulario de Ficha Clínica — Campos Ópticos
+```html
+<!-- fichas/formulario.html — sección de refracción -->
+<fieldset class="form-section">
+  <legend class="form-section-title">Refracción — Ojo Derecho (OD)</legend>
+  <div class="form-row-optical">
+    <div class="form-group">
+      <label class="form-label" for="od-esfera">Esfera</label>
+      <input class="form-input form-input--optical"
+             id="od-esfera" type="text"
+             th:field="*{odEsfera}"
+             th:classappend="${#fields.hasErrors('odEsfera')} ? 'form-input--error'"
+             placeholder="-0.00" autocomplete="off"
+             aria-describedby="od-esfera-hint">
+      <span class="form-hint" id="od-esfera-hint">D (dioptrías), ej: -2.50</span>
+      <span class="form-error" role="alert"
+            th:if="${#fields.hasErrors('odEsfera')}"
+            th:errors="*{odEsfera}">Error</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="od-cilindro">Cilindro</label>
+      <input class="form-input form-input--optical"
+             id="od-cilindro" type="text"
+             th:field="*{odCilindro}" placeholder="-0.00" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="od-eje">Eje</label>
+      <input class="form-input form-input--optical"
+             id="od-eje" type="text"
+             th:field="*{odEje}" placeholder="000°" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="od-adicion">Adición</label>
+      <input class="form-input form-input--optical"
+             id="od-adicion" type="text"
+             th:field="*{odAdicion}" placeholder="+0.00" autocomplete="off">
+    </div>
+  </div>
+</fieldset>
+```
+
+## 5. Fragmento Reutilizable de Tabla (HTMX target)
+```html
+<!-- ventas/fragments/tabla.html -->
+<div th:fragment="tabla(page)" id="tabla-ventas">
+  <table class="data-table" role="table" aria-label="Listado de ventas">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Fecha</th>
+        <th scope="col" class="col-amount">Total</th>
+        <th scope="col">Estado</th>
+        <th scope="col"><span class="sr-only">Acciones</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:if="${page.empty}">
+        <td colspan="6" style="text-align:center;padding:var(--sp-4);color:var(--slate-500)">
+          No se encontraron resultados.
+        </td>
+      </tr>
+      <tr th:each="v : ${page.content}">
+        <td th:text="${v.correlativo}" class="col-sku"></td>
+        <td th:text="${v.clienteNombre}"></td>
+        <td th:text="${#temporals.format(v.fecha, 'dd/MM/yyyy')}"></td>
+        <td th:text="${'Q ' + #numbers.formatDecimal(v.total,1,2)}" class="col-amount"></td>
+        <td>
+          <span class="badge"
+                th:classappend="'badge--' + ${v.estadoCss}"
+                th:text="${v.estadoLabel}"></span>
+        </td>
+        <td>
+          <div style="display:flex;gap:var(--sp-1)">
+            <a th:href="@{/ventas/{id}(id=${v.id})}"
+               class="btn btn-ghost btn-sm">Ver</a>
+            <button class="btn btn-danger btn-sm"
+                    th:attr="data-confirm='¿Eliminar venta ' + ${v.correlativo} + '?'"
+                    th:data-action="@{/ventas/{id}/eliminar(id=${v.id})}"
+                    aria-label="${'Eliminar venta ' + v.correlativo}">
+              Eliminar
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+## 6. Modal de Confirmación Reutilizable
+```html
+<!-- fragments/modals.html -->
+<div th:fragment="confirm-modal" id="modal-confirm"
+     class="modal-overlay" style="display:none"
+     role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <h2 class="section-title" id="modal-title">Confirmar acción</h2>
+    <p  class="modal-body" id="modal-message" style="margin:var(--sp-2) 0;color:var(--slate-700)">
+      ¿Estás seguro?
+    </p>
+    <div style="display:flex;justify-content:flex-end;gap:var(--sp-1);margin-top:var(--sp-3)">
+      <button class="btn btn-ghost"    onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger"   id="modal-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+```
+
+## 7. Seguridad con Spring Security en Thymeleaf
+```html
+<!-- Mostrar/ocultar según rol -->
+<button class="btn btn-danger"
+        sec:authorize="hasRole('ADMIN')">Eliminar</button>
+
+<a th:href="@{/usuarios}"
+   sec:authorize="hasRole('ADMIN')"
+   class="sidebar__item">Usuarios</a>
+
+<!-- Mostrar nombre del usuario autenticado -->
+<span sec:authentication="name" class="sidebar__user-name"></span>
+
+<!-- Avatar con inicial -->
+<div class="user-avatar"
+     th:text="${#strings.substring(#authentication.name,0,1).toUpperCase()}">U</div>
+
+<!-- CSRF token en formularios POST (Spring Security lo requiere) -->
+<form th:action="@{/ventas/guardar}" method="post">
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+  <!-- campos del form -->
+</form>
+```
+
+## 8. Patrones HTMX para Mi Óptica
+```html
+<!-- Búsqueda en tiempo real (delay 400ms para no saturar el servidor) -->
+<input hx-get="/clientes/buscar"
+       hx-target="#resultados-cliente"
+       hx-trigger="input changed delay:400ms"
+       hx-indicator="#spinner-cliente"
+       name="q" class="form-input" placeholder="Buscar cliente...">
+<div id="spinner-cliente" class="htmx-indicator">
+  <div class="spinner"></div>
+</div>
+<div id="resultados-cliente"></div>
+
+<!-- Actualizar una sección sin recargar la página -->
+<button hx-post="/inventario/actualizar"
+        hx-target="#stock-badge"
+        hx-swap="outerHTML"
+        hx-include="closest form"
+        class="btn btn-primary">Actualizar stock</button>
+
+<!-- Confirmar con modal antes de eliminar (JS + HTMX) -->
+<button class="btn btn-danger"
+        hx-delete="/productos/42"
+        hx-confirm="¿Eliminar este producto del catálogo?"
+        hx-target="closest tr"
+        hx-swap="outerHTML swap:200ms">Eliminar</button>
+```
+
+## 9. Reglas del Agente
+
+- **Nunca** retornar entidades JPA directamente al modelo. Usar DTOs o atributos selectivos.
+- **Siempre** incluir CSRF token en formularios POST/PUT/DELETE.
+- **Siempre** usar `layout:decorate` para herencia de layout.
+- **HTMX delay mínimo 300ms** en campos de búsqueda para evitar spam al servidor.
+- **`hx-indicator`** en todo elemento HTMX que haga petición al servidor.
+- Los campos de **valores ópticos** (esfera, cilindro, eje, adición) SIEMPRE llevan `form-input--optical` + `autocomplete="off"`.

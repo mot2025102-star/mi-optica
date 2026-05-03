@@ -47,7 +47,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value" id="statVentasHoy"
-                         th:text="'Q' + ${#numbers.formatDecimal(ventasHoy,1,'COMMA',2,'POINT')}">Q0.00</div>
+                         th:text="'Q ' + ${#numbers.formatDecimal(ventasHoy,1,'COMMA',2,'POINT')}">Q 0.00</div>
                     <div class="stat-label">Ventas hoy</div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
         <div class="card" th:if="${!stockBajo.isEmpty()}">
             <div class="card-header">
                 <div class="card-title">Productos con Stock Bajo</div>
-                <a th:href="@{/inventario}" class="btn btn-secondary btn-sm">Ver inventario →</a>
+                <a th:href="@{/inventario}" class="btn-inventario-premium btn-sm">Ver inventario →</a>
             </div>
             <div class="table-wrapper">
                 <table class="table">
@@ -110,7 +110,7 @@
                         <td class="text-sm" th:text="${inv.sucursal.nombre}"></td>
                         <td style="text-align:center">
                             <span class="badge"
-                                  th:class="${inv.existencia == 0 ? 'badge badge-danger' : 'badge badge-warning'}"
+                                  th:class="${inv.existencia == 0 ? 'badge badge--danger' : 'badge badge--warning'}"
                                   th:text="${inv.existencia}">
                             </span>
                         </td>

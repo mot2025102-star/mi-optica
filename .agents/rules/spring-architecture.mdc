@@ -1,0 +1,234 @@
+---
+description: >
+  Reglas de arquitectura Spring Boot para Mi Óptica. El agente aplica
+  estas convenciones al crear o modificar controladores, servicios,
+  repositorios y entidades. Basadas en Spring Best Practices 2024,
+  el principio de responsabilidad única y Clean Architecture.
+globs:
+  - "src/main/java/com/mioptica/**/*.java"
+alwaysApply: true
+agent_tools_required:
+  - terminal
+---
+
+# Mi Óptica — Arquitectura Spring Boot
+
+## 0. Verificación Rápida
+```bash
+# Confirmar estructura antes de crear archivos
+find src/main/java/com/mioptica -type d | sort
+# Debe existir: controller, service, repository, model, dto, config, security
+```
+
+## 1. Capas y Responsabilidades
+
+```
+Controller  →  recibe HTTP, delega a Service, retorna ModelAndView o ResponseEntity
+Service     →  lógica de negocio, transacciones, validaciones de dominio
+Repository  →  solo queries JPA, sin lógica de negocio
+Model       →  entidades JPA, solo anotaciones de mapeo
+DTO         →  transferencia de datos entre Controller↔View, nunca exponer entidades
+Config      →  beans, CORS, seguridad, configuración de la app
+```
+
+**Regla de oro:** Si un método tiene más de 30 líneas en el Controller, esa lógica pertenece al Service.
+
+## 2. Convención de Nombrado
+
+| Capa | Sufijo | Ejemplo |
+|---|---|---|
+| Controller | `Controller` | `VentaController` |
+| Service (interfaz) | `Service` | `VentaService` |
+| Service (impl) | `ServiceImpl` | `VentaServiceImpl` |
+| Repository | `Repository` | `VentaRepository` |
+| Entidad | (sin sufijo) | `Venta` |
+| DTO entrada | `Request` o `Form` | `VentaForm` |
+| DTO salida | `Response` o `DTO` | `VentaDTO` |
+| Enum de estado | (descriptivo) | `EstadoVenta`, `EstadoOrden` |
+
+## 3. Controller — Patrón Canónico
+```java
+@Controller
+@RequestMapping("/ventas")
+@RequiredArgsConstructor
+public class VentaController {
+
+    private final VentaService  ventaService;
+    private final ClienteService clienteService;
+
+    // GET: listar → siempre devuelve String (nombre de vista Thymeleaf)
+    @GetMapping
+    public String listar(@RequestParam(defaultValue = "0") int page,
+                         @RequestParam(defaultValue = "") String q,
+                         Model model) {
+        model.addAttribute("ventas",   ventaService.buscar(q, PageRequest.of(page, 20)));
+        model.addAttribute("currentPage", "ventas");
+        model.addAttribute("pageTitle",   "Ventas");
+        return "ventas/listado";
+    }
+
+    // POST: guardar → siempre RedirectAttributes, nunca Model en POST
+    @PostMapping("/guardar")
+    public String guardar(@Valid @ModelAttribute VentaForm form,
+                          BindingResult result,
+                          RedirectAttributes ra) {
+        if (result.hasErrors()) {
+            return "ventas/formulario"; // volver al form con errores
+        }
+        ventaService.registrar(form);
+        ra.addFlashAttribute("toast_success", "Venta registrada correctamente.");
+        return "redirect:/ventas";
+    }
+
+    // DELETE: siempre con confirmación previa (modal en frontend)
+    @PostMapping("/{id}/eliminar")
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
+        ventaService.eliminar(id);
+        ra.addFlashAttribute("toast_success", "Venta eliminada.");
+        return "redirect:/ventas";
+    }
+}
+```
+
+## 4. Service — Patrón Canónico
+```java
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class VentaServiceImpl implements VentaService {
+
+    private final VentaRepository    ventaRepository;
+    private final InventarioRepository inventarioRepository;
+    private final KardexRepository    kardexRepository;
+
+    // Operaciones de escritura: @Transactional heredado de clase
+    @Override
+    public Venta registrar(VentaForm form) {
+        Venta venta = VentaMapper.fromForm(form);
+        // 1. Descontar inventario
+        descontarInventario(form.getDetalles(), venta.getSucursal());
+        // 2. Registrar kardex (inmutable — solo inserts)
+        registrarKardex(form.getDetalles(), venta);
+        // 3. Persistir venta
+        return ventaRepository.save(venta);
+    }
+
+    // Operaciones de lectura: siempre @Transactional(readOnly = true)
+    @Override
+    @Transactional(readOnly = true)
+    public Page<VentaDTO> buscar(String q, Pageable pageable) {
+        return ventaRepository.buscarPorCliente(q, pageable)
+                              .map(VentaMapper::toDTO);
+    }
+
+    // Métodos privados de soporte: prefijo de acción descriptivo
+    private void descontarInventario(List<DetalleVentaForm> detalles, Sucursal sucursal) {
+        detalles.forEach(d -> {
+            Inventario inv = inventarioRepository
+                .findByProductoIdAndSucursalId(d.getProductoId(), sucursal.getId())
+                .orElseThrow(() -> new StockInsuficienteException(d.getProductoId()));
+            if (inv.getCantidad() < d.getCantidad()) throw new StockInsuficienteException(d.getProductoId());
+            inv.setCantidad(inv.getCantidad() - d.getCantidad());
+        });
+    }
+}
+```
+
+## 5. Repository — Queries Nombradas y JPQL
+```java
+public interface VentaRepository extends JpaRepository<Venta, Long> {
+
+    // Convención: findBy + campo + operador
+    Optional<Venta> findByCorrelativo(String correlativo);
+
+    // Consultas con filtro de texto → siempre Page<T>
+    @Query("SELECT v FROM Venta v JOIN v.cliente c " +
+           "WHERE (:q = '' OR LOWER(c.nombre) LIKE LOWER(CONCAT('%',:q,'%'))) " +
+           "AND v.sucursal.id = :sucursalId " +
+           "ORDER BY v.fechaCreacion DESC")
+    Page<Venta> buscarPorCliente(@Param("q") String q,
+                                  @Param("sucursalId") Long sucursalId,
+                                  Pageable pageable);
+
+    // Proyecciones para reportes (evitar cargar entidades completas)
+    @Query("SELECT new com.mioptica.dto.VentaResumenDTO(v.id, v.total, v.estado) " +
+           "FROM Venta v WHERE v.fechaCreacion BETWEEN :desde AND :hasta")
+    List<VentaResumenDTO> resumenPorRango(@Param("desde") LocalDateTime desde,
+                                          @Param("hasta") LocalDateTime hasta);
+}
+```
+
+## 6. Entidades — Convenciones JPA
+```java
+@Entity
+@Table(name = "ventas")
+@EntityListeners(AuditingEntityListener.class)
+@Getter @Setter
+@NoArgsConstructor
+public class Venta {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Timestamps automáticos
+    @CreatedDate  @Column(updatable = false)
+    private LocalDateTime fechaCreacion;
+    @LastModifiedDate
+    private LocalDateTime fechaModificacion;
+
+    // Enums: siempre STRING en BD
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoVenta estado = EstadoVenta.PENDIENTE;
+
+    // Relaciones Many: FetchType.LAZY por defecto
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
+
+    // Colecciones: LAZY + cascade si son dependientes
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DetalleVenta> detalles = new ArrayList<>();
+
+    // Kardex es INMUTABLE — solo se inserta, nunca se actualiza
+    // No agregar cascade DELETE ni UPDATE a las entidades de kardex
+}
+```
+
+## 7. Manejo de Excepciones
+```java
+// Excepciones de dominio — siempre en paquete exception/
+public class StockInsuficienteException extends RuntimeException {
+    public StockInsuficienteException(Long productoId) {
+        super("Stock insuficiente para producto ID: " + productoId);
+    }
+}
+
+// Handler global
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(StockInsuficienteException.class)
+    public String handleStock(StockInsuficienteException ex,
+                               RedirectAttributes ra) {
+        ra.addFlashAttribute("toast_error", ex.getMessage());
+        return "redirect:/ventas"; // volver a donde estaba
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public String handleNotFound(Model model) {
+        model.addAttribute("pageTitle", "No encontrado");
+        return "error/404";
+    }
+}
+```
+
+## 8. Reglas Absolutas del Agente
+
+- **Kardex es inmutable:** Solo `kardexRepository.save()`. Nunca `update`, nunca `delete`.
+- **Sin lógica en Controller:** Si hay más de un `if` de negocio, mover a Service.
+- **`@Transactional(readOnly = true)`** en todo método de consulta del Service.
+- **Nunca exponer entidades JPA** directamente a Thymeleaf. Siempre pasar DTOs o atributos específicos.
+- **RedirectAttributes** en todos los POST exitosos (PRG pattern — evitar doble submit).
+- **FetchType.LAZY** por defecto. EAGER solo cuando se justifique con comentario.
+- **Nunca `@Autowired` en fields.** Siempre constructor injection (`@RequiredArgsConstructor`).

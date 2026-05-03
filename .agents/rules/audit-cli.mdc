@@ -1,0 +1,175 @@
+---
+description: >
+  Auditoría UX vía terminal para Mi Óptica. El agente ejecuta estos
+  scripts bash para detectar violaciones del design system, tokens
+  obsoletos y problemas de accesibilidad en código fuente sin necesidad
+  de levantar el servidor. Ejecutar antes de cualquier PR.
+globs:
+  - "src/main/resources/templates/**/*.html"
+  - "src/main/resources/static/css/**/*.css"
+alwaysApply: false
+agent_tools_required:
+  - terminal
+---
+
+# Mi Óptica — Auditoría Terminal
+
+## 0. Quick Audit (< 5 segundos — ejecutar siempre antes de commit)
+```bash
+#!/bin/bash
+# Guardar como: scripts/ux-quick-audit.sh
+# Uso: bash scripts/ux-quick-audit.sh
+
+ERRORS=0; WARNS=0
+echo "══════════════════════════════════"
+echo "  MI ÓPTICA — UX QUICK AUDIT"
+echo "══════════════════════════════════"
+
+check() {
+  local label="$1" count="$2" level="$3"
+  if [ "$count" -gt 0 ]; then
+    [ "$level" = "error" ] && echo "❌ $count $label" && ERRORS=$((ERRORS+count)) \
+                           || echo "⚠️  $count $label" && WARNS=$((WARNS+count))
+  else
+    echo "✅ $label OK"
+  fi
+}
+
+C=$(grep -rn "color:#\|background:#" src/main/resources/static/css/ \
+      --include="*.css" | grep -v "estilos.css" | grep -v "/\*" | wc -l)
+check "colores hardcodeados en CSS" "$C" "error"
+
+C=$(grep -rn "color:\s*var(--cyan-400)\|color:\s*#00B4D8\|color:\s*#00b4d8" \
+      src/main/resources/ --include="*.css" --include="*.html" | wc -l)
+check "--cyan-400 usado como texto (WCAG FAIL ratio 2.9:1)" "$C" "error"
+
+C=$(grep -rn '<img[^>]*>' src/main/resources/templates/ \
+      --include="*.html" | grep -v 'alt=' | wc -l)
+check "imágenes sin atributo alt" "$C" "error"
+
+C=$(grep -rn 'outline:\s*none\|outline:\s*0' src/main/resources/static/css/ \
+      --include="*.css" | grep -v 'focus-visible\|focus\|:focus' | wc -l)
+check "outline:none sin focus ring de reemplazo" "$C" "error"
+
+C=$(grep -rn "\-\-gold\b\|\-\-bg\b\|\-\-texto-titulo\|\-\-bg-elev" \
+      src/main/resources/ --include="*.html" --include="*.css" \
+      | grep -v "estilos.css" | wc -l)
+check "tokens dark mode pendientes de migrar" "$C" "warn"
+
+C=$(grep -rn 'style=".*color\|style=".*background\|style=".*font-size' \
+      src/main/resources/templates/ --include="*.html" | wc -l)
+check "estilos inline en templates" "$C" "warn"
+
+echo "══════════════════════════════════"
+[ "$ERRORS" -eq 0 ] \
+  && echo "  ✅ APROBADO ($WARNS advertencias)" \
+  || echo "  ❌ BLOQUEADO — $ERRORS errores, $WARNS advertencias"
+echo "══════════════════════════════════"
+exit $ERRORS
+```
+
+## 1. Auditoría Profunda — Colores y Tokens
+```bash
+echo "=== COLORES HARDCODEADOS EN CSS ==="
+grep -rn "color:#\|background-color:#\|border-color:#\|fill:#" \
+  src/main/resources/static/css/ --include="*.css" \
+  | grep -v "estilos.css" | grep -v "/\*"
+
+echo ""
+echo "=== TOKENS DARK MODE ACTIVOS ==="
+grep -rn "\-\-gold\b\|\-\-bg\b\|\-\-texto-titulo\|\-\-text-soft\|\-\-text-muted\|\-\-bg-elev" \
+  src/main/resources/ --include="*.html" --include="*.css" \
+  | grep -v "estilos.css"
+
+echo ""
+echo "=== CYAN-400 COMO TEXTO (WCAG FAIL) ==="
+grep -rn "color:\s*var(--cyan-400)\|color:\s*#00b4d8\|color:\s*#00B4D8" \
+  src/main/resources/ --include="*.css" --include="*.html"
+```
+
+## 2. Auditoría Profunda — Accesibilidad
+```bash
+echo "=== INPUTS SIN LABEL ==="
+# Inputs sin id (no pueden tener <label for="...">)
+grep -rn '<input' src/main/resources/templates/ --include="*.html" \
+  | grep -v 'type="hidden"' \
+  | grep -v 'aria-label\|aria-labelledby' \
+  | grep -v ' id='
+
+echo ""
+echo "=== OUTLINE:NONE SIN REEMPLAZO ==="
+grep -rn 'outline:\s*none\|outline:\s*0' \
+  src/main/resources/static/css/ --include="*.css" \
+  | grep -v ':focus\|focus-visible'
+
+echo ""
+echo "=== IMÁGENES SIN ALT ==="
+grep -rn '<img[^>]*>' src/main/resources/templates/ \
+  --include="*.html" | grep -v 'alt='
+
+echo ""
+echo "=== TABLAS SIN ARIA-LABEL ==="
+grep -n '<table' src/main/resources/templates/**/*.html \
+  | grep -v 'aria-label\|<caption'
+```
+
+## 3. Auditoría Profunda — Tipografía y Espaciado
+```bash
+echo "=== FONT-SIZE MENORES A 11px ==="
+grep -rn "font-size:\s*[0-9]\{1,2\}px" \
+  src/main/resources/static/css/ --include="*.css" \
+  | awk -F'font-size:' '{
+      match($2, /([0-9]+)px/, arr)
+      if(arr[1]+0 < 11 && arr[1]+0 > 0)
+        printf "WARN: %s → %spx (mínimo: 11px)\n", $1, arr[1]
+    }'
+
+echo ""
+echo "=== ESPACIADO FUERA DEL GRID 4pt ==="
+grep -rn "padding:\|margin:\|gap:" \
+  src/main/resources/static/css/ --include="*.css" \
+  | grep -E "[0-9]+px" \
+  | grep -v "var(--\|0px\|1px\|2px\|3px\|0\.5px" \
+  | awk '{
+      match($0, /([0-9]+)px/, arr)
+      val=arr[1]+0
+      if(val > 3 && val % 4 != 0)
+        printf "WARN: %s → %spx (no múltiplo de 4)\n", $0, val
+    }'
+```
+
+## 4. Reemplazos Automáticos Seguros
+```bash
+# Solo ejecutar cuando el agente haya confirmado los cambios
+
+# Migrar tokens dark mode
+sed -i 's/var(--gold)/var(--cyan-400)/g' \
+  src/main/resources/static/css/estilos.css
+
+sed -i 's/var(--texto-titulo)/var(--navy-900)/g' \
+  src/main/resources/templates/*.html \
+  src/main/resources/static/css/*.css
+
+sed -i 's/var(--text-soft)/var(--slate-500)/g' \
+  src/main/resources/templates/*.html \
+  src/main/resources/static/css/*.css
+
+# Corregir cyan-400 como texto
+sed -i 's/color: var(--cyan-400)/color: var(--cyan-600)/g' \
+  src/main/resources/static/css/*.css
+```
+
+## 5. Pre-commit Hook (instalar una sola vez)
+```bash
+cat > .git/hooks/pre-commit << 'HOOK'
+#!/bin/bash
+bash scripts/ux-quick-audit.sh
+if [ $? -ne 0 ]; then
+  echo "❌ Commit bloqueado por errores UX/WCAG."
+  echo "   Usa 'git commit --no-verify' para forzar (no recomendado)."
+  exit 1
+fi
+HOOK
+chmod +x .git/hooks/pre-commit
+echo "✅ Pre-commit hook instalado"
+```

@@ -1,0 +1,181 @@
+---
+description: Snippets canónicos de Botones, Badges y Alertas para Mi Óptica. Usar estos snippets exactos al generar o modificar componentes. No inventar variaciones de clase o estilo. Requiere ds-tokens.mdc activo.
+globs:
+  - "src/main/resources/templates/**/*.html"
+  - "src/main/resources/static/css/**/*.css"
+alwaysApply: false
+---
+
+# Mi Óptica — Componentes: Botones, Badges, Alertas
+
+## 1. Jerarquía de botones — cuándo usar cada uno
+| Clase | Uso en Mi Óptica |
+|---|---|
+| `btn-primary` | Guardar, Registrar venta, Crear ficha |
+| `btn-accent` | Entregar pedido, Aprobar orden lab |
+| `btn-secondary` | Cancelar, Volver, Acción alternativa |
+| `btn-ghost` | Ver detalle, Filtros, Acciones secundarias de tabla |
+| `btn-danger` | Eliminar, Anular venta (siempre con modal de confirmación) |
+
+## 2. HTML canónico
+```html
+<!-- Primario -->
+<button class="btn btn-primary" type="submit">Guardar ficha</button>
+
+<!-- Acento -->
+<button class="btn btn-accent" type="button">Entregar pedido</button>
+
+<!-- Secundario -->
+<button class="btn btn-secondary" type="button">Cancelar</button>
+
+<!-- Ghost -->
+<a th:href="@{/ventas/{id}(id=${v.id})}" class="btn btn-ghost btn-sm">Ver</a>
+
+<!-- Peligro — SIEMPRE acompañado de confirmación modal -->
+<button class="btn btn-danger btn-sm"
+        data-modal-confirm="¿Anular venta #[[${v.correlativo}]]?"
+        data-modal-action="/ventas/[[${v.id}]]/anular"
+        aria-label="${'Anular venta ' + v.correlativo}">
+  Anular
+</button>
+
+<!-- Solo icono — SIEMPRE aria-label -->
+<button class="btn btn-ghost" type="button" aria-label="Imprimir comprobante">
+  <svg aria-hidden="true" width="16" height="16"><!-- icono --></svg>
+</button>
+
+<!-- Con loader HTMX — deshabilita el botón durante la petición -->
+<button class="btn btn-primary"
+        type="submit"
+        hx-post="/ventas/guardar"
+        hx-indicator="this"
+        hx-disabled-elt="this">
+  <span class="btn-text">Guardar venta</span>
+</button>
+
+<!-- Tamaños -->
+<button class="btn btn-primary btn-sm">Pequeño (tablas)</button>
+<button class="btn btn-primary">Normal (formularios)</button>
+<button class="btn btn-primary btn-lg">Grande (acciones principales)</button>
+```
+
+## 3. CSS de botones
+```css
+.btn {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  padding: 9px var(--sp-3); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: var(--text-base);
+  font-weight: 500; cursor: pointer; border: none;
+  transition: background var(--dur-fast) var(--ease-std),
+              transform  var(--dur-fast) var(--ease-std);
+  white-space: nowrap; text-decoration: none; line-height: 1;
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--cyan-400);
+}
+.btn:active   { transform: scale(0.98); }
+.btn:disabled, .btn[disabled] {
+  opacity: .45; cursor: not-allowed; transform: none !important;
+  pointer-events: none;
+}
+.btn-sm { font-size: var(--text-sm); padding: 6px 14px; }
+.btn-lg { font-size: var(--text-md); padding: 12px 28px; }
+
+.btn-primary   { background: var(--navy-900); color: #fff; }
+.btn-primary:hover { background: var(--navy-700); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-accent    { background: var(--cyan-400); color: var(--navy-900); font-weight: 600; }
+.btn-accent:hover  { background: var(--cyan-600); color: #fff; }
+
+.btn-secondary { background: transparent; color: var(--navy-700);
+                 border: 1.5px solid var(--navy-300); }
+.btn-secondary:hover { background: var(--navy-50); }
+
+.btn-ghost     { background: transparent; color: var(--slate-500);
+                 border: 1px solid var(--slate-300); }
+.btn-ghost:hover { background: var(--slate-100); color: var(--slate-700); }
+
+.btn-danger    { background: var(--danger-bg); color: var(--danger);
+                 border: 1px solid #FECACA; }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+
+/* Spinner durante hx-request */
+.btn.htmx-request { pointer-events: none; opacity: .75; position: relative; }
+.btn.htmx-request .btn-text { opacity: 0; }
+.btn.htmx-request::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  margin: -8px 0 0 -8px; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+  border-radius: 50%; animation: btn-spin 650ms linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+```
+
+## 4. Badges — mapeo de estados de Mi Óptica
+```html
+<!-- Órdenes de laboratorio -->
+<span class="badge badge--warning">En laboratorio</span>
+<span class="badge badge--success">Listo para entrega</span>
+<span class="badge badge--cyan">En proceso</span>
+
+<!-- Ventas / pagos -->
+<span class="badge badge--success">Pagado</span>
+<span class="badge badge--danger">Saldo pendiente</span>
+<span class="badge badge--neutral">Cotización</span>
+
+<!-- Usuarios -->
+<span class="badge badge--navy">Administrador</span>
+<span class="badge badge--cyan">Optometrista</span>
+<span class="badge badge--neutral">Vendedor</span>
+
+<!-- Inventario -->
+<span class="badge badge--danger">Sin stock</span>
+<span class="badge badge--warning">Stock bajo</span>
+<span class="badge badge--success">En stock</span>
+```
+```css
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 10px;
+  border-radius: var(--radius-full); font-size: var(--text-xs);
+  font-weight: 500; white-space: nowrap;
+}
+.badge--navy    { background: var(--navy-100);   color: var(--navy-700);  }
+.badge--cyan    { background: var(--cyan-50);    color: var(--cyan-600);  }
+.badge--success { background: var(--success-bg); color: var(--success);   }
+.badge--warning { background: var(--warning-bg); color: var(--warning);   }
+.badge--danger  { background: var(--danger-bg);  color: var(--danger);    }
+.badge--neutral { background: var(--slate-100);  color: var(--slate-700); }
+```
+
+## 5. Alertas y Toast
+```html
+<!-- Alertas estáticas en vista — SIEMPRE role="alert" -->
+<div class="alert alert--success" role="alert">
+  <strong>Venta registrada</strong> — La orden #0914 fue guardada.
+</div>
+<div class="alert alert--warning" role="alert">
+  <strong>Stock bajo:</strong> Ray-Ban RB3447 tiene 2 unidades restantes.
+</div>
+<div class="alert alert--danger" role="alert">
+  <strong>Error:</strong> El NIT ingresado no tiene formato válido.
+</div>
+
+<!-- Flash messages de Spring (en layout.html, cerca del cierre de body) -->
+<div th:if="${toast_success}" class="alert alert--success"
+     role="alert" id="flash-msg" th:text="${toast_success}"></div>
+<div th:if="${toast_error}"   class="alert alert--danger"
+     role="alert" id="flash-msg" th:text="${toast_error}"></div>
+```
+```css
+.alert {
+  display: flex; gap: 10px; padding: 10px 14px;
+  border-radius: var(--radius-md); font-size: var(--text-base);
+  align-items: flex-start; margin-bottom: var(--sp-2);
+}
+.alert--success { background: var(--success-bg); color: #166534; border: 1px solid #BBF7D0; }
+.alert--warning { background: var(--warning-bg); color: #92400E; border: 1px solid #FDE68A; }
+.alert--danger  { background: var(--danger-bg);  color: #9F1239; border: 1px solid #FECDD3; }
+.alert--info    { background: var(--info-bg);    color: #1E40AF; border: 1px solid #BFDBFE; }
+```

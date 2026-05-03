@@ -9,11 +9,24 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ExportService {
+
+    private static String formatoQuetzales(BigDecimal valor) {
+        if (valor == null) {
+            return "Q 0.00";
+        }
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        return "Q " + nf.format(valor.doubleValue());
+    }
 
     // ─── EXPORTAR EXCEL ───────────────────────────────────────────
     public byte[] exportarExcel(List<VentaDetalleDTO> ventas, LocalDate fi, LocalDate ff) throws Exception {
@@ -69,7 +82,7 @@ public class ExportService {
                 row.createCell(3).setCellValue(v.getCategoria());
                 row.createCell(4).setCellValue(v.getProducto());
                 row.createCell(5).setCellValue(v.getCantidad());
-                row.createCell(6).setCellValue(v.getPrecioVenta().doubleValue());
+                row.createCell(6).setCellValue(formatoQuetzales(v.getPrecioVenta()));
                 row.createCell(7).setCellValue(v.getFormaPago());
 
                 for (int i = 0; i <= 7; i++) {
@@ -151,7 +164,7 @@ public class ExportService {
                 v.getCategoria(),
                 v.getProducto(),
                 String.valueOf(v.getCantidad()),
-                "Q" + v.getPrecioVenta(),
+                formatoQuetzales(v.getPrecioVenta()),
                 v.getFormaPago()
             };
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -20,8 +20,8 @@
  
     <div class="page-body">
  
-        <div id="alertaValidacion" class="alert alert-danger" style="display:none"></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"><span th:text="${mensajeError}"></span></div>
+        <div id="alertaValidacion" class="alert alert--danger" style="display:none"></div>
+        <div th:if="${mensajeError}" class="alert alert--danger"><span th:text="${mensajeError}"></span></div>
  
         <!-- ═══ FORM OCULTO ═══════════════════════════════════ -->
         <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"

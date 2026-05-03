@@ -1,0 +1,153 @@
+---
+description: >
+  Snippets canónicos de Botones, Badges y Alertas para Mi Óptica.
+  El agente usa estos snippets exactos. No inventar variaciones.
+  Requiere que ds-tokens.mdc esté aplicado primero.
+globs:
+  - "src/main/resources/templates/**/*.html"
+  - "src/main/resources/static/css/**/*.css"
+alwaysApply: false
+agent_tools_required:
+  - terminal
+---
+
+# Mi Óptica — Componentes: Botones, Badges, Alertas
+
+## 1. Botones — HTML canónico
+```html
+<button class="btn btn-primary"   type="submit">Guardar ficha</button>
+<button class="btn btn-accent"    type="button">Entregar pedido</button>
+<button class="btn btn-secondary" type="button">Cancelar</button>
+<button class="btn btn-ghost"     type="button">Ver historial</button>
+<button class="btn btn-danger"    type="button">Eliminar producto</button>
+
+<!-- Solo icono: siempre con aria-label -->
+<button class="btn btn-ghost" aria-label="Eliminar venta">
+  <svg aria-hidden="true"><!-- icono --></svg>
+</button>
+
+<!-- Con loader HTMX -->
+<button class="btn btn-primary btn-loading"
+        hx-post="/ventas/guardar" hx-indicator="this">
+  <span class="btn-text">Guardar venta</span>
+</button>
+```
+
+## 2. Botones — CSS
+```css
+.btn {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  padding: 9px var(--sp-3); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: var(--text-base);
+  font-weight: 500; cursor: pointer; border: none;
+  transition: background var(--dur-fast) var(--ease-std),
+              transform  var(--dur-fast) var(--ease-std);
+  white-space: nowrap; text-decoration: none;
+}
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--cyan-400); }
+.btn:active        { transform: scale(0.98); }
+.btn:disabled      { opacity: .45; cursor: not-allowed; transform: none !important; }
+.btn-sm { font-size: var(--text-sm); padding: 6px 14px; }
+.btn-lg { font-size: var(--text-md); padding: 12px 28px; }
+
+.btn-primary   { background: var(--navy-900); color: #fff; }
+.btn-primary:hover { background: var(--navy-700); transform: translateY(-1px); }
+
+.btn-accent    { background: var(--cyan-400); color: var(--navy-900); font-weight: 600; }
+.btn-accent:hover { background: var(--cyan-600); color: #fff; }
+
+.btn-secondary { background: transparent; color: var(--navy-700); border: 1.5px solid var(--navy-300); }
+.btn-secondary:hover { background: var(--navy-50); }
+
+.btn-ghost     { background: transparent; color: var(--slate-500); border: 1px solid var(--slate-300); }
+.btn-ghost:hover { background: var(--slate-100); color: var(--slate-700); }
+
+.btn-danger    { background: var(--danger-bg); color: var(--danger); border: 1px solid #FECACA; }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+
+/* Estado de carga */
+.btn-loading   { pointer-events: none; opacity: .75; position: relative; }
+.btn-loading .btn-text { opacity: 0; }
+.btn-loading::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  margin: -8px 0 0 -8px; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin 650ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+```
+
+## 3. Badges — HTML y CSS
+```html
+<span class="badge badge--navy">Administrador</span>
+<span class="badge badge--cyan">Optometrista</span>
+<span class="badge badge--success">Entregado</span>
+<span class="badge badge--warning">En laboratorio</span>
+<span class="badge badge--danger">Saldo pendiente</span>
+<span class="badge badge--neutral">Sin stock</span>
+```
+```css
+.badge { display: inline-flex; align-items: center; padding: 3px 10px;
+         border-radius: var(--radius-full); font-size: var(--text-xs);
+         font-weight: 500; white-space: nowrap; }
+.badge--navy    { background: var(--navy-100);   color: var(--navy-700); }
+.badge--cyan    { background: var(--cyan-50);    color: var(--cyan-600); }
+.badge--success { background: var(--success-bg); color: var(--success); }
+.badge--warning { background: var(--warning-bg); color: var(--warning); }
+.badge--danger  { background: var(--danger-bg);  color: var(--danger);  }
+.badge--neutral { background: var(--slate-100);  color: var(--slate-700);}
+```
+
+## 4. Alertas
+```html
+<!-- Siempre role="alert" para feedback dinámico -->
+<div class="alert alert--success" role="alert">
+  <strong>Venta registrada</strong> — La orden fue guardada y el inventario actualizado.
+</div>
+<div class="alert alert--warning" role="alert">
+  <strong>Stock bajo:</strong> Ray-Ban RB3447 tiene solo 2 unidades.
+</div>
+<div class="alert alert--danger"  role="alert">
+  <strong>Error:</strong> El NIT ingresado no tiene un formato válido.
+</div>
+<div class="alert alert--info"    role="alert">
+  Orden en laboratorio. Listo en 3–5 días hábiles.
+</div>
+```
+```css
+.alert { display: flex; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md);
+         font-size: var(--text-base); align-items: flex-start; }
+.alert--success { background: var(--success-bg); color: #166534; border: 1px solid #BBF7D0; }
+.alert--warning { background: var(--warning-bg); color: #92400E; border: 1px solid #FDE68A; }
+.alert--danger  { background: var(--danger-bg);  color: #9F1239; border: 1px solid #FECDD3; }
+.alert--info    { background: var(--info-bg);    color: #1E40AF; border: 1px solid #BFDBFE; }
+```
+
+## 5. Toast Notifications (JS vanilla)
+```javascript
+const Toast = {
+  _container: null,
+  _getContainer() {
+    if (!this._container) {
+      this._container = Object.assign(document.createElement('div'), {
+        className: 'toast-container'
+      });
+      document.body.appendChild(this._container);
+    }
+    return this._container;
+  },
+  show(msg, type = 'success', ms = 3500) {
+    const t = Object.assign(document.createElement('div'), {
+      className: `toast toast--${type}`, textContent: msg
+    });
+    this._getContainer().appendChild(t);
+    setTimeout(() => {
+      t.classList.add('toast--exit');
+      t.addEventListener('animationend', () => t.remove(), { once: true });
+    }, ms);
+  },
+  success: (m) => Toast.show(m, 'success'),
+  error:   (m) => Toast.show(m, 'error',   5000),
+  warning: (m) => Toast.show(m, 'warning'),
+};
+```

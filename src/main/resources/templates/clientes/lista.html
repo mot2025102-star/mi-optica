@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -25,8 +25,8 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -157,7 +157,7 @@
 
                             <!-- Estado -->
                             <td>
-                                <span th:class="${c.activo} ? 'badge badge-success' : 'badge badge-danger'"
+                                <span th:class="${c.activo} ? 'badge badge--success' : 'badge badge--danger'"
                                       th:text="${c.activo} ? 'Activo' : 'Inactivo'"></span>
                             </td>
 

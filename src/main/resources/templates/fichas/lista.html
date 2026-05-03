@@ -21,8 +21,8 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -135,24 +135,24 @@
                             <!-- Estado entrega -->
                             <td>
                                 <span th:if="${f.estadoEntrega == 'Entregado'}"
-                                      class="badge badge-success"> Entregado</span>
+                                      class="badge badge--success"> Entregado</span>
                                 <span th:if="${f.estadoEntrega == 'En proceso'}"
-                                      class="badge badge-info"> En proceso</span>
+                                      class="badge badge--info"> En proceso</span>
                                 <span th:if="${f.estadoEntrega == 'Pendiente' or f.estadoEntrega == null}"
-                                      class="badge badge-warning"> Pendiente</span>
+                                      class="badge badge--warning"> Pendiente</span>
                             </td>
 
                             <!-- Total -->
                             <td style="text-align:right" class="text-sm"
-                                th:text="'Q' + ${#numbers.formatDecimal(f.total,1,'COMMA',2,'POINT')}"></td>
+                                th:text="'Q ' + ${#numbers.formatDecimal(f.total,1,'COMMA',2,'POINT')}"></td>
 
                             <!-- Saldo -->
                             <td style="text-align:right">
                                 <span th:if="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                                       class="fw-600" style="color:var(--rojo)"
-                                      th:text="'Q' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}"></span>
+                                      th:text="'Q ' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}"></span>
                                 <span th:unless="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
-                                      class="badge badge-success" style="font-size:11px">Pagado</span>
+                                      class="badge badge--success" style="font-size:11px">Pagado</span>
                             </td>
 
                             <!-- Acciones -->

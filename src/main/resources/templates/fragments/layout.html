@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -138,9 +138,7 @@
         </div>
     </div>
 
-    <a th:href="@{/perfil}" class="sidebar-user" title="Ver mi perfil"
-       style="text-decoration:none;cursor:pointer;transition:opacity .15s"
-       onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity='1'">
+    <a th:href="@{/perfil}" class="sidebar-user" title="Ver mi perfil">
         <!-- Avatar: foto si existe, iniciales si no -->
         <div class="sidebar-user-avatar" style="overflow:hidden;position:relative">
             <sec:authentication property="principal.username" var="username"/>
