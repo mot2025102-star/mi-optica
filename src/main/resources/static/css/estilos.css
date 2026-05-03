@@ -250,8 +250,7 @@ h4{ font-size:18px; }
   gap:2px;
   flex:1;
   height:100%;
-  overflow-x:auto;
-  overflow-y:visible;
+  overflow:visible;
   flex-wrap:nowrap;
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
@@ -305,6 +304,31 @@ h4{ font-size:18px; }
 }
 .sidebar-item.active{ color:var(--cyan-400); }
 .sidebar-item.active::after{ transform:scaleX(1); }
+
+/* ── IMAGE PREVIEW ON HOVER ─────────────────────────────── */
+.nav-preview {
+  position: fixed;
+  bottom: calc(100vh - var(--topbar-h) + 12px);
+  left: 0;
+  width: 130px;
+  height: 130px;
+  border-radius: 14px;
+  background-color: rgba(13,27,42,0.88);
+  background-image: var(--nav-img);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: 0 -8px 32px rgba(0,0,0,.6), 0 0 0 1px rgba(0,180,216,.35);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .2s ease, transform .2s ease;
+  z-index: 99999;
+}
+.sidebar-item:hover .nav-preview {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .sidebar-user{
   display:flex; align-items:center; gap:8px;
