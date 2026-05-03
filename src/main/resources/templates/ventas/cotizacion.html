@@ -28,7 +28,7 @@
         <!-- PASO 1: BUSCAR FICHA CLÍNICA -->
         <div class="card mb-3">
             <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                <div style="font-size:13px;font-weight:700;color:var(--turquesa)">🔍 Paso 1 — Buscar Ficha Clínica del Paciente</div>
+                <div style="font-size:13px;font-weight:700;color:var(--turquesa)"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Paso 1 — Buscar Ficha Clínica del Paciente</div>
                 <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Busca por nombre del cliente o número de ficha</div>
             </div>
             <div class="card-body">
@@ -36,7 +36,7 @@
                     <div class="form-group" style="position:relative">
                         <label class="form-label">Buscar ficha clínica</label>
                         <div style="position:relative">
-                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)">🔍</span>
+                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
                             <input type="text" id="busqFicha" class="form-control" style="padding-left:36px"
                                    placeholder="Nombre del cliente o # de ficha..."
                                    autocomplete="off"
@@ -417,7 +417,7 @@ function agregarFila() {
         <input type="number" id="sub_${idx}" class="form-control" readonly
                style="background:rgba(39,194,201,0.08);color:var(--turquesa);font-weight:600" value="0.00">
         <button type="button" class="btn btn-danger btn-sm"
-                onclick="document.getElementById('fila_${idx}').remove();calcTotal()">🗑</button>
+                onclick="document.getElementById('fila_${idx}').remove();calcTotal()"><svg style="width:13px;height:13px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
     `;
     document.getElementById('listaProds').appendChild(div);
 }

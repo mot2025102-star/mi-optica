@@ -10,7 +10,7 @@
 <div class="main-content">
     <div class="topbar">
         <div>
-            <div class="topbar-title">🔬 Órdenes de Laboratorio</div>
+            <div class="topbar-title"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0h10m-10 0a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2m0 0V9m0 5a2 2 0 0 1-2-2V9m0 0H9"/></svg> Órdenes de Laboratorio</div>
             <div class="topbar-sub"
                  th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}">
             </div>
@@ -110,7 +110,7 @@
                             <!-- CELDA ORIGEN (nueva) -->
                             <td>
                                 <span th:if="${o.origen == 'FICHA_INTERNA'}"  class="badge badge-info">🏥 Ficha</span>
-                                <span th:if="${o.origen == 'RECETA_EXTERNA'}" class="badge badge-warning">📋 Externa</span>
+                                <span th:if="${o.origen == 'RECETA_EXTERNA'}" class="badge badge-warning"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Externa</span>
                                 <span th:if="${o.origen == 'MANUAL' or o.origen == null}" class="badge badge-secondary">✏️ Manual</span>
                             </td>
 
