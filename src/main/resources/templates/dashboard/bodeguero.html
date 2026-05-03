@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Dashboard Bodeguero')}"></head>
 <body>
@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="topbar-actions">
-            <a th:href="@{/inventario}" class="btn btn-primary">Ver Inventario</a>
+            <a th:href="@{/inventario}" class="btn-inventario-premium">Ver Inventario</a>
         </div>
     </div>
 
@@ -110,7 +110,7 @@
         <div class="card" th:if="${!stockBajo.isEmpty()}">
             <div class="card-header">
                 <div class="card-title">Productos con Stock Bajo</div>
-                <a th:href="@{/inventario}" class="btn btn-secondary btn-sm">Ver inventario →</a>
+                <a th:href="@{/inventario}" class="btn-inventario-premium btn-sm">Ver inventario →</a>
             </div>
             <div class="table-wrapper">
                 <table class="table">
@@ -131,7 +131,7 @@
                             <td class="text-sm" th:text="${inv.sucursal.nombre}"></td>
                             <td style="text-align:center">
                                 <span th:class="${inv.existencia.compareTo(T(java.math.BigDecimal).ZERO) == 0}
-                                    ? 'badge badge-danger' : 'badge badge-warning'"
+                                    ? 'badge badge--danger' : 'badge badge--warning'"
                                       th:text="${inv.existencia}">
                                 </span>
                             </td>

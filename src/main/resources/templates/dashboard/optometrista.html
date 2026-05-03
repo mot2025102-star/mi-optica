@@ -164,19 +164,19 @@
                                 </div>
                             </td>
                             <td>
-                                <span th:if="${f.estadoEntrega == 'En proceso'}"  class="badge badge-info">En proceso</span>
-                                <span th:if="${f.estadoEntrega == 'Pendiente' or f.estadoEntrega == null}" class="badge badge-warning">Pendiente</span>
+                                <span th:if="${f.estadoEntrega == 'En proceso'}"  class="badge badge--info">En proceso</span>
+                                <span th:if="${f.estadoEntrega == 'Pendiente' or f.estadoEntrega == null}" class="badge badge--warning">Pendiente</span>
                             </td>
                             <td style="text-align:right">
                                 <span th:if="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                                       class="fw-600" style="color:var(--rojo)"
-                                      th:text="'Q' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}"></span>
+                                      th:text="'Q ' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}"></span>
                                 <span th:unless="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
-                                      class="badge badge-success">Pagado</span>
+                                      class="badge badge--success">Pagado</span>
                             </td>
                             <td>
                                 <a th:href="@{/fichas/editar/{id}(id=${f.idFicha})}"
-                                   class="btn btn-sm btn-secondary">Editar</a>
+                                   class="btn btn-sm btn btn-secondary">Editar</a>
                             </td>
                         </tr>
                     </tbody>

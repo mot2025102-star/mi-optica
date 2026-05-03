@@ -20,15 +20,15 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon verde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
                 <div class="stat-info">
-                    <div class="stat-value" th:text="'Q' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">Q0.00</div>
+                    <div class="stat-value" th:text="'Q ' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">Q 0.00</div>
                     <div class="stat-label">Total período</div>
                 </div>
             </div>
@@ -42,7 +42,7 @@
             <div class="stat-card">
                 <div class="stat-icon amarillo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
                 <div class="stat-info">
-                    <div class="stat-value" th:text="${cantPeriodo > 0} ? 'Q' + ${#numbers.formatDecimal(totalPeriodo / cantPeriodo, 1,'COMMA',2,'POINT')} : 'Q0.00'">Q0.00</div>
+                    <div class="stat-value" th:text="${cantPeriodo > 0} ? 'Q ' + ${#numbers.formatDecimal(totalPeriodo / cantPeriodo, 1,'COMMA',2,'POINT')} : 'Q 0.00'">Q 0.00</div>
                     <div class="stat-label">Promedio por venta</div>
                 </div>
             </div>
@@ -110,20 +110,20 @@
                             </td>
                         </tr>
                         <tr th:each="v : ${ventas}">
-                            <td class="text-turquesa fw-600" th:text="${v.numeroFactura}"></td>
+                            <td class="text-cyan fw-600" th:text="${v.numeroFactura}"></td>
                             <td class="text-sm"              th:text="${#temporals.format(v.fecha,'dd/MM/yyyy')}"></td>
                             <td class="text-sm"              th:text="${v.cliente != null ? v.cliente.nombre : 'CF'}"></td>
                             <td class="text-sm text-gris"    th:text="${v.usuario != null ? v.usuario.nombreCompleto : '—'}"></td>
                             <td class="text-sm" sec:authorize="hasRole('ADMINISTRADOR')" th:text="${v.sucursal != null ? v.sucursal.nombre : '—'}"></td>
                             <td style="text-align:right" class="text-sm"
-                                th:classappend="${v.descuento != null and v.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'text-naranja' : 'text-gris'"
-                                th:text="${v.descuento != null and v.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? '- Q' + ${#numbers.formatDecimal(v.descuento,1,'COMMA',2,'POINT')} : '—'">
+                                th:classappend="${v.descuento != null and v.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'text-warning' : 'text-gris'"
+                                th:text="${v.descuento != null and v.descuento.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? '- Q ' + ${#numbers.formatDecimal(v.descuento,1,'COMMA',2,'POINT')} : '—'">
                             </td>
                             <td style="text-align:right" class="fw-600 text-verde"
-                                th:text="${v.total != null} ? 'Q' + ${#numbers.formatDecimal(v.total,1,'COMMA',2,'POINT')} : 'Q0.00'">
+                                th:text="${v.total != null} ? 'Q ' + ${#numbers.formatDecimal(v.total,1,'COMMA',2,'POINT')} : 'Q 0.00'">
                             </td>
                             <td>
-                                <span th:class="${v.estado == 'Pagada'} ? 'badge badge-success' : 'badge badge-danger'"
+                                <span th:class="${v.estado == 'Pagada'} ? 'badge badge--success' : 'badge badge--danger'"
                                       th:text="${v.estado}">
                                 </span>
                             </td>
@@ -188,8 +188,8 @@
                         <tr style="background:rgba(39,194,201,0.08)">
                             <td colspan="5" class="fw-600">TOTAL DEL PERÍODO</td>
                             <td></td>
-                            <td style="text-align:right" class="fw-600 text-turquesa"
-                                th:text="'Q' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">
+                            <td style="text-align:right" class="fw-600 text-cyan"
+                                th:text="'Q ' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">
                             </td>
                             <td colspan="2"></td>
                         </tr>
@@ -256,24 +256,24 @@ async function verDetalle(id, num) {
         <div><div class="text-gris text-sm">Vendedor</div><div class="fw-600">${d.info.vendedor}</div></div>
         <div><div class="text-gris text-sm">Sucursal</div><div class="fw-600">${d.info.sucursal}</div></div>
         <div><div class="text-gris text-sm">Fecha</div><div class="fw-600">${d.info.fecha}</div></div>
-        <div><div class="text-gris text-sm">Estado</div><span class="badge ${d.info.estado==='Pagada'?'badge-success':'badge-danger'}">${d.info.estado}</span></div>
+        <div><div class="text-gris text-sm">Estado</div><span class="badge ${d.info.estado==='Pagada'?'badge--success':'badge--danger'}">${d.info.estado}</span></div>
     </div>`;
     h += '<div class="table-wrapper"><table class="table"><thead><tr><th>Código</th><th>Producto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Precio</th><th style="text-align:right">Desc.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody>';
     d.items.forEach(it => {
         h += `<tr>
-            <td class="text-turquesa text-sm fw-600">${it.codigo}</td>
+            <td class="text-cyan text-sm fw-600">${it.codigo}</td>
             <td>${it.detalle}</td>
             <td style="text-align:center">${it.cantidad}</td>
-            <td style="text-align:right">Q${parseFloat(it.precio).toFixed(2)}</td>
-            <td style="text-align:right">${parseFloat(it.descuento)>0?'Q'+parseFloat(it.descuento).toFixed(2):'—'}</td>
-            <td style="text-align:right" class="fw-600">Q${parseFloat(it.subtotal).toFixed(2)}</td>
+            <td style="text-align:right">Q ${parseFloat(it.precio).toFixed(2)}</td>
+            <td style="text-align:right">${parseFloat(it.descuento)>0?'Q ' + parseFloat(it.descuento).toFixed(2):'—'}</td>
+            <td style="text-align:right" class="fw-600">Q ${parseFloat(it.subtotal).toFixed(2)}</td>
         </tr>`;
     });
     h += '</tbody></table></div>';
     h += `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-borde)">
-        <div><span class="text-gris text-sm">Subtotal: </span><span class="fw-600">Q${parseFloat(d.info.subtotal).toFixed(2)}</span></div>
-        ${parseFloat(d.info.descuento)>0?`<div><span class="text-gris text-sm">Descuento: </span><span class="fw-600 text-naranja">-Q${parseFloat(d.info.descuento).toFixed(2)}</span></div>`:''}
-        <div style="font-size:18px"><span class="text-gris text-sm">TOTAL: </span><span class="fw-600 text-turquesa">Q${parseFloat(d.info.total).toFixed(2)}</span></div>
+        <div><span class="text-gris text-sm">Subtotal: </span><span class="fw-600">Q ${parseFloat(d.info.subtotal).toFixed(2)}</span></div>
+        ${parseFloat(d.info.descuento)>0?`<div><span class="text-gris text-sm">Descuento: </span><span class="fw-600 text-warning">- Q ${parseFloat(d.info.descuento).toFixed(2)}</span></div>`:''}
+        <div style="font-size:18px"><span class="text-gris text-sm">TOTAL: </span><span class="fw-600 text-cyan">Q ${parseFloat(d.info.total).toFixed(2)}</span></div>
     </div>`;
     document.getElementById('detBody').innerHTML = h;
 }

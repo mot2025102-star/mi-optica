@@ -1,31 +1,34 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Óptica | Iniciar Sesión</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-        :root {
-            --accent:      #d4b27a;
-            --accent-glow: rgba(212,178,122,.18);
-            --bg:          #0a0a0b;
-            --bg-1:        #111114;
-            --text:        #f5f3ee;
-            --text-muted:  #74716a;
-            --border:      rgba(255,255,255,.08);
-            --border-h:    rgba(255,255,255,.18);
-            --danger:      #e07a6b;
-            --success:     #6ec19a;
-            --warning:     #e2b86b;
+                :root {
+            --accent:      #00B4D8; /* cyan-400 */
+            --accent-glow: rgba(0,180,216,.15);
+            --bg:          #F9FAFB; /* slate-50 */
+            --bg-1:        #ffffff;
+            --text:        #374151; /* slate-700 */
+            --text-muted:  #6B7280; /* slate-500 */
+            --border:      #D1D5DB; /* slate-300 */
+            --border-h:    #9CA3AF;
+            --danger:      #DC2626;
+            --success:     #059669;
+            --warning:     #D97706;
             --ease-out:    cubic-bezier(.16,1,.3,1);
-            --font:        'Inter Tight', system-ui, sans-serif;
-            --font-d:      'Fraunces', serif;
+            --font:        'Urbanist', system-ui, sans-serif;
+            --font-d:      'Urbanist', sans-serif;
+            --navy-900:    #0D1B2A;
         }
 
         body {
@@ -69,7 +72,7 @@
         }
         .form-side::before {
             content:""; position:absolute; inset:0;
-            background: radial-gradient(ellipse 70% 50% at 50% -10%, var(--accent-glow), transparent 60%);
+            background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0,180,216,.08), transparent 60%);
             pointer-events:none;
         }
 
@@ -94,12 +97,12 @@
             stroke-linecap:round; stroke-linejoin:round;
         }
         #eyePupil  { fill: var(--accent); }
-        #eyeLid    { fill: var(--bg-1); }
+        #eyeLid    { fill: #ffffff; }
 
         .login-brand-title {
             font-family: var(--font-d);
             font-size:28px; font-weight:400;
-            color:#fafaf7; letter-spacing:-.02em; line-height:1.1;
+            color: var(--navy-900); letter-spacing:-.02em; line-height:1.1;
         }
         .login-brand-title::after { content:"."; color: var(--accent); }
         .login-brand-sub {
@@ -116,7 +119,7 @@
         .login-heading h2 {
             font-family:var(--font-d);
             font-size:22px; font-weight:400;
-            color:#fafaf7; letter-spacing:-.01em;
+            color: var(--navy-900); letter-spacing:-.01em;
         }
         .login-heading p { font-size:12px; margin-top:4px; color: var(--text-muted); }
 
@@ -129,8 +132,8 @@
         }
         .alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
         .alert-error   { color:var(--danger);  background:rgba(224,122,107,.10); border-color:rgba(224,122,107,.25); border-left:2px solid var(--danger); }
-        .alert-success { color:var(--success); background:rgba(110,193,154,.10); border-color:rgba(110,193,154,.25); border-left:2px solid var(--success); }
-        .alert-warning { color:var(--warning); background:rgba(226,184,107,.10); border-color:rgba(226,184,107,.25); border-left:2px solid var(--warning); }
+        .alert--success { color:var(--success); background:rgba(110,193,154,.10); border-color:rgba(110,193,154,.25); border-left:2px solid var(--success); }
+        .alert--warning { color:var(--warning); background:rgba(226,184,107,.10); border-color:rgba(226,184,107,.25); border-left:2px solid var(--warning); }
 
         /* Inputs */
         .input-wrapper { position:relative; margin-bottom:1.75rem; }
@@ -187,7 +190,7 @@
             border-radius:999px;
             background-color: var(--accent);
             box-shadow: 0 8px 24px -10px var(--accent-glow);
-            color:#0a0a0b;
+            color: #ffffff;
             font-size:11px; font-weight:700;
             font-family:var(--font);
             letter-spacing:.2em; text-transform:uppercase;
@@ -266,11 +269,11 @@
                 <span class="alert-icon">&#9888;</span>
                 <span th:text="${mensajeError}"></span>
             </div>
-            <div th:if="${mensajeLogout}" class="alert alert-success">
+            <div th:if="${mensajeLogout}" class="alert alert--success">
                 <span class="alert-icon">&#10003;</span>
                 <span th:text="${mensajeLogout}"></span>
             </div>
-            <div th:if="${mensajeExpired}" class="alert alert-warning">
+            <div th:if="${mensajeExpired}" class="alert alert--warning">
                 <span class="alert-icon">&#9200;</span>
                 <span th:text="${mensajeExpired}"></span>
             </div>
@@ -299,7 +302,7 @@
                     </button>
                 </div>
 
-                <button type="submit" class="login-button">Ingresar</button>
+                <button type="submit" class="btn btn-primary login-button-override">Ingresar</button>
             </form>
 
             <div class="footer-links">

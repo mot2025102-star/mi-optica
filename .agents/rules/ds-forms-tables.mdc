@@ -1,0 +1,183 @@
+---
+description: >
+  Snippets canónicos de Formularios, Tablas y Cards para Mi Óptica.
+  Incluye patrones específicos para campos ópticos (esfera, cilindro,
+  eje) y tablas de datos clínicos/financieros. Requiere ds-tokens.mdc.
+globs:
+  - "src/main/resources/templates/**/*.html"
+  - "src/main/resources/static/css/**/*.css"
+alwaysApply: false
+agent_tools_required:
+  - terminal
+---
+
+# Mi Óptica — Formularios, Tablas y Cards
+
+## 1. Formulario — Campo Estándar (Thymeleaf)
+```html
+<div class="form-group">
+  <label class="form-label" for="campo-dpi">DPI del paciente</label>
+  <input  class="form-input"
+          id="campo-dpi" type="text"
+          th:field="*{dpi}"
+          th:classappend="${#fields.hasErrors('dpi')} ? 'form-input--error'"
+          placeholder="0000 00000 0000"
+          aria-required="true"
+          th:aria-describedby="${#fields.hasErrors('dpi')} ? 'error-dpi' : null">
+  <span   class="form-error" id="error-dpi" role="alert"
+          th:if="${#fields.hasErrors('dpi')}"
+          th:errors="*{dpi}">Error</span>
+  <span   class="form-hint">13 dígitos sin espacios</span>
+</div>
+```
+
+## 2. Campos Ópticos (esfera, cilindro, eje) — SIEMPRE font-mono
+```html
+<div class="form-row-optical">
+  <div class="form-group">
+    <label class="form-label" for="od-esfera">OD Esfera</label>
+    <input class="form-input form-input--optical" id="od-esfera"
+           type="text" placeholder="-0.00" aria-label="Esfera ojo derecho">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="od-cilindro">Cilindro</label>
+    <input class="form-input form-input--optical" id="od-cilindro"
+           type="text" placeholder="-0.00">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="od-eje">Eje</label>
+    <input class="form-input form-input--optical" id="od-eje"
+           type="text" placeholder="000°">
+  </div>
+</div>
+```
+
+## 3. Formularios — CSS
+```css
+.form-group  { display: flex; flex-direction: column; gap: 6px; }
+.form-label  { font-size: var(--text-sm); font-weight: 500; color: var(--navy-700); }
+.form-hint   { font-size: var(--text-xs); color: var(--slate-500); }
+.form-error  { font-size: var(--text-xs); color: var(--danger); }
+
+.form-input {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--slate-300); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: var(--text-base);
+  color: var(--slate-700); background: #fff; outline: none;
+  transition: border-color var(--dur-fast) var(--ease-std),
+              box-shadow   var(--dur-fast) var(--ease-std);
+  box-sizing: border-box;
+}
+.form-input:hover       { border-color: var(--slate-500); }
+.form-input:focus       { border-color: var(--cyan-400); box-shadow: var(--shadow-focus); }
+.form-input--error      { border-color: var(--danger) !important;
+                          box-shadow: 0 0 0 3px rgba(220,38,38,.1) !important; }
+.form-input--success    { border-color: var(--success) !important;
+                          box-shadow: 0 0 0 3px rgba(5,150,105,.1) !important; }
+/* Valores ópticos: mono + derecha */
+.form-input--optical    { font-family: var(--font-mono); text-align: right;
+                          letter-spacing: .03em; }
+.form-row-optical       { display: grid; grid-template-columns: repeat(3, 1fr);
+                          gap: var(--sp-2); }
+```
+
+## 4. Cards — HTML y CSS
+```html
+<!-- Ficha clínica / reportes — acento navy -->
+<div class="card card-navy">
+  <div class="card__label">FICHA CLÍNICA · #2847</div>
+  <h3  class="card__title">Ana Pérez García</h3>
+  <p   class="card__body">OD: -2.50 / -0.75 × 175°</p>
+  <div class="card__footer">
+    <span class="badge badge--warning">En laboratorio</span>
+  </div>
+</div>
+
+<!-- Venta / pago — acento cyan -->
+<div class="card card-cyan">...</div>
+
+<!-- KPI de dashboard -->
+<div class="stat-card">
+  <p class="stat-card__label">Ventas hoy</p>
+  <p class="stat-card__value">Q 4,290</p>
+  <p class="stat-card__delta stat-card__delta--up">+12% vs ayer</p>
+</div>
+
+<!-- Card con hover interactivo (módulos del dashboard) -->
+<div class="card card-interactive">...</div>
+```
+```css
+.card {
+  background: #fff; border: 0.5px solid var(--slate-300);
+  border-radius: var(--radius-lg); padding: var(--sp-3);
+}
+.card-navy   { border-left: 3px solid var(--navy-900);
+               border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+.card-cyan   { border-left: 3px solid var(--cyan-400);
+               border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+.card__label { font-size: var(--text-xs); font-weight: 600;
+               letter-spacing: .08em; text-transform: uppercase; color: var(--slate-500); }
+.card__title { font-size: var(--text-lg); font-weight: 600; color: var(--navy-900); margin: 4px 0; }
+.card__body  { font-size: var(--text-base); color: var(--slate-700); }
+.card__footer{ margin-top: var(--sp-1); display: flex; gap: var(--sp-1); align-items: center; }
+
+.stat-card             { background: var(--slate-100); border-radius: var(--radius-md);
+                         padding: 14px var(--sp-2); }
+.stat-card__label      { font-size: var(--text-xs); font-weight: 500; color: var(--slate-500);
+                         text-transform: uppercase; letter-spacing: .06em; }
+.stat-card__value      { font-size: 22px; font-weight: 500; color: var(--navy-900); }
+.stat-card__delta--up  { font-size: var(--text-xs); color: var(--success); }
+.stat-card__delta--down{ font-size: var(--text-xs); color: var(--danger); }
+
+.card-interactive {
+  transition: transform    var(--dur-normal) var(--ease-std),
+              box-shadow   var(--dur-normal) var(--ease-std),
+              border-color var(--dur-fast)   var(--ease-std);
+}
+.card-interactive:hover {
+  transform: translateY(-2px); border-color: var(--cyan-400);
+  box-shadow: 0 6px 20px rgba(0,180,216,.10);
+}
+```
+
+## 5. Tablas de Datos
+```html
+<table class="data-table" role="table" aria-label="Listado de ventas">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Cliente</th>
+      <th scope="col" class="col-optical">OD / OI</th>
+      <th scope="col" class="col-amount">Total</th>
+      <th scope="col">Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="v : ${ventas}">
+      <td th:text="${v.id}"></td>
+      <td th:text="${v.cliente.nombre}"></td>
+      <td class="col-optical" th:text="${v.receta}"></td>
+      <td class="col-amount"  th:text="${'Q ' + v.total}"></td>
+      <td><span class="badge"
+               th:classappend="'badge--' + ${v.estadoCss}"
+               th:text="${v.estado}"></span></td>
+    </tr>
+  </tbody>
+</table>
+```
+```css
+.data-table            { width: 100%; border-collapse: collapse; font-size: var(--text-base); }
+.data-table th         { text-align: left; padding: var(--sp-1) 14px;
+                         background: var(--navy-50); color: var(--navy-700);
+                         font-weight: 600; font-size: var(--text-xs);
+                         text-transform: uppercase; letter-spacing: .07em;
+                         border-bottom: 2px solid var(--navy-100); }
+.data-table td         { padding: 10px 14px; border-bottom: 0.5px solid var(--slate-200);
+                         color: var(--slate-700);
+                         transition: background var(--dur-fast) var(--ease-std); }
+.data-table tr:hover td{ background: var(--navy-50); }
+.col-optical, .col-sku { font-family: var(--font-mono); font-size: var(--text-sm);
+                         color: var(--navy-700); }
+.col-amount            { font-family: var(--font-mono); font-weight: 500;
+                         color: var(--navy-900); text-align: right; }
+```

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org">
 
@@ -18,7 +18,7 @@
     </div>
 
     <div class="page-body">
-        <div id="alertaError" class="alert alert-danger" style="display:none"></div>
+        <div id="alertaError" class="alert alert--danger" style="display:none"></div>
 
         <!-- Datos del Cliente -->
         <div class="card mb-3">
@@ -97,7 +97,7 @@
         <div class="card mb-3">
             <div class="card-header">
                 <div class="card-title"> Productos Solicitados</div>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="agregarFila()"> Agregar fila</button>
+                <button type="button" class="btn btn-sm btn btn-secondary" onclick="agregarFila()"> Agregar fila</button>
             </div>
             <div class="card-body" style="padding:0;overflow-x:auto">
                 <table class="table" id="tblProductos">
@@ -162,7 +162,7 @@
             <td><input class="form-control form-control-sm p-material" placeholder="CR-39, Policarbonato..."></td>
             <td><input class="form-control form-control-sm p-tratamiento" placeholder="AR, UV, Fotocromático..."></td>
             <td><input class="form-control form-control-sm p-color" placeholder="Transparente, Gris..."></td>
-            <td><button class="btn btn-sm btn-danger" onclick="quitarFila(${filaIdx})"></button></td>
+            <td><button class="btn btn-sm btn btn-danger" onclick="quitarFila(${filaIdx})"></button></td>
         `;
         document.getElementById('bodyProductos').appendChild(tr);
         filaIdx++;

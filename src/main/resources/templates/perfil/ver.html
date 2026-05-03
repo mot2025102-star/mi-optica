@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -17,8 +17,8 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"><span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"> <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"><span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger"> <span th:text="${mensajeError}"></span></div>
 
         <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
 
@@ -69,8 +69,8 @@
                     </div>
 
                     <!-- Badge activo -->
-                    <span th:if="${usuario.activo}"  class="badge badge-success">Cuenta activa</span>
-                    <span th:unless="${usuario.activo}" class="badge badge-danger">Cuenta inactiva</span>
+                    <span th:if="${usuario.activo}"  class="badge badge--success">Cuenta activa</span>
+                    <span th:unless="${usuario.activo}" class="badge badge--danger">Cuenta inactiva</span>
 
                     <!-- Form subida de foto (oculto, se activa con el label de cámara) -->
                     <form th:action="@{/perfil/foto}" method="post" enctype="multipart/form-data"

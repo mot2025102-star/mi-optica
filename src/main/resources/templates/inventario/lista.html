@@ -23,8 +23,8 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats clicables -->
         <div class="stats-grid">
@@ -63,7 +63,7 @@
         </div>
 
         <!-- Alerta si viene filtrado por producto -->
-        <div th:if="${pid > 0}" class="alert alert-info">
+        <div th:if="${pid > 0}" class="alert alert--info">
              Mostrando solo el producto seleccionado.
             <a th:href="@{/inventario}" style="color:var(--turquesa);font-weight:600">✖ Quitar filtro</a>
         </div>
@@ -132,24 +132,24 @@
                             <!-- Badge stock -->
                             <td style="text-align:center">
                                 <span th:if="${inv.existencia == null or inv.existencia.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
-                                      class="badge badge-danger" style="font-size:14px;padding:5px 14px"
+                                      class="badge badge--danger" style="font-size:14px;padding:5px 14px"
                                       th:text="${inv.existencia ?: 0}"></span>
                                 <span th:if="${inv.existencia != null and inv.existencia.compareTo(T(java.math.BigDecimal).ZERO) > 0 and inv.existencia.compareTo(new java.math.BigDecimal('2')) <= 0}"
-                                      class="badge badge-warning" style="font-size:14px;padding:5px 14px"
+                                      class="badge badge--warning" style="font-size:14px;padding:5px 14px"
                                       th:text="${inv.existencia}"></span>
                                 <span th:if="${inv.existencia != null and inv.existencia.compareTo(new java.math.BigDecimal('2')) > 0}"
-                                      class="badge badge-success" style="font-size:14px;padding:5px 14px"
+                                      class="badge badge--success" style="font-size:14px;padding:5px 14px"
                                       th:text="${inv.existencia}"></span>
                             </td>
 
                             <td style="text-align:right" class="text-sm">
                                 <span th:if="${inv.costo != null and inv.costo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
-                                      th:text="'Q' + ${#numbers.formatDecimal(inv.costo,1,'COMMA',2,'POINT')}"></span>
+                                      th:text="'Q ' + ${#numbers.formatDecimal(inv.costo,1,'COMMA',2,'POINT')}"></span>
                                 <span th:if="${inv.costo == null or inv.costo.compareTo(T(java.math.BigDecimal).ZERO) == 0}">—</span>
                             </td>
                             <td style="text-align:right" class="fw-600">
                                 <span th:if="${inv.precioVenta != null and inv.precioVenta.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
-                                      th:text="'Q' + ${#numbers.formatDecimal(inv.precioVenta,1,'COMMA',2,'POINT')}"></span>
+                                      th:text="'Q ' + ${#numbers.formatDecimal(inv.precioVenta,1,'COMMA',2,'POINT')}"></span>
                                 <span th:if="${inv.precioVenta == null or inv.precioVenta.compareTo(T(java.math.BigDecimal).ZERO) == 0}">—</span>
                             </td>
 
@@ -321,10 +321,10 @@ async function verKardex(idProd, nombre) {
     }
 
     const TIPOS = {
-        'Entrada':         { icon:'', cls:'badge-success'  },
-        'Salida':          { icon:'', cls:'badge-danger'   },
-        'Traslado_Entrada':{ icon:'', cls:'badge-info'     },
-        'Traslado_Salida': { icon:'', cls:'badge-warning'  },
+        'Entrada':         { icon:'', cls:'badge--success'  },
+        'Salida':          { icon:'', cls:'badge--danger'   },
+        'Traslado_Entrada':{ icon:'', cls:'badge--info'     },
+        'Traslado_Salida': { icon:'', cls:'badge--warning'  },
         'Ajuste':          { icon:'', cls:'badge-secondary'},
     };
 

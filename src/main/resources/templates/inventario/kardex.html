@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -24,8 +24,8 @@
  
     <div class="page-body">
  
-        <div th:if="${mensajeOk}"    class="alert alert-success" th:text="${mensajeOk}"></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"  th:text="${mensajeError}"></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success" th:text="${mensajeOk}"></div>
+        <div th:if="${mensajeError}" class="alert alert--danger"  th:text="${mensajeError}"></div>
  
         <!-- Stats -->
         <div class="stats-grid">
@@ -134,9 +134,9 @@
  
                         <tr th:each="k : ${movimientos}">
                             <td>
-                                <span th:if="${k.tipoMovimiento == 'Entrada'}" class="badge badge-success"> Entrada</span>
-                                <span th:if="${k.tipoMovimiento == 'Salida'}"  class="badge badge-danger"> Salida</span>
-                                <span th:if="${k.tipoMovimiento == 'Ajuste'}"  class="badge badge-warning"> Ajuste</span>
+                                <span th:if="${k.tipoMovimiento == 'Entrada'}" class="badge badge--success"> Entrada</span>
+                                <span th:if="${k.tipoMovimiento == 'Salida'}"  class="badge badge--danger"> Salida</span>
+                                <span th:if="${k.tipoMovimiento == 'Ajuste'}"  class="badge badge--warning"> Ajuste</span>
                             </td>
                             <td><code th:text="${k.producto.codigo}"></code></td>
                             <td><div class="fw-600 text-sm" th:text="${k.producto.detalle}"></div></td>

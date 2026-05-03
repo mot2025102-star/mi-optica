@@ -20,8 +20,8 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -29,7 +29,7 @@
                 <div class="stat-icon rojo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
                 <div class="stat-info">
                     <div class="stat-value"
-                         th:text="'Q' + ${#numbers.formatDecimal(totalDeuda,1,'COMMA',2,'POINT')}">
+                         th:text="'Q ' + ${#numbers.formatDecimal(totalDeuda,1,'COMMA',2,'POINT')}">
                     </div>
                     <div class="stat-label">Total por cobrar</div>
                 </div>
@@ -131,11 +131,11 @@
                                 </td>
 
                                 <td style="text-align:right"
-                                    th:text="'Q' + ${#numbers.formatDecimal(f.total,1,'COMMA',2,'POINT')}">
+                                    th:text="'Q ' + ${#numbers.formatDecimal(f.total,1,'COMMA',2,'POINT')}">
                                 </td>
 
                                 <td style="text-align:right" class="text-verde fw-600"
-                                    th:text="'Q' + ${#numbers.formatDecimal(f.abono,1,'COMMA',2,'POINT')}">
+                                    th:text="'Q ' + ${#numbers.formatDecimal(f.abono,1,'COMMA',2,'POINT')}">
                                 </td>
 
                                 <!-- Saldo con color según monto -->
@@ -143,7 +143,7 @@
                                     <span class="fw-600"
                                           th:style="${f.saldo.compareTo(T(java.math.BigDecimal).valueOf(500)) > 0} ? 'color:var(--rojo)' :
                                                      ${f.saldo.compareTo(T(java.math.BigDecimal).valueOf(100)) > 0} ? 'color:var(--amarillo)' : 'color:var(--turquesa)'"
-                                          th:text="'Q' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}">
+                                          th:text="'Q ' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}">
                                     </span>
                                 </td>
 
@@ -184,7 +184,7 @@
                             <tr style="background:rgba(220,53,69,0.08)">
                                 <td class="fw-600" th:colspan="${esAdmin} ? 5 : 4">TOTAL POR COBRAR</td>
                                 <td style="text-align:right;color:var(--rojo)" class="fw-600"
-                                    th:text="'Q' + ${#numbers.formatDecimal(totalDeuda,1,'COMMA',2,'POINT')}">
+                                    th:text="'Q ' + ${#numbers.formatDecimal(totalDeuda,1,'COMMA',2,'POINT')}">
                                 </td>
                                 <td colspan="3"></td>
                             </tr>
@@ -300,10 +300,10 @@
                                 <td style="text-align:right">
                                     <span th:if="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                                           class="fw-600" style="color:var(--rojo)"
-                                          th:text="'Q' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}">
+                                          th:text="'Q ' + ${#numbers.formatDecimal(f.saldo,1,'COMMA',2,'POINT')}">
                                     </span>
                                     <span th:if="${f.saldo == null or f.saldo.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
-                                          class="badge badge-success" style="font-size:11px">
+                                          class="badge badge--success" style="font-size:11px">
                                         Pagado
                                     </span>
                                 </td>
@@ -316,7 +316,7 @@
                                               method="post" style="display:inline"
                                               onsubmit="return confirm('¿Marcar como entregado?')">
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                            <button type="submit" class="btn btn-sm btn-success"
+                                            <button type="submit" class="btn btn-sm btn btn-success"
                                                     title="Marcar como entregado">
                                                 
                                             </button>
@@ -324,7 +324,7 @@
 
                                         <!-- Pagar saldo si tiene -->
                                         <button th:if="${f.saldo != null and f.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
-                                                class="btn btn-sm btn-primary"
+                                                class="btn btn-sm btn btn-primary"
                                                 th:onclick="'abrirPago(' + ${f.idFicha} + ',' + ${f.saldo} + ',\'' + ${f.cliente.nombre} + '\')'">
                                             
                                         </button>
@@ -408,7 +408,7 @@ function filtrar(tablaId, q) {
 function abrirPago(idFicha, saldo, nombre) {
     fichaActual = idFicha;
     document.getElementById('pagoCliente').textContent = nombre;
-    document.getElementById('pagoSaldo').textContent   = 'Q' + parseFloat(saldo).toFixed(2);
+    document.getElementById('pagoSaldo').textContent   = 'Q ' + parseFloat(saldo).toFixed(2);
     document.getElementById('pagoMonto').value  = parseFloat(saldo).toFixed(2);
     document.getElementById('pagoMonto').max    = parseFloat(saldo);
     document.getElementById('pagoNota').value   = '';

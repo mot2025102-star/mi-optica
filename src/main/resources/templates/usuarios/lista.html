@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -21,8 +21,8 @@
 
     <div class="page-body">
 
-        <div th:if="${mensajeOk}"    class="alert alert-success"> <span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger">  <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -132,7 +132,7 @@
 
                             <!-- Estado -->
                             <td>
-                                <span th:class="${u.activo} ? 'badge badge-success' : 'badge badge-danger'"
+                                <span th:class="${u.activo} ? 'badge badge--success' : 'badge badge--danger'"
                                       th:text="${u.activo} ? 'Activo' : 'Inactivo'">
                                 </span>
                             </td>
@@ -141,14 +141,14 @@
                             <td>
                                 <div class="d-flex gap-1">
                                     <a th:href="@{/usuarios/editar/{id}(id=${u.idUsuario})}"
-                                       class="btn btn-sm btn-secondary" title="Editar usuario"> Editar</a>
+                                       class="btn btn-sm btn btn-secondary" title="Editar usuario"> Editar</a>
 
                                     <form th:action="@{/usuarios/toggle/{id}(id=${u.idUsuario})}"
                                           method="post" style="display:inline"
                                           onsubmit="return confirm('¿Cambiar estado del usuario?')">
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                         <button type="submit"
-                                                th:class="${u.activo} ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-success'"
+                                                th:class="${u.activo} ? 'btn btn-sm btn btn-danger' : 'btn btn-sm btn btn-success'"
                                                 th:text="${u.activo} ? ' Desactivar' : ' Activar'"
                                                 th:title="${u.activo} ? 'Desactivar — no podrá iniciar sesión' : 'Activar'">
                                         </button>

@@ -1,0 +1,242 @@
+---
+description: >
+  Calidad de código Java y convenciones para Mi Óptica. El agente aplica
+  estas reglas al escribir cualquier clase Java: naming, manejo de errores,
+  validaciones, seguridad, logging y estructura de paquetes. El agente
+  ejecuta los comandos de verificación antes de hacer commit.
+globs:
+  - "src/main/java/com/mioptica/**/*.java"
+  - "src/test/java/com/mioptica/**/*.java"
+alwaysApply: true
+agent_tools_required:
+  - terminal
+---
+
+# Mi Óptica — Calidad de Código Java
+
+## 0. Verificaciones Pre-Commit
+```bash
+# Compilar sin errores
+./mvnw compile -q
+
+# Ejecutar tests (si existen)
+./mvnw test -q 2>&1 | tail -5
+
+# Detectar problemas comunes
+grep -rn "System.out.println\|e.printStackTrace()" \
+  src/main/java/ --include="*.java" \
+  | grep -v "//.*System.out" \
+  && echo "⚠️  Hay System.out.println — usar log.info/warn/error"
+
+grep -rn "@Autowired" src/main/java/ --include="*.java" \
+  && echo "⚠️  Usar @RequiredArgsConstructor en vez de @Autowired en fields"
+```
+
+## 1. Estructura de Paquetes
+```
+com.mioptica
+├── config/          # SecurityConfig, WebConfig, AppConfig
+├── controller/      # Solo HTTP — delega a service
+├── service/         # Interfaces
+│   └── impl/        # Implementaciones
+├── repository/      # Interfaces JpaRepository
+├── model/           # Entidades JPA
+├── dto/             # Forms (entrada) y DTOs (salida)
+├── mapper/          # Conversión entity ↔ DTO (MapStruct o estáticos)
+├── exception/       # Excepciones de dominio personalizadas
+├── security/        # UserDetailsService, JWT si aplica
+└── util/            # Helpers estáticos puros (sin estado)
+```
+
+## 2. Convenciones de Nombrado Java
+
+```java
+// Clases: PascalCase descriptivo con sufijo de capa
+public class VentaServiceImpl {}     // ✅
+public class VentaManager {}         // ❌ ambiguo
+
+// Métodos: verbo + sustantivo, camelCase
+public Venta registrarVenta()        // ✅
+public Venta venta()                 // ❌ no describe la acción
+public Venta saveVenta()             // ❌ mezcla inglés-español
+
+// Constantes: SCREAMING_SNAKE_CASE
+public static final int MAX_PRODUCTOS_POR_VENTA = 50;
+
+// Variables booleanas: prefijo "es", "tiene", "puede"
+boolean esActivo, tieneStock, puedeEliminar;
+
+// Métodos booleanos: idem
+public boolean tieneStockSuficiente(Long productoId, int cantidad)
+```
+
+## 3. Validaciones con Bean Validation
+```java
+// DTO de entrada — validar aquí, no en el Service
+@Data
+public class VentaForm {
+
+    @NotNull(message = "El cliente es obligatorio")
+    private Long clienteId;
+
+    @NotNull(message = "La sucursal es obligatoria")
+    private Long sucursalId;
+
+    @NotEmpty(message = "La venta debe tener al menos un producto")
+    @Size(max = 50, message = "Máximo 50 productos por venta")
+    private List<DetalleVentaForm> detalles;
+
+    @DecimalMin(value = "0.0", message = "El descuento no puede ser negativo")
+    @DecimalMax(value = "100.0", message = "El descuento máximo es 100%")
+    private BigDecimal descuentoPorcentaje = BigDecimal.ZERO;
+}
+
+// Sub-DTO de detalle
+@Data
+public class DetalleVentaForm {
+    @NotNull  private Long productoId;
+    @Min(1)   private int cantidad;
+    @NotNull  @DecimalMin("0.01") private BigDecimal precioUnitario;
+}
+```
+
+## 4. Manejo de Excepciones de Dominio
+```java
+// ── Excepciones personalizadas (package exception/) ──────────────
+
+public class StockInsuficienteException extends RuntimeException {
+    private final Long productoId;
+    public StockInsuficienteException(Long productoId) {
+        super("Stock insuficiente para producto ID: " + productoId);
+        this.productoId = productoId;
+    }
+    public Long getProductoId() { return productoId; }
+}
+
+public class EntidadNoEncontradaException extends RuntimeException {
+    public EntidadNoEncontradaException(String entidad, Long id) {
+        super(entidad + " con ID " + id + " no encontrado");
+    }
+}
+
+public class OperacionNoPermitidaException extends RuntimeException {
+    public OperacionNoPermitidaException(String mensaje) {
+        super(mensaje);
+    }
+}
+
+// ── Uso correcto en Service ───────────────────────────────────────
+Inventario inv = inventarioRepository.findById(id)
+    .orElseThrow(() -> new EntidadNoEncontradaException("Inventario", id));
+```
+
+## 5. Logging — SLF4J con Lombok
+```java
+// SIEMPRE Lombok @Slf4j — nunca System.out.println
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class VentaServiceImpl implements VentaService {
+
+    @Override
+    public Venta registrar(VentaForm form) {
+        log.info("Registrando venta para cliente ID: {}", form.getClienteId());
+        try {
+            Venta venta = procesarVenta(form);
+            log.info("Venta registrada con ID: {} correlativo: {}", venta.getId(), venta.getCorrelativo());
+            return venta;
+        } catch (StockInsuficienteException e) {
+            log.warn("Stock insuficiente al registrar venta. Producto ID: {}", e.getProductoId());
+            throw e; // re-lanzar para que el handler de @ControllerAdvice lo capture
+        } catch (Exception e) {
+            log.error("Error inesperado al registrar venta para cliente {}: {}", form.getClienteId(), e.getMessage(), e);
+            throw new RuntimeException("Error al registrar la venta", e);
+        }
+    }
+}
+```
+
+## 6. Seguridad — Buenas Prácticas
+```java
+// Configuración de Spring Security
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                // Estáticos siempre públicos
+                .requestMatchers("/css/**","/js/**","/img/**").permitAll()
+                .requestMatchers("/login","/error").permitAll()
+                // Rutas por rol
+                .requestMatchers("/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/reportes/**").hasAnyRole("ADMIN","CONTADOR")
+                .requestMatchers("/inventario/**").hasAnyRole("ADMIN","BODEGUERO")
+                // El resto requiere autenticación
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/dashboard"))
+            .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
+            .csrf(AbstractHttpConfigurer::disable); // Manejar CSRF con Thymeleaf token
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12); // costo 12 — balance seguridad/performance
+    }
+}
+
+// Anotar métodos sensibles con @PreAuthorize
+@PreAuthorize("hasRole('ADMIN')")
+public void eliminarUsuario(Long id) { ... }
+
+@PreAuthorize("hasAnyRole('ADMIN','VENDEDOR')")
+public Venta registrarVenta(VentaForm form) { ... }
+```
+
+## 7. Operaciones Monetarias — BigDecimal Obligatorio
+```java
+// ❌ NUNCA double para dinero
+double total = precio * cantidad;
+
+// ✅ SIEMPRE BigDecimal
+BigDecimal total = precio.multiply(BigDecimal.valueOf(cantidad))
+                         .setScale(2, RoundingMode.HALF_UP);
+
+// Constantes monetarias
+BigDecimal cero   = BigDecimal.ZERO;
+BigDecimal cien   = BigDecimal.valueOf(100);
+BigDecimal factor = descuento.divide(cien, 4, RoundingMode.HALF_UP);
+BigDecimal neto   = subtotal.multiply(BigDecimal.ONE.subtract(factor))
+                            .setScale(2, RoundingMode.HALF_UP);
+```
+
+## 8. Tests — Convenciones Mínimas
+```java
+// Nombrado: should_[resultado]_when_[condición]
+@Test
+void should_throwStockInsuficiente_when_cantidadSuperaStock() {
+    // Arrange
+    when(inventarioRepository.findByProductoIdAndSucursalId(1L, 1L))
+        .thenReturn(Optional.of(inventarioConStock(2)));
+
+    VentaForm form = ventaFormConCantidad(5); // pedir 5, hay 2
+
+    // Act + Assert
+    assertThrows(StockInsuficienteException.class,
+        () -> ventaService.registrar(form));
+}
+```
+
+## 9. Reglas Absolutas del Agente
+
+- **`System.out.println` → prohibido.** Siempre `log.info/warn/error`.
+- **`@Autowired` en fields → prohibido.** Usar `@RequiredArgsConstructor`.
+- **`double` para dinero → prohibido.** Siempre `BigDecimal` con `HALF_UP`.
+- **Entidad directa a Thymeleaf → prohibido.** Siempre DTO o atributos selectivos.
+- **Catch sin log ni re-throw → prohibido.** Todo catch loguea o relanza.
+- **Kardex → solo INSERT.** Nunca update ni delete en registros de kardex.
+- **Queries N+1 → detectar** con `spring.jpa.show-sql=true` en dev y corregir con JOIN FETCH o `@EntityGraph`.

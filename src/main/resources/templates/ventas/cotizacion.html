@@ -21,7 +21,7 @@
 
     <div class="page-body">
 
-        <div id="alertaError" class="alert alert-danger" style="display:none">
+        <div id="alertaError" class="alert alert--danger" style="display:none">
              <span id="alertaMsg"></span>
         </div>
 
@@ -188,16 +188,16 @@
                         <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                                 <span class="text-gris">Subtotal:</span>
-                                <span class="fw-600" id="resSubtotal">Q0.00</span>
+                                <span class="fw-600" id="resSubtotal">Q 0.00</span>
                             </div>
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:var(--naranja)">
                                 <span>Descuento total:</span>
-                                <span class="fw-600" id="resDescuento">- Q0.00</span>
+                                <span class="fw-600" id="resDescuento">- Q 0.00</span>
                             </div>
                             <div style="border-top:2px solid var(--turquesa);margin:10px 0"></div>
                             <div style="display:flex;justify-content:space-between;align-items:center">
                                 <span style="font-size:15px;font-weight:700">TOTAL:</span>
-                                <span style="font-size:28px;font-weight:700;color:var(--turquesa)" id="resTotal">Q0.00</span>
+                                <span style="font-size:28px;font-weight:700;color:var(--turquesa)" id="resTotal">Q 0.00</span>
                             </div>
                         </div>
                         <div style="margin-top:14px">
@@ -445,9 +445,9 @@ function calcTotal() {
     document.querySelectorAll('[id^="sub_"]').forEach(i  => sub      += parseFloat(i.value || 0));
     document.querySelectorAll('[id^="desc_"]').forEach(i => descTotal += parseFloat(i.value || 0));
 
-    document.getElementById('resSubtotal').textContent  = 'Q' + (sub + descTotal).toFixed(2);
-    document.getElementById('resDescuento').textContent = '- Q' + descTotal.toFixed(2);
-    document.getElementById('resTotal').textContent     = 'Q' + Math.max(0, sub).toFixed(2);
+    document.getElementById('resSubtotal').textContent  = 'Q ' + (sub + descTotal).toFixed(2);
+    document.getElementById('resDescuento').textContent = '- Q ' + descTotal.toFixed(2);
+    document.getElementById('resTotal').textContent     = 'Q ' + Math.max(0, sub).toFixed(2);
 
     let html = '';
     document.querySelectorAll('#listaProds > div').forEach(fila => {
@@ -459,7 +459,7 @@ function calcTotal() {
         const sub  = document.getElementById('sub_'  + idx)?.value || '0.00';
         html += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--gris-borde);font-size:12px">
                     <span>${cant}× ${opt.text.split('(')[0].trim()}</span>
-                    <span class="fw-600">Q${parseFloat(sub).toFixed(2)}</span>
+                    <span class="fw-600">Q ${parseFloat(sub).toFixed(2)}</span>
                  </div>`;
     });
     document.getElementById('resumenItems').innerHTML = html || '<span class="text-gris">Sin productos</span>';
@@ -482,9 +482,9 @@ function imprimirCotizacion() {
         itemsHtml   += `<tr>
             <td style="padding:8px 12px;border:1px solid #ddd">${cant}</td>
             <td style="padding:8px 12px;border:1px solid #ddd">${opt.text.split('(')[0].trim()}</td>
-            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right">Q${parseFloat(precio).toFixed(2)}</td>
-            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right">Q${parseFloat(desc).toFixed(2)}</td>
-            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right;font-weight:700">Q${parseFloat(sub).toFixed(2)}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right">Q ${parseFloat(precio).toFixed(2)}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right">Q ${parseFloat(desc).toFixed(2)}</td>
+            <td style="padding:8px 12px;border:1px solid #ddd;text-align:right;font-weight:700">Q ${parseFloat(sub).toFixed(2)}</td>
         </tr>`;
     });
     if (!itemsHtml) { mostrarError('Agrega al menos un producto antes de imprimir.'); return; }
@@ -555,7 +555,7 @@ function imprimirCotizacion() {
                     <tbody>${itemsHtml}</tbody>
                     <tfoot><tr style="background:#f0fffe">
                         <td colspan="4" style="padding:10px 12px;border:1px solid #ddd;text-align:right;font-weight:700">TOTAL:</td>
-                        <td style="padding:10px 12px;border:1px solid #ddd;text-align:right;font-weight:700;font-size:16px;color:#27c2c9">Q${totalAcum.toFixed(2)}</td>
+                        <td style="padding:10px 12px;border:1px solid #ddd;text-align:right;font-weight:700;font-size:16px;color:#27c2c9">Q ${totalAcum.toFixed(2)}</td>
                     </tr></tfoot>
                 </table>
             </div>
@@ -620,7 +620,7 @@ async function registrarVentaDesdeCotz() {
     cerrarModal('modalConvertir');
     if (data.ok) {
         document.getElementById('exitoFactura').textContent = data.factura;
-        document.getElementById('exitoTotal').textContent   = 'Q' + parseFloat(data.total).toFixed(2);
+        document.getElementById('exitoTotal').textContent   = 'Q ' + parseFloat(data.total).toFixed(2);
         document.getElementById('exitoPdfLink').href        = '/ventas/factura/' + data.idVenta;
         document.getElementById('modalExito').classList.add('show');
         document.getElementById('alertaError').style.display = 'none';

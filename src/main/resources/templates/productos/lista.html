@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -27,8 +27,8 @@
  
     <div class="page-body">
  
-        <div th:if="${mensajeOk}"    class="alert alert-success"><span th:text="${mensajeOk}"></span></div>
-        <div th:if="${mensajeError}" class="alert alert-danger"> <span th:text="${mensajeError}"></span></div>
+        <div th:if="${mensajeOk}"    class="alert alert--success"><span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger"> <span th:text="${mensajeError}"></span></div>
  
         <!-- Stats -->
         <div class="stats-grid">
@@ -202,13 +202,13 @@
                                 <td style="text-align:center">
                                     <th:block th:with="stock=${stockMap[p.idProducto]}">
                                         <span th:if="${stock == null or stock.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
-                                              class="badge badge-danger" th:text="${stock ?: 0}"
+                                              class="badge badge--danger" th:text="${stock ?: 0}"
                                               style="font-size:13px;padding:5px 12px"></span>
                                         <span th:if="${stock != null and stock.compareTo(T(java.math.BigDecimal).ZERO) > 0 and stock.compareTo(new java.math.BigDecimal('2')) <= 0}"
-                                              class="badge badge-warning" th:text="${stock}"
+                                              class="badge badge--warning" th:text="${stock}"
                                               style="font-size:13px;padding:5px 12px"></span>
                                         <span th:if="${stock != null and stock.compareTo(new java.math.BigDecimal('2')) > 0}"
-                                              class="badge badge-success" th:text="${stock}"
+                                              class="badge badge--success" th:text="${stock}"
                                               style="font-size:13px;padding:5px 12px"></span>
                                     </th:block>
                                 </td>
@@ -239,8 +239,8 @@
  
                                 <!-- Estado -->
                                 <td>
-                                    <span th:if="${p.activo}"  class="badge badge-success">Activo</span>
-                                    <span th:if="${!p.activo}" class="badge badge-danger">Inactivo</span>
+                                    <span th:if="${p.activo}"  class="badge badge--success">Activo</span>
+                                    <span th:if="${!p.activo}" class="badge badge--danger">Inactivo</span>
                                 </td>
  
                                 <!-- Acciones -->
@@ -331,8 +331,8 @@
                          th:style="${p.activo} ? 'background:var(--turquesa)' : 'background:var(--gris-borde)'"></div>
                     <div class="d-flex justify-between align-center mb-2" style="margin-top:4px">
                         <span class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></span>
-                        <span th:if="${p.activo}"  class="badge badge-success">Activo</span>
-                        <span th:if="${!p.activo}" class="badge badge-danger">Inactivo</span>
+                        <span th:if="${p.activo}"  class="badge badge--success">Activo</span>
+                        <span th:if="${!p.activo}" class="badge badge--danger">Inactivo</span>
                     </div>
                     <div class="fw-600" style="margin-bottom:4px;line-height:1.3" th:text="${p.detalle}"></div>
                     <!-- Código interno para lentes -->
@@ -359,13 +359,13 @@
                             <div class="text-gris text-sm">Stock</div>
                             <th:block th:with="stock=${stockMap[p.idProducto]}">
                                 <span th:if="${stock == null or stock.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
-                                      class="badge badge-danger" th:text="${stock ?: 0}"
+                                      class="badge badge--danger" th:text="${stock ?: 0}"
                                       style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
                                 <span th:if="${stock != null and stock.compareTo(T(java.math.BigDecimal).ZERO) > 0 and stock.compareTo(new java.math.BigDecimal('2')) <= 0}"
-                                      class="badge badge-warning" th:text="${stock}"
+                                      class="badge badge--warning" th:text="${stock}"
                                       style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
                                 <span th:if="${stock != null and stock.compareTo(new java.math.BigDecimal('2')) > 0}"
-                                      class="badge badge-success" th:text="${stock}"
+                                      class="badge badge--success" th:text="${stock}"
                                       style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
                             </th:block>
                         </div>
@@ -465,8 +465,8 @@
 function cambiarVista(v) {
     document.getElementById('vistaTabla').style.display = v === 'tabla' ? '' : 'none';
     document.getElementById('vistaCards').style.display = v === 'cards' ? '' : 'none';
-    document.getElementById('btnTabla').className = 'btn btn-sm ' + (v === 'tabla' ? 'btn-primary' : 'btn-secondary');
-    document.getElementById('btnCards').className = 'btn btn-sm ' + (v === 'cards' ? 'btn-primary' : 'btn-secondary');
+    document.getElementById('btnTabla').className = 'btn btn-sm ' + (v === 'tabla' ? 'btn btn-primary' : 'btn btn-secondary');
+    document.getElementById('btnCards').className = 'btn btn-sm ' + (v === 'cards' ? 'btn btn-primary' : 'btn btn-secondary');
     const url = new URL(window.location);
     url.searchParams.set('vista', v);
     window.history.replaceState({}, '', url);

@@ -1,0 +1,180 @@
+---
+description: >
+  Layout principal, Sidebar y sistema de Grid para Mi Óptica. Aplica a
+  layout.html y cualquier fragmento que defina la estructura de página.
+  El sidebar usa Navy 900 como fondo; el ítem activo usa Cyan 400.
+globs:
+  - "src/main/resources/templates/layout.html"
+  - "src/main/resources/templates/fragments/**/*.html"
+  - "src/main/resources/static/css/estilos.css"
+alwaysApply: false
+agent_tools_required:
+  - terminal
+  - browser
+---
+
+# Mi Óptica — Layout, Sidebar y Grid
+
+## 1. Estructura HTML de Página
+```html
+<!-- layout.html — estructura base -->
+<body class="app-layout">
+  <nav  class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></nav>
+  <main class="main-content">
+    <header class="page-header">
+      <h1 class="page-title" th:text="${pageTitle}">Módulo</h1>
+    </header>
+    <div th:replace="${content}"></div>
+  </main>
+</body>
+```
+
+## 2. Sidebar — Fragmento Canónico
+```html
+<!-- fragments/sidebar.html -->
+<nav th:fragment="sidebar" class="sidebar" aria-label="Navegación principal">
+
+  <div class="sidebar__logo-area">
+    <!-- Logo animado (JS del ojo — no modificar) -->
+  </div>
+
+  <p class="sidebar__nav-label">Principal</p>
+
+  <a th:each="item : ${navItems}"
+     th:href="@{${item.url}}"
+     class="sidebar__item"
+     th:classappend="${currentPage == item.key} ? ' active'"
+     th:aria-current="${currentPage == item.key} ? 'page' : null"
+     sec:authorize="${item.role}">
+    <svg aria-hidden="true" th:replace="~{icons/${item.icon}}"></svg>
+    <span th:text="${item.label}"></span>
+  </a>
+
+  <!-- Items estáticos si no usas navItems dinámico -->
+  <a th:href="@{/dashboard}" class="sidebar__item"
+     th:classappend="${currentPage == 'dashboard'} ? ' active'"
+     th:aria-current="${currentPage == 'dashboard'} ? 'page'">
+    <svg aria-hidden="true"><!-- icono --></svg>
+    <span>Dashboard</span>
+  </a>
+</nav>
+```
+
+## 3. Sidebar — CSS
+```css
+.sidebar {
+  width: 240px; min-height: 100vh; background: var(--navy-900);
+  padding: var(--sp-3) 0; display: flex; flex-direction: column;
+  position: sticky; top: 0; align-self: flex-start;
+}
+.sidebar__logo-area {
+  padding: 0 var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  margin-bottom: var(--sp-1);
+}
+.sidebar__nav-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.3);
+  padding: var(--sp-2) var(--sp-2) var(--sp-1);
+  margin: var(--sp-1) 0 0;
+}
+.sidebar__item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px var(--sp-2); color: rgba(255,255,255,.6);
+  font-size: var(--text-base); font-weight: 400;
+  text-decoration: none; margin: 1px var(--sp-1);
+  border-radius: var(--radius-md); position: relative;
+  transition: background var(--dur-fast)   var(--ease-std),
+              color       var(--dur-fast)   var(--ease-std),
+              padding-left var(--dur-normal) var(--ease-std);
+}
+.sidebar__item:hover       { background: rgba(255,255,255,.07);
+                             color: rgba(255,255,255,.9); padding-left: 22px; }
+.sidebar__item:focus-visible{ outline: none;
+                              box-shadow: 0 0 0 2px rgba(0,180,216,.6); }
+/* Item activo — cyan sobre navy */
+.sidebar__item.active      { background: var(--cyan-400); color: var(--navy-900);
+                             font-weight: 600; padding-left: var(--sp-2); }
+.sidebar__item.active svg  { color: var(--navy-900); }
+```
+
+## 4. Layout Principal — CSS
+```css
+.app-layout {
+  display: flex; min-height: 100vh;
+  background: var(--slate-50); font-family: var(--font-body);
+  color: var(--slate-700);
+}
+.main-content {
+  flex: 1; padding: var(--sp-5) var(--sp-6);
+  max-width: 1280px; overflow-x: hidden;
+}
+.page-header  { margin-bottom: var(--sp-4); }
+.page-title   { font-size: var(--text-2xl); font-weight: 700;
+                color: var(--navy-900); margin: 0; }
+.page-subtitle{ font-size: var(--text-base); color: var(--slate-500);
+                margin-top: 4px; }
+```
+
+## 5. Grid Responsivo
+```css
+/* Contenedores de grid — siempre múltiplo de var(--sp-2) en gap */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); }
+
+/* Grid de KPIs del dashboard */
+.kpi-grid { display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--sp-2); margin-bottom: var(--sp-4); }
+
+@media (max-width: 1024px) { .grid-4 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+
+/* Collapsar sidebar en móvil */
+@media (max-width: 768px) {
+  .sidebar { width: 64px; }
+  .sidebar .sidebar__item span,
+  .sidebar .sidebar__nav-label { display: none; }
+}
+```
+
+## 6. Separadores y Espaciado de Sección
+```html
+<!-- Separador entre secciones de página -->
+<hr class="section-divider">
+
+<!-- Header de sección con acción -->
+<div class="section-header">
+  <h2 class="section-title">Ventas del día</h2>
+  <button class="btn btn-secondary btn-sm">Exportar</button>
+</div>
+```
+```css
+.section-divider { border: none; border-top: 0.5px solid var(--slate-300);
+                   margin: var(--sp-4) 0; }
+.section-header  { display: flex; align-items: center;
+                   justify-content: space-between; margin-bottom: var(--sp-3); }
+.section-title   { font-size: var(--text-xl); font-weight: 600;
+                   color: var(--navy-900); margin: 0; }
+```
+
+## 7. Skeleton Loader
+```css
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+.skeleton {
+  background: var(--slate-200); border-radius: var(--radius-sm);
+  position: relative; overflow: hidden;
+}
+.skeleton::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.75) 50%, transparent 100%);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.skeleton--text  { height: 14px; margin-bottom: 6px; }
+.skeleton--title { height: 22px; width: 60%; }
+.skeleton--card  { height: 120px; border-radius: var(--radius-lg); }
+```

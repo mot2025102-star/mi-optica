@@ -21,7 +21,7 @@
     <div class="page-body">
 
         <!-- Alerta de errores -->
-        <div id="alertaError" class="alert alert-danger" style="display:none">
+        <div id="alertaError" class="alert alert--danger" style="display:none">
              <span id="alertaMsg"></span>
         </div>
 
@@ -84,7 +84,7 @@
                                     <input type="checkbox" id="chkRecetaExterna"
                                         onchange="toggleRecetaExterna(this.checked)"
                                         style="width:18px;height:18px;accent-color:var(--dorado,#C9A84C)">
-                                    <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Venta con Receta Externa
+                                    📋 Venta con Receta Externa
                                 </label>
                                 <span class="text-gris text-sm">
                                     Activa esta opción si el cliente trae su propia graduación
@@ -94,8 +94,8 @@
 
                         <div class="card mb-3" id="cardRecetaExterna" style="display:none;border:2px solid var(--dorado,#C9A84C)">
                             <div class="card-header">
-                                <div class="card-title"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Graduación del Cliente (Receta Externa)</div>
-                                <span class="badge badge-warning"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Dada por el cliente</span>
+                                <div class="card-title">📋 Graduación del Cliente (Receta Externa)</div>
+                                <span class="badge badge--warning">⚠️ Dada por el cliente</span>
                             </div>
                             <div class="card-body" style="padding:16px 20px;overflow-x:auto">
                                 <table class="table table-sm" style="min-width:600px">
@@ -171,16 +171,16 @@
                         <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                                 <span class="text-gris">Subtotal:</span>
-                                <span class="fw-600" id="resSubtotal">Q0.00</span>
+                                <span class="fw-600" id="resSubtotal">Q 0.00</span>
                             </div>
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:var(--naranja)">
                                 <span>Descuento:</span>
-                                <span class="fw-600" id="resDescuento">- Q0.00</span>
+                                <span class="fw-600" id="resDescuento">- Q 0.00</span>
                             </div>
                             <div style="border-top:2px solid var(--turquesa);margin:10px 0"></div>
                             <div style="display:flex;justify-content:space-between;align-items:center">
                                 <span style="font-size:15px;font-weight:700">TOTAL:</span>
-                                <span style="font-size:24px;font-weight:700;color:var(--turquesa)" id="resTotal">Q0.00</span>
+                                <span style="font-size:24px;font-weight:700;color:var(--turquesa)" id="resTotal">Q 0.00</span>
                             </div>
                         </div>
                         
@@ -201,10 +201,10 @@
 <div class="modal-overlay" id="modalExito">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Venta Registrada</div>
+            <div class="modal-title">✅ Venta Registrada</div>
         </div>
         <div class="modal-body" style="text-align:center;padding:30px">
-            <div style="margin-bottom:16px"><svg style="width:48px;height:48px;display:block;margin:0 auto 12px" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div style="font-size:48px;margin-bottom:12px">🧾</div>
             <div style="font-size:22px;font-weight:700;color:var(--turquesa)" id="exitoFactura"></div>
             <div style="color:var(--gris-texto);margin-top:8px">Factura generada exitosamente</div>
             <div style="font-size:20px;font-weight:700;color:var(--verde);margin-top:16px" id="exitoTotal"></div>
@@ -212,7 +212,7 @@
         <div class="modal-footer" style="justify-content:center;gap:12px">
             <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary"> Imprimir Factura</a>
             <button class="btn btn-primary" onclick="nuevaVenta()"> Nueva Venta</button>
-            <a th:href="@{/ventas}" class="btn btn-secondary"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Ver lista</a>
+            <a th:href="@{/ventas}" class="btn btn-secondary">📋 Ver lista</a>
         </div>
     </div>
 </div>
@@ -291,9 +291,9 @@ function calcTotal() {
     document.querySelectorAll('[id^="sub_"]').forEach(i => sub += parseFloat(i.value || 0));
     const desc  = parseFloat(document.getElementById('descGlobal').value || 0);
     const total = Math.max(0, sub - desc);
-    document.getElementById('resSubtotal').textContent = 'Q' + sub.toFixed(2);
-    document.getElementById('resDescuento').textContent = '- Q' + desc.toFixed(2);
-    document.getElementById('resTotal').textContent = 'Q' + total.toFixed(2);
+    document.getElementById('resSubtotal').textContent = 'Q ' + sub.toFixed(2);
+    document.getElementById('resDescuento').textContent = '- Q ' + desc.toFixed(2);
+    document.getElementById('resTotal').textContent = 'Q ' + total.toFixed(2);
 }
 
 // ─── Búsqueda cliente ─────────────────────────────────────────────
@@ -397,7 +397,7 @@ async function registrarVenta() {
 
     if (data.ok) {
         document.getElementById('exitoFactura').textContent = data.factura;
-        document.getElementById('exitoTotal').textContent   = 'Q' + parseFloat(data.total).toFixed(2);
+        document.getElementById('exitoTotal').textContent   = 'Q ' + parseFloat(data.total).toFixed(2);
         document.getElementById('exitoPdfLink').href        = '/ventas/factura/' + data.idVenta;
         document.getElementById('modalExito').classList.add('show');
         document.getElementById('alertaError').style.display = 'none';
@@ -421,9 +421,9 @@ function nuevaVenta() {
     document.getElementById('clienteInfo').innerHTML = 'Consumidor Final (CF) — sin cliente asignado';
     document.getElementById('descGlobal').value = '0';
     document.getElementById('observacion').value = '';
-    document.getElementById('resSubtotal').textContent = 'Q0.00';
-    document.getElementById('resDescuento').textContent = '- Q0.00';
-    document.getElementById('resTotal').textContent = 'Q0.00';
+    document.getElementById('resSubtotal').textContent = 'Q 0.00';
+    document.getElementById('resDescuento').textContent = '- Q 0.00';
+    document.getElementById('resTotal').textContent = 'Q 0.00';
     agregarFila();
     // Recargar la página para actualizar el stock
     location.reload();

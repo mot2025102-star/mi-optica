@@ -1,0 +1,232 @@
+---
+description: Snippets canónicos de Formularios, Tablas y Cards para Mi Óptica. Incluye el patrón especializado para campos ópticos (esfera, cilindro, eje, adición) que SIEMPRE usan font-mono. Requiere ds-tokens.mdc activo.
+globs:
+  - "src/main/resources/templates/**/*.html"
+  - "src/main/resources/static/css/**/*.css"
+alwaysApply: false
+---
+
+# Mi Óptica — Formularios, Tablas y Cards
+
+## 1. Campo de formulario estándar (Thymeleaf)
+```html
+<div class="form-group">
+  <label class="form-label" for="campo-nit">NIT del cliente</label>
+  <input  class="form-input"
+          id="campo-nit" type="text"
+          th:field="*{nit}"
+          th:classappend="${#fields.hasErrors('nit')} ? 'form-input--error'"
+          placeholder="CF o NIT sin guiones"
+          autocomplete="off"
+          aria-required="true"
+          th:aria-describedby="${#fields.hasErrors('nit')} ? 'error-nit' : 'hint-nit'">
+  <span class="form-hint" id="hint-nit">Consumidor Final o NIT, ej: 12345678-9</span>
+  <span class="form-error" id="error-nit" role="alert"
+        th:if="${#fields.hasErrors('nit')}"
+        th:errors="*{nit}">Error</span>
+</div>
+```
+
+## 2. Campos ópticos — SIEMPRE `form-input--optical` + `autocomplete="off"`
+```html
+<!-- Sección de refracción — patrón 4 columnas por ojo -->
+<fieldset class="optical-row">
+  <legend class="form-section-title">Ojo Derecho (OD)</legend>
+  <div class="form-row-optical">
+    <div class="form-group">
+      <label class="form-label" for="od-esf">Esfera</label>
+      <input class="form-input form-input--optical"
+             id="od-esf" type="text" th:field="*{odEsfera}"
+             placeholder="-0.00" autocomplete="off"
+             aria-label="Esfera ojo derecho">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="od-cil">Cilindro</label>
+      <input class="form-input form-input--optical"
+             id="od-cil" type="text" th:field="*{odCilindro}"
+             placeholder="-0.00" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="od-eje">Eje</label>
+      <input class="form-input form-input--optical"
+             id="od-eje" type="text" th:field="*{odEje}"
+             placeholder="000°" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="od-add">Adición</label>
+      <input class="form-input form-input--optical"
+             id="od-add" type="text" th:field="*{odAdicion}"
+             placeholder="+0.00" autocomplete="off">
+    </div>
+  </div>
+</fieldset>
+```
+
+## 3. CSS de formularios
+```css
+.form-group      { display: flex; flex-direction: column; gap: 6px; }
+.form-label      { font-size: var(--text-sm); font-weight: 500; color: var(--navy-700); }
+.form-hint       { font-size: var(--text-xs); color: var(--slate-500); }
+.form-error      { font-size: var(--text-xs); color: var(--danger); }
+.form-section-title { font-size: var(--text-md); font-weight: 600;
+                      color: var(--navy-700); margin-bottom: var(--sp-2); }
+.form-row-optical { display: grid; grid-template-columns: repeat(4,1fr);
+                    gap: var(--sp-2); }
+
+.form-input {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--slate-300); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: var(--text-base);
+  color: var(--slate-700); background: #fff; outline: none;
+  transition: border-color var(--dur-fast) var(--ease-std),
+              box-shadow   var(--dur-fast) var(--ease-std);
+  box-sizing: border-box;
+}
+.form-input::placeholder { color: var(--slate-500); }
+.form-input:hover        { border-color: var(--slate-500); }
+.form-input:focus        { border-color: var(--cyan-400); box-shadow: var(--shadow-focus); }
+.form-input--error   { border-color: var(--danger) !important;
+                       box-shadow: 0 0 0 3px rgba(220,38,38,.1) !important; }
+.form-input--success { border-color: var(--success) !important;
+                       box-shadow: 0 0 0 3px rgba(5,150,105,.1) !important; }
+/* Valores ópticos: mono, alineado a la derecha */
+.form-input--optical { font-family: var(--font-mono); text-align: right; letter-spacing: .03em; }
+```
+
+## 4. Cards
+```html
+<!-- Con acento navy — fichas clínicas, reportes -->
+<div class="card card-navy">
+  <p class="card__label">FICHA CLÍNICA · #2847</p>
+  <h3 class="card__title">Ana Pérez García</h3>
+  <p class="card__body">OD: -2.50 / -0.75 × 175° &nbsp;|&nbsp; OI: -2.00 × 010°</p>
+  <div class="card__footer">
+    <span class="badge badge--warning">En laboratorio</span>
+    <span class="card__meta">02/05/2026</span>
+  </div>
+</div>
+
+<!-- Con acento cyan — ventas, pagos -->
+<div class="card card-cyan">
+  <p class="card__label">VENTA · #0914</p>
+  <h3 class="card__title">Q 1,850.00</h3>
+  <p class="card__body">Armazón + lentes progresivos</p>
+  <div class="card__footer">
+    <span class="badge badge--danger">Saldo: Q 950</span>
+    <span class="card__meta">Vendedor: J. Rodas</span>
+  </div>
+</div>
+
+<!-- KPI del dashboard — stat-card -->
+<div class="stat-card">
+  <p class="stat-card__label">Ventas hoy</p>
+  <p class="stat-card__value">Q 4,290</p>
+  <p class="stat-card__delta stat-card__delta--up">+12% vs ayer</p>
+</div>
+
+<!-- Card interactiva (navegación de módulos) -->
+<a th:href="@{/ventas}" class="card card-interactive">
+  <p class="card__label">MÓDULO</p>
+  <h3 class="card__title">Ventas</h3>
+</a>
+```
+```css
+.card {
+  background: #fff; border: 0.5px solid var(--slate-300);
+  border-radius: var(--radius-lg); padding: var(--sp-3);
+}
+.card-navy { border-left: 3px solid var(--navy-900);
+             border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+.card-cyan { border-left: 3px solid var(--cyan-400);
+             border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+
+.card__label  { font-size: var(--text-xs); font-weight: 600;
+                letter-spacing: .08em; text-transform: uppercase;
+                color: var(--slate-500); margin-bottom: 4px; }
+.card__title  { font-size: var(--text-lg); font-weight: 600;
+                color: var(--navy-900); margin: 0 0 4px; }
+.card__body   { font-size: var(--text-base); color: var(--slate-700); margin: 0; }
+.card__footer { margin-top: var(--sp-1); display: flex;
+                gap: var(--sp-1); align-items: center; flex-wrap: wrap; }
+.card__meta   { font-size: var(--text-xs); color: var(--slate-500); }
+
+.stat-card             { background: var(--slate-100); border-radius: var(--radius-md);
+                         padding: 14px var(--sp-2); }
+.stat-card__label      { font-size: var(--text-xs); font-weight: 500;
+                         color: var(--slate-500); text-transform: uppercase;
+                         letter-spacing: .06em; margin-bottom: 4px; }
+.stat-card__value      { font-size: 22px; font-weight: 500; color: var(--navy-900); }
+.stat-card__delta--up  { font-size: var(--text-xs); color: var(--success); margin-top: 3px; }
+.stat-card__delta--down{ font-size: var(--text-xs); color: var(--danger);  margin-top: 3px; }
+
+.card-interactive {
+  display: block; text-decoration: none; cursor: pointer;
+  transition: transform    var(--dur-normal) var(--ease-std),
+              box-shadow   var(--dur-normal) var(--ease-std),
+              border-color var(--dur-fast)   var(--ease-std);
+}
+.card-interactive:hover {
+  transform: translateY(-2px); border-color: var(--cyan-400);
+  box-shadow: 0 6px 20px rgba(0,180,216,.10);
+}
+```
+
+## 5. Tablas de datos
+```html
+<table class="data-table" role="table" aria-label="Listado de ventas">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Cliente</th>
+      <th scope="col">Fecha</th>
+      <th scope="col" class="col-amount">Total</th>
+      <th scope="col">Estado</th>
+      <th scope="col"><span class="sr-only">Acciones</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Fila vacía -->
+    <tr th:if="${page.empty}">
+      <td colspan="6" class="table-empty">No se encontraron resultados.</td>
+    </tr>
+    <tr th:each="v : ${page.content}">
+      <td class="col-sku"    th:text="${v.correlativo}"></td>
+      <td                    th:text="${v.clienteNombre}"></td>
+      <td                    th:text="${#temporals.format(v.fecha,'dd/MM/yyyy')}"></td>
+      <td class="col-amount" th:text="${'Q ' + #numbers.formatDecimal(v.total,1,2)}"></td>
+      <td>
+        <span class="badge"
+              th:classappend="'badge--' + ${v.estadoCss}"
+              th:text="${v.estadoLabel}"></span>
+      </td>
+      <td class="col-actions">
+        <a  th:href="@{/ventas/{id}(id=${v.id})}" class="btn btn-ghost btn-sm">Ver</a>
+        <button class="btn btn-danger btn-sm"
+                data-modal-confirm="¿Anular esta venta?"
+                th:data-modal-action="@{/ventas/{id}/anular(id=${v.id})}"
+                th:aria-label="${'Anular venta ' + v.correlativo}">Anular</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+```
+```css
+.data-table             { width: 100%; border-collapse: collapse; font-size: var(--text-base); }
+.data-table th          { text-align: left; padding: var(--sp-1) 14px;
+                          background: var(--navy-50); color: var(--navy-700);
+                          font-weight: 600; font-size: var(--text-xs);
+                          text-transform: uppercase; letter-spacing: .07em;
+                          border-bottom: 2px solid var(--navy-100); }
+.data-table td          { padding: 10px 14px; border-bottom: 0.5px solid var(--slate-200);
+                          color: var(--slate-700);
+                          transition: background var(--dur-fast) var(--ease-std); }
+.data-table tr:hover td { background: var(--navy-50); }
+.col-optical, .col-sku  { font-family: var(--font-mono); font-size: var(--text-sm);
+                          color: var(--navy-700); }
+.col-amount             { font-family: var(--font-mono); font-weight: 500;
+                          color: var(--navy-900); text-align: right; }
+.col-actions            { white-space: nowrap; display: flex; gap: var(--sp-1);
+                          align-items: center; }
+.table-empty            { text-align: center; padding: var(--sp-5);
+                          color: var(--slate-500); font-style: italic; }
+```

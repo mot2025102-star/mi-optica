@@ -28,7 +28,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value"
-                         th:text="${ventasHoy != null} ? 'Q' + ${#numbers.formatDecimal(ventasHoy,1,'COMMA',2,'POINT')} : 'Q0.00'">
+                         th:text="${ventasHoy != null} ? 'Q ' + ${#numbers.formatDecimal(ventasHoy,1,'COMMA',2,'POINT')} : 'Q 0.00'">
                     </div>
                     <div class="stat-label">Ventas hoy (total)</div>
                 </div>
