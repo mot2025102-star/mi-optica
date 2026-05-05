@@ -250,13 +250,14 @@ h4{ font-size:18px; }
   gap:2px;
   flex:1;
   height:100%;
-  overflow:visible;
+  overflow-x: auto;
+  overflow-y: visible;
   flex-wrap:nowrap;
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior-x:contain;
   scrollbar-width:thin;
-  scrollbar-color: rgba(212,178,122,.35) transparent;
+  scrollbar-color: rgba(66, 255, 255, 0.35) transparent;
 }
 .sidebar-nav::-webkit-scrollbar{ height:3px; }
 .sidebar-nav::-webkit-scrollbar-track{ background:transparent; }

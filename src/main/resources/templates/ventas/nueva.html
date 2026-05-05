@@ -4,6 +4,56 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="~{fragments/layout :: head('Nueva Venta')}"></head>
+
+<!-- Tom Select — buscador de productos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
+
+<style>
+    /* ── Tom Select: tema oscuro ────────────────────────────── */
+    .ts-wrapper { width: 100%; }
+    .ts-control {
+        background: var(--gris-oscuro, #ffffff) !important;
+        border: 1px solid var(--gris-borde, #585858) !important;
+        border-radius: 8px !important;
+        color: var(--texto, #ffffff) !important;
+        font-size: 13px !important;
+        min-height: 38px !important;
+        padding: 4px 8px !important;
+        box-shadow: none !important;
+        cursor: text !important;
+    }
+    .ts-control:focus-within {
+        border-color: var(--turquesa, #27c2c9) !important;
+        box-shadow: 0 0 0 2px rgba(39,194,201,0.15) !important;
+    }
+    .ts-dropdown {
+        background: var(--gris-oscuro, #1e1e2e) !important;
+        border: 1px solid var(--turquesa, #27c2c9) !important;
+        border-radius: 8px !important;
+        color: var(--texto, #fff9f9) !important;
+        font-size: 13px !important;
+        z-index: 9999 !important;
+        margin-top: 2px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+    }
+    .ts-dropdown .option {
+        padding: 9px 14px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        cursor: pointer;
+    }
+    .ts-dropdown .option:hover,
+    .ts-dropdown .option.active {
+        background: rgba(39,194,201,0.12) !important;
+        color: var(--turquesa, #27c2c9) !important;
+    }
+    .ts-control input {
+        color: var(--texto, #000000) !important;
+        font-size: 13px !important;
+    }
+    .ts-control input::placeholder { color: var(--gris-texto, #ffffff) !important; }
+</style>
+
 <body>
 <div th:replace="~{fragments/layout :: sidebar}"></div>
 
@@ -33,15 +83,14 @@
                 <div class="text-gris text-sm">Factura: se generará automáticamente</div>
             </div>
 
-            <!-- CLIENTE -->
+            <!-- ── CLIENTE ─────────────────────────────────────────── -->
             <div style="padding:20px;border-bottom:1px solid var(--gris-borde)">
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Cliente</div>
                 <div class="form-row form-row-2">
                     <div class="form-group" style="position:relative">
                         <label class="form-label">Buscar cliente (opcional)</label>
                         <div style="position:relative">
-                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)"></span>
-                            <input type="text" id="busqCliente" class="form-control" style="padding-left:36px"
+                            <input type="text" id="busqCliente" class="form-control"
                                    placeholder="Nombre, DPI o teléfono..." autocomplete="off"
                                    oninput="buscarCliente(this.value)">
                             <div id="autoCliente" style="position:absolute;top:100%;left:0;right:0;background:var(--gris-oscuro);border:1px solid var(--turquesa);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:200px;overflow-y:auto;display:none"></div>
@@ -57,48 +106,61 @@
                 </div>
             </div>
 
-            <!-- PRODUCTOS -->
+            <!-- ── PRODUCTOS ───────────────────────────────────────── -->
             <div style="padding:20px;border-bottom:1px solid var(--gris-borde)">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
                     <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px">
                          Productos
                         <span class="text-gris text-sm" style="text-transform:none;letter-spacing:0"
-                              th:text="'(' + ${stockDisponible.size()} + ' disponibles)'"></span>
+                              th:text="'(' + ${stockDisponible.size()} + ' disponibles en esta sucursal)'"></span>
                     </div>
                     <button type="button" class="btn btn-primary btn-sm" onclick="agregarFila()"> Agregar</button>
                 </div>
 
                 <!-- Encabezado columnas -->
                 <div style="display:grid;grid-template-columns:3fr 90px 110px 90px 110px 40px;gap:8px;font-size:11px;font-weight:700;color:var(--gris-texto);text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--gris-borde);margin-bottom:10px">
-                    <div>Producto</div><div>Cant.</div><div>Precio unit.</div><div>Desc.</div><div>Subtotal</div><div></div>
+                    <div>Producto</div>
+                    <div>Cant.</div>
+                    <div>Precio unit.</div>
+                    <div>Desc.</div>
+                    <div>Subtotal</div>
+                    <div></div>
                 </div>
+
+                <!-- Filas de productos (dinámicas) -->
                 <div id="listaProds"></div>
             </div>
 
+            <!-- ── PAGO + RECETA + TOTALES ─────────────────────────── -->
             <div style="padding:20px">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+
+                    <!-- Izquierda: Receta externa -->
                     <div>
+                        <!-- Toggle receta externa -->
                         <div class="card mb-3" id="cardRecetaToggle">
                             <div class="card-body" style="padding:14px 20px;display:flex;align-items:center;gap:16px">
                                 <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600">
                                     <input type="checkbox" id="chkRecetaExterna"
-                                        onchange="toggleRecetaExterna(this.checked)"
-                                        style="width:18px;height:18px;accent-color:var(--dorado,#C9A84C)">
+                                           onchange="toggleRecetaExterna(this.checked)"
+                                           style="width:18px;height:18px;accent-color:var(--dorado,#C9A84C)">
                                     📋 Venta con Receta Externa
                                 </label>
                                 <span class="text-gris text-sm">
-                                    Activa esta opción si el cliente trae su propia graduación
+                                    Activa si el cliente trae su propia graduación
                                 </span>
                             </div>
                         </div>
 
-                        <div class="card mb-3" id="cardRecetaExterna" style="display:none;border:2px solid var(--dorado,#C9A84C)">
+                        <!-- Formulario receta externa (oculto por defecto) -->
+                        <div class="card mb-3" id="cardRecetaExterna"
+                             style="display:none;border:2px solid var(--dorado,#C9A84C)">
                             <div class="card-header">
                                 <div class="card-title">📋 Graduación del Cliente (Receta Externa)</div>
                                 <span class="badge badge--warning">⚠️ Dada por el cliente</span>
                             </div>
                             <div class="card-body" style="padding:16px 20px;overflow-x:auto">
-                                <table class="table table-sm" style="min-width:600px">
+                                <table class="table table-sm" style="min-width:500px">
                                     <thead>
                                         <tr>
                                             <th style="width:50px">Ojo</th>
@@ -111,21 +173,21 @@
                                     <tbody>
                                         <tr>
                                             <td class="fw-600" style="color:var(--dorado,#C9A84C)">OD</td>
-                                            <td><input id="rxOdEsfera"   class="form-control form-control-sm" placeholder="Ej: -1.50"></td>
-                                            <td><input id="rxOdCilindro" class="form-control form-control-sm" placeholder="Ej: -0.75"></td>
-                                            <td><input id="rxOdEje"      class="form-control form-control-sm" placeholder="Ej: 90"></td>
-                                            <td><input id="rxOdAdd"      class="form-control form-control-sm" placeholder="Ej: +1.00"></td>
+                                            <td><input id="rxOdEsfera"   class="form-control form-control-sm" placeholder="-1.50"></td>
+                                            <td><input id="rxOdCilindro" class="form-control form-control-sm" placeholder="-0.75"></td>
+                                            <td><input id="rxOdEje"      class="form-control form-control-sm" placeholder="90"></td>
+                                            <td><input id="rxOdAdd"      class="form-control form-control-sm" placeholder="+1.00"></td>
                                         </tr>
                                         <tr>
                                             <td class="fw-600" style="color:var(--dorado,#C9A84C)">OI</td>
-                                            <td><input id="rxOiEsfera"   class="form-control form-control-sm" placeholder="Ej: -1.50"></td>
-                                            <td><input id="rxOiCilindro" class="form-control form-control-sm" placeholder="Ej: -0.75"></td>
-                                            <td><input id="rxOiEje"      class="form-control form-control-sm" placeholder="Ej: 90"></td>
-                                            <td><input id="rxOiAdd"      class="form-control form-control-sm" placeholder="Ej: +1.00"></td>
+                                            <td><input id="rxOiEsfera"   class="form-control form-control-sm" placeholder="-1.50"></td>
+                                            <td><input id="rxOiCilindro" class="form-control form-control-sm" placeholder="-0.75"></td>
+                                            <td><input id="rxOiEje"      class="form-control form-control-sm" placeholder="90"></td>
+                                            <td><input id="rxOiAdd"      class="form-control form-control-sm" placeholder="+1.00"></td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap">
+                                <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
                                     <div style="display:flex;align-items:center;gap:8px">
                                         <label class="form-label mb-0">Pantoscópico</label>
                                         <input id="rxPantoscopico" class="form-control form-control-sm" style="width:80px" placeholder="°">
@@ -143,6 +205,7 @@
                         </div>
                     </div>
 
+                    <!-- Derecha: Forma de pago + Resumen -->
                     <div>
                         <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Forma de Pago</div>
                         <div class="form-row form-row-2">
@@ -161,12 +224,13 @@
                                        min="0" step="0.01" value="0" oninput="calcTotal()">
                             </div>
                         </div>
-                        <div class="form-group" style="margin-bottom: 28px;">
+                        <div class="form-group" style="margin-bottom:20px">
                             <label class="form-label">Observaciones</label>
                             <textarea id="observacion" class="form-control" rows="2"
                                       placeholder="Notas de la venta..."></textarea>
                         </div>
 
+                        <!-- Resumen -->
                         <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Resumen</div>
                         <div style="background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.2);border-radius:10px;padding:16px 20px">
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
@@ -183,9 +247,9 @@
                                 <span style="font-size:24px;font-weight:700;color:var(--turquesa)" id="resTotal">Q 0.00</span>
                             </div>
                         </div>
-                        
+
                         <button type="button"
-                                style="width:100%;margin-top:12px;padding:14px;font-size:15px"
+                                style="width:100%;margin-top:16px;padding:14px;font-size:15px"
                                 class="btn btn-primary"
                                 onclick="registrarVenta()">
                              Registrar Venta
@@ -197,7 +261,7 @@
     </div>
 </div>
 
-<!-- Modal éxito -->
+<!-- ── Modal éxito ─────────────────────────────────────────────── -->
 <div class="modal-overlay" id="modalExito">
     <div class="modal">
         <div class="modal-header">
@@ -217,48 +281,49 @@
     </div>
 </div>
 
-<!-- Datos de productos disponibles inyectados desde el servidor -->
+<!-- ── Datos de stock inyectados desde el servidor ─────────────── -->
 <script th:inline="javascript">
     const STOCK = /*[[${stockDisponible}]]*/ [];
 </script>
 
 <script>
-let filaIdx = 0;
+// ── Estado ────────────────────────────────────────────────────────
+let filaIdx    = 0;
+const tomSelects = {}; // instancias de Tom Select por fila
 
-// ─── Agregar fila de producto ─────────────────────────────────────
+// ── Agregar fila de producto ──────────────────────────────────────
 function agregarFila() {
     const idx = filaIdx++;
     const div = document.createElement('div');
     div.id = 'fila_' + idx;
     div.style.cssText = 'display:grid;grid-template-columns:3fr 90px 110px 90px 110px 40px;gap:8px;align-items:center;margin-bottom:8px';
 
+    // Opciones del select
     const opts = STOCK.map(s =>
         `<option value="${s.producto.idProducto}"
-                 data-precio="${s.precioVenta}"
-                 data-stock="${s.existencia}">
+                 data-precio="${s.precioVenta ?? 0}"
+                 data-stock="${s.existencia ?? 0}">
             ${s.producto.codigo} — ${s.producto.detalle} (Stock: ${s.existencia})
          </option>`
     ).join('');
 
     div.innerHTML = `
-        <select class="form-select" onchange="onProd(this,${idx})" required>
-            <option value="">Seleccionar producto...</option>${opts}
+        <select id="sel_${idx}" required>
+            <option value="">Buscar producto...</option>
+            ${opts}
         </select>
-        <input type="number" id="cant_${idx}"   class="form-control" min="1"    step="1"    value="1"  oninput="calcFila(${idx})" required>
-        <input type="number" id="precio_${idx}" class="form-control" min="0"    step="0.01" value=""   oninput="calcFila(${idx})" required placeholder="0.00">
+        <input type="number" id="cant_${idx}"   class="form-control" min="1"  step="1"    value="1"  oninput="calcFila(${idx})" required>
+        <input type="number" id="precio_${idx}" class="form-control" min="0"  step="0.01" value=""   oninput="calcFila(${idx})" required placeholder="0.00">
+        <input type="number" id="desc_${idx}"   class="form-control" min="0"  step="0.01" value="0"  oninput="calcFila(${idx})" placeholder="0.00">
         <input type="number" id="sub_${idx}"    class="form-control" readonly
                style="background:rgba(39,194,201,0.08);color:var(--turquesa);font-weight:600" value="0.00">
-               
-        <input type="number" id="sub_${idx}"    class="form-control" readonly
-               style="background:rgba(39,194,201,0.08);color:var(--turquesa);font-weight:600" value="0.00">
-               
-        <button type="button" 
-                style="background:rgba(255, 71, 87, 0.1); border:1px solid rgba(255, 71, 87, 0.3); color:#ff4757; border-radius:10px; height:38px; width:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                onmouseover="this.style.background='rgba(255, 71, 87, 0.25)'; this.style.transform='scale(1.1) rotate(5deg)'; this.style.boxShadow='0 4px 8px rgba(255, 71, 87, 0.3)';"
-                onmouseout="this.style.background='rgba(255, 71, 87, 0.1)'; this.style.transform='scale(1) rotate(0deg)'; this.style.boxShadow='none';"
-                onclick="document.getElementById('fila_${idx}').remove();calcTotal()" 
+        <button type="button"
+                style="background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);color:#ff4757;border-radius:10px;height:38px;width:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;flex-shrink:0"
+                onmouseover="this.style.background='rgba(255,71,87,0.25)';this.style.transform='scale(1.1) rotate(5deg)'"
+                onmouseout="this.style.background='rgba(255,71,87,0.1)';this.style.transform='scale(1) rotate(0deg)'"
+                onclick="eliminarFila(${idx})"
                 title="Eliminar producto">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -267,48 +332,76 @@ function agregarFila() {
         </button>
     `;
     document.getElementById('listaProds').appendChild(div);
+
+    // Inicializar Tom Select en el <select> recién creado
+    tomSelects[idx] = new TomSelect('#sel_' + idx, {
+        placeholder: 'Escribir para buscar...',
+        searchField:  ['text'],
+        maxOptions:   100,
+        render: {
+            option: (data) => `<div style="padding:6px 4px">
+                <div style="font-weight:600;font-size:13px">${data.text.split('(')[0].trim()}</div>
+                <div style="font-size:11px;color:var(--gris-texto,#888)">${data.text.match(/\(.*\)/)?.[0] || ''}</div>
+            </div>`,
+        },
+        onChange(value) {
+            if (!value) return;
+            const sel   = document.getElementById('sel_' + idx);
+            const opt   = sel?.options[sel.selectedIndex];
+            if (!opt) return;
+            const precio = parseFloat(opt.dataset.precio || 0);
+            const stock  = parseFloat(opt.dataset.stock  || 0);
+            document.getElementById('precio_' + idx).value = precio > 0 ? precio.toFixed(2) : '';
+            document.getElementById('cant_'   + idx).max   = stock;
+            calcFila(idx);
+        }
+    });
 }
 
-function onProd(sel, idx) {
-    const opt = sel.options[sel.selectedIndex];
-    const precio = parseFloat(opt.dataset.precio || 0);
-    document.getElementById('precio_' + idx).value = precio > 0 ? precio.toFixed(2) : '';
-    document.getElementById('cant_' + idx).max = parseFloat(opt.dataset.stock || 0);
-    calcFila(idx);
-}
-
-function calcFila(idx) {
-    const cant  = parseFloat(document.getElementById('cant_'   + idx)?.value || 0);
-    const precio= parseFloat(document.getElementById('precio_' + idx)?.value || 0);
-    const desc  = parseFloat(document.getElementById('desc_'   + idx)?.value || 0);
-    const el    = document.getElementById('sub_' + idx);
-    if (el) el.value = (cant * precio - desc).toFixed(2);
+// ── Eliminar fila (destruye Tom Select antes de quitar el DOM) ────
+function eliminarFila(idx) {
+    if (tomSelects[idx]) {
+        tomSelects[idx].destroy();
+        delete tomSelects[idx];
+    }
+    document.getElementById('fila_' + idx)?.remove();
     calcTotal();
 }
 
+// ── Calcular subtotal de una fila ─────────────────────────────────
+function calcFila(idx) {
+    const cant   = parseFloat(document.getElementById('cant_'  + idx)?.value || 0);
+    const precio = parseFloat(document.getElementById('precio_'+ idx)?.value || 0);
+    const desc   = parseFloat(document.getElementById('desc_'  + idx)?.value || 0);
+    const el     = document.getElementById('sub_' + idx);
+    if (el) el.value = Math.max(0, cant * precio - desc).toFixed(2);
+    calcTotal();
+}
+
+// ── Calcular total general ────────────────────────────────────────
 function calcTotal() {
     let sub = 0;
     document.querySelectorAll('[id^="sub_"]').forEach(i => sub += parseFloat(i.value || 0));
     const desc  = parseFloat(document.getElementById('descGlobal').value || 0);
     const total = Math.max(0, sub - desc);
-    document.getElementById('resSubtotal').textContent = 'Q ' + sub.toFixed(2);
+    document.getElementById('resSubtotal').textContent  = 'Q ' + sub.toFixed(2);
     document.getElementById('resDescuento').textContent = '- Q ' + desc.toFixed(2);
-    document.getElementById('resTotal').textContent = 'Q ' + total.toFixed(2);
+    document.getElementById('resTotal').textContent     = 'Q ' + total.toFixed(2);
 }
 
-// ─── Búsqueda cliente ─────────────────────────────────────────────
+// ── Búsqueda de cliente ───────────────────────────────────────────
 let toCli;
 function buscarCliente(q) {
     clearTimeout(toCli);
     const box = document.getElementById('autoCliente');
     if (q.length < 2) { box.style.display = 'none'; return; }
     toCli = setTimeout(async () => {
-        const r = await fetch('/clientes/api/buscar?q=' + encodeURIComponent(q));
+        const r    = await fetch('/clientes/api/buscar?q=' + encodeURIComponent(q));
         const data = await r.json();
         if (!data.length) { box.style.display = 'none'; return; }
         box.innerHTML = data.map(c => `
             <div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--gris-borde)"
-                 onmousedown="selCliente(${c.id},'${c.nombre.replace(/'/g,"\\'")}','${c.nit}')">
+                 onmousedown="selCliente(${c.id},'${c.nombre.replace(/'/g,"\\'")}','${c.nit ?? ''}')">
                 <div class="fw-600">${c.nombre}</div>
                 <div class="text-gris text-sm">DPI: ${c.dpi || '—'} | NIT: ${c.nit || 'CF'}</div>
             </div>`).join('');
@@ -317,10 +410,11 @@ function buscarCliente(q) {
 }
 
 function selCliente(id, nombre, nit) {
-    document.getElementById('idCliente').value = id;
-    document.getElementById('busqCliente').value = nombre;
+    document.getElementById('idCliente').value    = id;
+    document.getElementById('busqCliente').value  = nombre;
     document.getElementById('clienteInfo').innerHTML =
-        `<span class="fw-600 text-turquesa">${nombre}</span> <span class="text-gris text-sm">NIT: ${nit || 'CF'}</span>`;
+        `<span class="fw-600 text-turquesa">${nombre}</span>
+         <span class="text-gris text-sm"> NIT: ${nit || 'CF'}</span>`;
     document.getElementById('autoCliente').style.display = 'none';
 }
 
@@ -329,33 +423,41 @@ document.addEventListener('click', e => {
         document.getElementById('autoCliente').style.display = 'none';
 });
 
-// ─── Registrar venta vía fetch ────────────────────────────────────
+// ── Toggle receta externa ─────────────────────────────────────────
+function toggleRecetaExterna(activa) {
+    document.getElementById('cardRecetaExterna').style.display = activa ? 'block' : 'none';
+}
+
+// ── Registrar venta ───────────────────────────────────────────────
 async function registrarVenta() {
-    // Recolectar filas
     const items = [];
     const filas = document.querySelectorAll('#listaProds > div');
 
     for (const fila of filas) {
-        const sel    = fila.querySelector('select');
-        const idx    = fila.id.split('_')[1];
-        if (!sel.value) continue;
+        const idx   = fila.id.split('_')[1];
+        const sel   = document.getElementById('sel_' + idx);   // ← Tom Select usa el <select> original
+        if (!sel || !sel.value) continue;
 
-        const cant   = parseFloat(document.getElementById('cant_'   + idx)?.value || 0);
-        const precio = parseFloat(document.getElementById('precio_' + idx)?.value || 0);
-        const desc   = parseFloat(document.getElementById('desc_'   + idx)?.value || 0);
-        const sub    = parseFloat(document.getElementById('sub_'    + idx)?.value || 0);
-
+        const cant   = parseFloat(document.getElementById('cant_'  + idx)?.value || 0);
+        const precio = parseFloat(document.getElementById('precio_'+ idx)?.value || 0);
+        const desc   = parseFloat(document.getElementById('desc_'  + idx)?.value || 0);
+        const sub    = parseFloat(document.getElementById('sub_'   + idx)?.value || 0);
         const opt    = sel.options[sel.selectedIndex];
-        const stock  = parseFloat(opt.dataset.stock || 0);
+        const stock  = parseFloat(opt?.dataset.stock || 0);
 
         if (cant <= 0) continue;
         if (cant > stock) {
-            mostrarError('Stock insuficiente para "' + opt.text.split('(')[0].trim() + '". Stock: ' + stock);
+            mostrarError('Stock insuficiente para "' + (opt?.text?.split('(')[0]?.trim() || '') + '". Stock disponible: ' + stock);
             return;
         }
 
-        items.push({ idProducto: parseInt(sel.value), cantidad: cant,
-                     precioUnitario: precio, descuento: desc, subtotal: sub });
+        items.push({
+            idProducto:    parseInt(sel.value),
+            cantidad:      cant,
+            precioUnitario: precio,
+            descuento:     desc,
+            subtotal:      sub
+        });
     }
 
     if (!items.length) { mostrarError('Agrega al menos un producto.'); return; }
@@ -369,40 +471,42 @@ async function registrarVenta() {
         descuentoGlobal: parseFloat(document.getElementById('descGlobal').value || 0),
         observacion:     document.getElementById('observacion').value,
         items,
-
-        // ── Receta externa ──────────────────────────────────────
         recetaExterna,
-        rxOdEsfera:    recetaExterna ? vRx('rxOdEsfera')   : null,
-        rxOdCilindro:  recetaExterna ? vRx('rxOdCilindro') : null,
-        rxOdEje:       recetaExterna ? vRx('rxOdEje')      : null,
-        rxOdAdd:       recetaExterna ? vRx('rxOdAdd')      : null,
-        rxOiEsfera:    recetaExterna ? vRx('rxOiEsfera')   : null,
-        rxOiCilindro:  recetaExterna ? vRx('rxOiCilindro') : null,
-        rxOiEje:       recetaExterna ? vRx('rxOiEje')      : null,
-        rxOiAdd:       recetaExterna ? vRx('rxOiAdd')      : null,
-        rxPantoscopico: recetaExterna ? vRx('rxPantoscopico') : null,
-        rxVertex:       recetaExterna ? vRx('rxVertex')       : null,
-        rxPanoramico:   recetaExterna ? vRx('rxPanoramico')   : null
+        rxOdEsfera:     recetaExterna ? vRx('rxOdEsfera')    : null,
+        rxOdCilindro:   recetaExterna ? vRx('rxOdCilindro')  : null,
+        rxOdEje:        recetaExterna ? vRx('rxOdEje')       : null,
+        rxOdAdd:        recetaExterna ? vRx('rxOdAdd')       : null,
+        rxOiEsfera:     recetaExterna ? vRx('rxOiEsfera')    : null,
+        rxOiCilindro:   recetaExterna ? vRx('rxOiCilindro')  : null,
+        rxOiEje:        recetaExterna ? vRx('rxOiEje')       : null,
+        rxOiAdd:        recetaExterna ? vRx('rxOiAdd')       : null,
+        rxPantoscopico: recetaExterna ? vRx('rxPantoscopico'): null,
+        rxVertex:       recetaExterna ? vRx('rxVertex')      : null,
+        rxPanoramico:   recetaExterna ? vRx('rxPanoramico')  : null
     };
 
     const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-    const res  = await fetch('/ventas/registrar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
-        body: JSON.stringify(payload)
-    });
-    const data = await res.json();
+    try {
+        const res  = await fetch('/ventas/registrar', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+            body:    JSON.stringify(payload)
+        });
+        const data = await res.json();
 
-    if (data.ok) {
-        document.getElementById('exitoFactura').textContent = data.factura;
-        document.getElementById('exitoTotal').textContent   = 'Q ' + parseFloat(data.total).toFixed(2);
-        document.getElementById('exitoPdfLink').href        = '/ventas/factura/' + data.idVenta;
-        document.getElementById('modalExito').classList.add('show');
-        document.getElementById('alertaError').style.display = 'none';
-    } else {
-        mostrarError(data.error);
+        if (data.ok) {
+            document.getElementById('exitoFactura').textContent = data.factura;
+            document.getElementById('exitoTotal').textContent   = 'Q ' + parseFloat(data.total).toFixed(2);
+            document.getElementById('exitoPdfLink').href        = '/ventas/factura/' + data.idVenta;
+            document.getElementById('modalExito').classList.add('show');
+            document.getElementById('alertaError').style.display = 'none';
+        } else {
+            mostrarError(data.error);
+        }
+    } catch (e) {
+        mostrarError('Error de conexión: ' + e.message);
     }
 }
 
@@ -415,27 +519,10 @@ function mostrarError(msg) {
 
 function nuevaVenta() {
     document.getElementById('modalExito').classList.remove('show');
-    document.getElementById('listaProds').innerHTML = '';
-    document.getElementById('idCliente').value = '';
-    document.getElementById('busqCliente').value = '';
-    document.getElementById('clienteInfo').innerHTML = 'Consumidor Final (CF) — sin cliente asignado';
-    document.getElementById('descGlobal').value = '0';
-    document.getElementById('observacion').value = '';
-    document.getElementById('resSubtotal').textContent = 'Q 0.00';
-    document.getElementById('resDescuento').textContent = '- Q 0.00';
-    document.getElementById('resTotal').textContent = 'Q 0.00';
-    agregarFila();
-    // Recargar la página para actualizar el stock
     location.reload();
 }
 
-// ── Toggle receta externa ─────────────────────────────────────
-function toggleRecetaExterna(activa) {
-    document.getElementById('cardRecetaExterna').style.display
-        = activa ? 'block' : 'none';
-}
-
-// Primera fila al cargar
+// ── Primera fila al cargar ────────────────────────────────────────
 agregarFila();
 </script>
 </body>

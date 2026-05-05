@@ -93,25 +93,61 @@
     </script>
     <script>
         (function () {
-            function enableHorizontalWheelScroll(container) {
+            function enableNavScroll(container) {
                 if (!container) return;
 
+                // ── Scroll con rueda del mouse ────────────────────────
                 container.addEventListener('wheel', function (e) {
-                    // Si el usuario ya está haciendo scroll horizontal (trackpad/shift), no interferimos
                     const absX = Math.abs(e.deltaX || 0);
                     const absY = Math.abs(e.deltaY || 0);
-                    if (absX > absY) return;
-
+                    if (absX > absY) return; // trackpad horizontal ya funciona solo
                     const canScroll = container.scrollWidth > container.clientWidth + 1;
                     if (!canScroll) return;
-
                     e.preventDefault();
-                    container.scrollLeft += e.deltaY;
+                    container.scrollLeft += e.deltaY * 1.2;
                 }, { passive: false });
+
+                // ── Click y arrastrar ─────────────────────────────────
+                let isDragging  = false;
+                let startX      = 0;
+                let scrollStart = 0;
+
+                container.addEventListener('mousedown', function (e) {
+                    // Solo si hace clic en el fondo de la nav, no en un link
+                    if (e.target.closest('a')) return;
+                    isDragging  = true;
+                    startX      = e.pageX;
+                    scrollStart = container.scrollLeft;
+                    container.style.cursor  = 'grabbing';
+                    container.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', function (e) {
+                    if (!isDragging) return;
+                    const delta = e.pageX - startX;
+                    container.scrollLeft = scrollStart - delta;
+                });
+
+                document.addEventListener('mouseup', function () {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    container.style.cursor    = '';
+                    container.style.userSelect = '';
+                });
+
+                // Cursor grab cuando el mouse entra (solo si hay scroll disponible)
+                container.addEventListener('mouseenter', function () {
+                    if (container.scrollWidth > container.clientWidth + 1)
+                        container.style.cursor = 'grab';
+                });
+                container.addEventListener('mouseleave', function () {
+                    if (!isDragging) container.style.cursor = '';
+                });
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                enableHorizontalWheelScroll(document.querySelector('.sidebar-nav'));
+                enableNavScroll(document.querySelector('.sidebar-nav'));
             });
         })();
     </script>

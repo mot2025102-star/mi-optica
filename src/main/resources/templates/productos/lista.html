@@ -13,12 +13,11 @@
         <div>
             <div class="topbar-title"> Catálogo de Productos</div>
             <div class="topbar-sub"
-                 th:text="${productos.size()} + ' producto(s) — ' + ${categorias.size()} + ' categorías — ' + ${marcas.size()} + ' marcas'">
+                 th:text="${productos.size()} + ' producto(s) — ' + ${marcas.size()} + ' marcas'">
             </div>
         </div>
         <div class="topbar-actions">
             <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
-                <button class="btn btn-secondary" onclick="abrirModalCat()"> Categorías</button>
                 <button class="btn btn-secondary" onclick="abrirModalMar()"> Marcas</button>
                 <a th:href="@{/productos/nuevo}" class="btn btn-primary"> Nuevo Producto</a>
             </div>
@@ -30,7 +29,6 @@
         <div th:if="${mensajeOk}"    class="alert alert--success"><span th:text="${mensajeOk}"></span></div>
         <div th:if="${mensajeError}" class="alert alert--danger"> <span th:text="${mensajeError}"></span></div>
  
-        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon turquesa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
@@ -47,13 +45,6 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon amarillo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-                <div class="stat-info">
-                    <div class="stat-value" th:text="${categorias.size()}">0</div>
-                    <div class="stat-label">Categorías</div>
-                </div>
-            </div>
-            <div class="stat-card">
                 <div class="stat-icon turquesa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${marcas.size()}">0</div>
@@ -62,7 +53,6 @@
             </div>
         </div>
  
-        <!-- Filtros -->
         <div class="card mb-3">
             <div class="card-body" style="padding:14px 20px">
                 <form th:action="@{/productos}" method="get"
@@ -76,12 +66,14 @@
                                    placeholder="Código, nombre, modelo..." th:value="${q}">
                         </div>
                     </div>
-                    <div style="min-width:160px">
+                    <div style="min-width:150px">
                         <label class="form-label">Categoría</label>
-                        <select name="cat" class="form-select">
-                            <option value="0">Todas</option>
-                            <option th:each="c : ${categorias}" th:value="${c.idCategoria}"
-                                    th:text="${c.nombre}" th:selected="${cat == c.idCategoria}"></option>
+                        <select name="tipo" class="form-select">
+                            <option value=""         th:selected="${tipo == ''}">Todas</option>
+                            <option value="ARMAZON"  th:selected="${tipo == 'ARMAZON'}"> Armazones</option>
+                            <option value="LENTE"    th:selected="${tipo == 'LENTE'}"> Lentes</option>
+                            <option value="LIMPIEZA" th:selected="${tipo == 'LIMPIEZA'}"> Limpieza</option>
+                            <option value="ACCESORIO" th:selected="${tipo == 'ACCESORIO'}"> Accesorios</option>
                         </select>
                     </div>
                     <div style="min-width:140px">
@@ -108,7 +100,6 @@
             </div>
         </div>
  
-        <!-- Toggle vista -->
         <div class="d-flex justify-between align-center mb-3">
             <div class="text-gris text-sm" th:text="${productos.size()} + ' resultado(s)'"></div>
             <div class="d-flex gap-1">
@@ -119,7 +110,6 @@
             </div>
         </div>
  
-        <!-- VISTA TABLA -->
         <div id="vistaTabla" th:style="${vista=='cards'} ? 'display:none' : ''">
             <div class="card">
                 <div class="card-header">
@@ -153,23 +143,18 @@
                                 </td>
                             </tr>
                             <tr th:each="p : ${productos}">
-                                <!-- Código -->
                                 <td class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></td>
  
-                                <!-- Nombre + info extra lente -->
                                 <td>
                                     <div class="fw-600" th:text="${p.detalle}"></div>
-                                    <!-- Código interno si es lente -->
                                     <div th:if="${p.tipoProducto == 'LENTE' and p.codigoInternoLente != null and !p.codigoInternoLente.isEmpty()}"
                                          class="text-gris text-sm"
                                          th:text="${p.codigoInternoLente}"></div>
-                                    <!-- Descripción para otros tipos -->
                                     <div th:if="${p.tipoProducto != 'LENTE' and p.descripcion != null and !p.descripcion.isEmpty()}"
                                          class="text-gris text-sm"
                                          th:text="${#strings.abbreviate(p.descripcion, 50)}"></div>
                                 </td>
  
-                                <!-- Tipo -->
                                 <td>
                                     <span th:if="${p.tipoProducto == 'ARMAZON'}"
                                           style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa)">Armazón</span>
@@ -181,13 +166,11 @@
                                           style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(180,100,255,0.12);color:#b464ff">Accesorio</span>
                                     <span th:if="${p.tipoProducto == null or p.tipoProducto == 'GENERAL'}"
                                           class="text-gris text-sm">General</span>
-                                    <!-- Sub-info lente -->
                                     <div th:if="${p.tipoProducto == 'LENTE' and p.clasificacionLente != null}"
                                          class="text-gris" style="font-size:10px;margin-top:3px"
                                          th:text="${p.clasificacionLente}"></div>
                                 </td>
  
-                                <!-- Marca -->
                                 <td>
                                     <span th:if="${p.marca != null}"
                                           style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"
@@ -195,10 +178,8 @@
                                     <span th:if="${p.marca == null}" class="text-gris text-sm">—</span>
                                 </td>
  
-                                <!-- Color -->
                                 <td class="text-sm" th:text="${p.color != null and !p.color.isEmpty() ? p.color : '—'}"></td>
  
-                                <!-- Stock -->
                                 <td style="text-align:center">
                                     <th:block th:with="stock=${stockMap[p.idProducto]}">
                                         <span th:if="${stock == null or stock.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
@@ -213,18 +194,14 @@
                                     </th:block>
                                 </td>
  
-                                <!-- Precio Venta -->
                                 <td style="text-align:right">
-                                    <!-- Lente: usar precioVentaLente -->
                                     <span th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente != null}"
                                           class="fw-600 text-turquesa"
                                           style="font-size:13px"
                                           th:text="'Q ' + ${#numbers.formatDecimal(p.precioVentaLente, 1, 2)}">
                                     </span>
-                                    <!-- Lente sin precio -->
                                     <span th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente == null}"
                                           class="text-gris text-sm">—</span>
-                                    <!-- Otros tipos: usar precio del inventario (primera sucursal) -->
                                     <th:block th:if="${p.tipoProducto != 'LENTE'}">
                                         <th:block th:with="inv=${precioMap != null ? precioMap[p.idProducto] : null}">
                                             <span th:if="${inv != null}"
@@ -237,13 +214,11 @@
                                     </th:block>
                                 </td>
  
-                                <!-- Estado -->
                                 <td>
                                     <span th:if="${p.activo}"  class="badge badge--success">Activo</span>
                                     <span th:if="${!p.activo}" class="badge badge--danger">Inactivo</span>
                                 </td>
  
-                                <!-- Acciones -->
                                 <td>
                                     <div class="d-flex gap-1">
                                         <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
@@ -320,7 +295,6 @@
             </div>
         </div>
  
-        <!-- VISTA TARJETAS -->
         <div id="vistaCards" th:style="${vista=='tabla'} ? 'display:none' : ''">
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
                 <div th:each="p : ${productos}"
@@ -335,7 +309,6 @@
                         <span th:if="${!p.activo}" class="badge badge--danger">Inactivo</span>
                     </div>
                     <div class="fw-600" style="margin-bottom:4px;line-height:1.3" th:text="${p.detalle}"></div>
-                    <!-- Código interno para lentes -->
                     <div th:if="${p.tipoProducto == 'LENTE' and p.codigoInternoLente != null and !p.codigoInternoLente.isEmpty()}"
                          class="text-gris text-sm" style="margin-bottom:6px"
                          th:text="${p.codigoInternoLente}"></div>
@@ -349,7 +322,6 @@
                         <span th:if="${p.color != null and !p.color.isEmpty()}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--gris-texto)"
                               th:text="${p.color}"></span>
-                        <!-- Rango lente -->
                         <span th:if="${p.tipoProducto == 'LENTE' and p.rangoLente != null}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.1);color:#64b4ff"
                               th:text="${p.rangoLente}"></span>
@@ -369,7 +341,6 @@
                                       style="font-size:12px;padding:4px 10px;margin-top:3px"></span>
                             </th:block>
                         </div>
-                        <!-- Precio venta en tarjeta -->
                         <div style="text-align:right">
                             <div class="text-gris text-sm">Precio</div>
                             <div th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente != null}"
@@ -417,29 +388,6 @@
     </div>
 </div>
  
-<!-- MODAL CATEGORÍAS -->
-<div class="modal-overlay" id="modalCat">
-    <div class="modal">
-        <div class="modal-header">
-            <div class="modal-title"> Gestión de Categorías</div>
-            <button class="modal-close" onclick="document.getElementById('modalCat').classList.remove('show')">✕</button>
-        </div>
-        <div class="modal-body">
-            <div style="display:flex;gap:10px;margin-bottom:20px">
-                <input type="text" id="nuevaCat" class="form-control" placeholder="Nombre de la categoría..." style="flex:1">
-                <button class="btn btn-primary" onclick="guardarCategoria()"> Guardar</button>
-            </div>
-            <div class="table-wrapper">
-                <table class="table">
-                    <thead><tr><th>Categoría</th></tr></thead>
-                    <tbody><tr th:each="c : ${categorias}"><td th:text="${c.nombre}"></td></tr></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
- 
-<!-- MODAL MARCAS -->
 <div class="modal-overlay" id="modalMar">
     <div class="modal">
         <div class="modal-header">
@@ -477,24 +425,11 @@ function filtrar(q) {
         tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'
     );
 }
-function abrirModalCat() { document.getElementById('modalCat').classList.add('show'); }
 function abrirModalMar() { document.getElementById('modalMar').classList.add('show'); }
  
 const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
  
-async function guardarCategoria() {
-    const nombre = document.getElementById('nuevaCat').value.trim();
-    if (!nombre) return;
-    const r = await fetch('/productos/api/categoria', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken },
-        body: 'nombre=' + encodeURIComponent(nombre)
-    });
-    const d = await r.json();
-    if (d.ok) { alert('Categoría guardada: ' + d.nombre); location.reload(); }
-    else { alert('Error: ' + d.error); }
-}
 async function guardarMarca() {
     const nombre = document.getElementById('nuevaMar').value.trim();
     if (!nombre) return;

@@ -29,47 +29,52 @@ public class ProductoController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR','CONTADOR','BODEGUERO','OPTOMETRISTA')")
     public String lista(
             @RequestParam(defaultValue = "")       String  q,
-            @RequestParam(defaultValue = "0")      Integer cat,
+            @RequestParam(defaultValue = "")       String  tipo,   // ← cambia de "cat/Integer" a "tipo/String"
             @RequestParam(defaultValue = "0")      Integer mar,
             @RequestParam(defaultValue = "activo") String  est,
             @RequestParam(defaultValue = "tabla")  String  vista,
             Model model) {
- 
+
         var productos = q.isBlank() ? productoService.listarTodos()
-                                     : productoService.buscar(q);
- 
-        if (cat > 0) { int c = cat; productos = productos.stream().filter(p -> p.getCategoria() != null && p.getCategoria().getIdCategoria().equals(c)).toList(); }
-        if (mar > 0) { int m = mar; productos = productos.stream().filter(p -> p.getMarca()     != null && p.getMarca().getIdMarca().equals(m)).toList(); }
+                                    : productoService.buscar(q);
+
+        // ── Filtro por tipo de producto ───────────────────────────────
+        if (!tipo.isBlank()) {
+            productos = productos.stream()
+                .filter(p -> tipo.equalsIgnoreCase(p.getTipoProducto()))
+                .toList();
+        }
+
+        if (mar > 0) { int m = mar; productos = productos.stream()
+            .filter(p -> p.getMarca() != null && p.getMarca().getIdMarca().equals(m))
+            .toList(); }
+
         if ("activo".equals(est))        productos = productos.stream().filter(Producto::getActivo).toList();
         else if ("inactivo".equals(est)) productos = productos.stream().filter(p -> !p.getActivo()).toList();
- 
+
         long activos   = productos.stream().filter(Producto::getActivo).count();
         long inactivos = productos.size() - activos;
- 
-        // ── stockMap: stock total por producto ────────────────────
-        var stockMap = new HashMap<Integer, BigDecimal>();
-        productos.forEach(p -> stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto())));
- 
-        // ── precioMap: precio de venta por producto ───────────────
+
+        var stockMap  = new HashMap<Integer, BigDecimal>();
         var precioMap = new HashMap<Integer, BigDecimal>();
         productos.forEach(p -> {
+            stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto()));
             BigDecimal pv = productoService.precioVenta(p.getIdProducto());
             if (pv != null) precioMap.put(p.getIdProducto(), pv);
         });
- 
-        model.addAttribute("productos",   productos);
-        model.addAttribute("stockMap",    stockMap);
-        model.addAttribute("precioMap",   precioMap);   // ← NUEVO
-        model.addAttribute("categorias",  productoService.listarCategorias());
-        model.addAttribute("marcas",      productoService.listarMarcas());
-        model.addAttribute("activos",     activos);
-        model.addAttribute("inactivos",   inactivos);
-        model.addAttribute("q",           q);
-        model.addAttribute("cat",         cat);
-        model.addAttribute("mar",         mar);
-        model.addAttribute("est",         est);
-        model.addAttribute("vista",       vista);
-        model.addAttribute("activePage",  "productos");
+
+        model.addAttribute("productos",  productos);
+        model.addAttribute("stockMap",   stockMap);
+        model.addAttribute("precioMap",  precioMap);
+        model.addAttribute("marcas",     productoService.listarMarcas());
+        model.addAttribute("activos",    activos);
+        model.addAttribute("inactivos",  inactivos);
+        model.addAttribute("q",          q);
+        model.addAttribute("tipo",       tipo);   // ← antes era "cat"
+        model.addAttribute("mar",        mar);
+        model.addAttribute("est",        est);
+        model.addAttribute("vista",      vista);
+        model.addAttribute("activePage", "productos");
         return "productos/lista";
     }
  
