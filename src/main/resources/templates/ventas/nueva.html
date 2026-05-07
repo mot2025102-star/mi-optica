@@ -10,13 +10,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
 
 <style>
-    /* ── Tom Select: tema oscuro ────────────────────────────── */
+    /* ── Tom Select: tema claro (nueva venta) ───────────────── */
     .ts-wrapper { width: 100%; }
     .ts-control {
-        background: var(--gris-oscuro, #ffffff) !important;
-        border: 1px solid var(--gris-borde, #585858) !important;
+        background: var(--card-bg, #ffffff) !important;
+        border: 1px solid var(--slate-300, #CBD5E1) !important;
         border-radius: 8px !important;
-        color: var(--texto, #ffffff) !important;
+        color: var(--slate-700, #374151) !important;
         font-size: 13px !important;
         min-height: 38px !important;
         padding: 4px 8px !important;
@@ -24,34 +24,45 @@
         cursor: text !important;
     }
     .ts-control:focus-within {
-        border-color: var(--turquesa, #27c2c9) !important;
-        box-shadow: 0 0 0 2px rgba(39,194,201,0.15) !important;
+        border-color: var(--cyan-400, #00B4D8) !important;
+        box-shadow: 0 0 0 2px rgba(0,180,216,0.15) !important;
     }
+    /* ── Texto del item seleccionado ── */
+    .ts-control .item {
+        color: var(--slate-700, #374151) !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+    }
+    /* ── Input de búsqueda ── */
+    .ts-control input {
+        color: var(--slate-700, #374151) !important;
+        font-size: 13px !important;
+    }
+    .ts-control input::placeholder {
+        color: var(--slate-500, #64748B) !important;
+    }
+    /* ── Dropdown ── */
     .ts-dropdown {
-        background: var(--gris-oscuro, #1e1e2e) !important;
-        border: 1px solid var(--turquesa, #27c2c9) !important;
+        background: #ffffff !important;
+        border: 1px solid var(--cyan-400, #00B4D8) !important;
         border-radius: 8px !important;
-        color: var(--texto, #fff9f9) !important;
+        color: var(--slate-700, #374151) !important;
         font-size: 13px !important;
         z-index: 9999 !important;
         margin-top: 2px !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
     }
     .ts-dropdown .option {
         padding: 9px 14px !important;
-        border-bottom: 1px solid rgba(255,255,255,0.04);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
         cursor: pointer;
+        color: var(--slate-700, #374151) !important;
     }
     .ts-dropdown .option:hover,
     .ts-dropdown .option.active {
-        background: rgba(39,194,201,0.12) !important;
-        color: var(--turquesa, #27c2c9) !important;
+        background: rgba(0,180,216,0.08) !important;
+        color: var(--cyan-600, #0077A8) !important;
     }
-    .ts-control input {
-        color: var(--texto, #000000) !important;
-        font-size: 13px !important;
-    }
-    .ts-control input::placeholder { color: var(--gris-texto, #ffffff) !important; }
 </style>
 
 <body>

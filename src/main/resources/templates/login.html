@@ -5,137 +5,167 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Óptica | Iniciar Sesión</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --accent:      #00B4D8;
-            --accent-glow: rgba(0, 180, 216, .18);
-            --bg:          #F0F4F8;
+            --accent-dim:  rgba(0,180,216,.14);
+            --accent-glow: rgba(0,180,216,.22);
+            --bg:          #EEF4F8;
             --card-bg:     #ffffff;
-            --text:        #374151;
-            --text-muted:  #6B7280;
-            --border:      #D1D5DB;
+            --text:        #1E293B;
+            --text-muted:  #64748B;
+            --border:      #CBD5E1;
             --border-focus:#00B4D8;
             --danger:      #DC2626;
             --success:     #059669;
             --warning:     #D97706;
-            --navy-900:    #0D1B2A;
-            --ease-out:    cubic-bezier(.16, 1, .3, 1);
+            --navy:        #0D1B2A;
+            --ease-spring: cubic-bezier(.16,1,.3,1);
             --font:        'Urbanist', system-ui, sans-serif;
         }
 
         html, body {
             height: 100%;
             font-family: var(--font);
-            background-color: var(--bg);
-            /* Fondo sutil con patrón de puntos */
-            background-image: radial-gradient(circle, rgba(0,180,216,.08) 1px, transparent 1px);
-            background-size: 28px 28px;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 25% 15%, rgba(0,180,216,.07) 0%, transparent 55%),
+                radial-gradient(circle at 80% 85%, rgba(13,27,42,.06) 0%, transparent 50%),
+                radial-gradient(circle, rgba(0,180,216,.05) 1px, transparent 1px);
+            background-size: auto, auto, 28px 28px;
         }
 
-        /* ══ CENTRADO TOTAL ══ */
+        /* ══ LAYOUT ══ */
         .login-page {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem 1rem;
-            position: relative;
-        }
-
-        /* Brillo decorativo detrás de la card */
-        .login-page::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 55% 45% at 30% 20%, rgba(0,180,216,.10), transparent 60%),
-                radial-gradient(ellipse 45% 40% at 75% 80%, rgba(13,27,42,.07), transparent 60%);
-            pointer-events: none;
-            z-index: 0;
         }
 
         /* ══ CARD ══ */
         .login-card {
-            position: relative;
-            z-index: 1;
             width: 100%;
-            max-width: 560px;
+            max-width: 480px;
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 24px;
             box-shadow:
-                0 2px 4px rgba(0,0,0,.04),
-                0 8px 24px rgba(0,0,0,.08),
-                0 0 0 1px rgba(0,180,216,.10);
-            padding: 2rem 3.5rem 1.75rem;
-            animation: cardUp .7s var(--ease-out) both;
+                0 1px 2px rgba(0,0,0,.04),
+                0 4px 16px rgba(0,0,0,.06),
+                0 20px 48px rgba(0,0,0,.08),
+                0 0 0 1px rgba(0,180,216,.12);
+            padding: 2.5rem 3rem 2rem;
+            animation: cardUp .7s var(--ease-spring) both;
         }
 
-        /* ══ MARCA / OJO ══ */
+        /* ══ BRAND + EYE ══ */
         .login-brand {
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            user-select: none;
         }
 
-        .eye-container {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 14px;
-            cursor: none;
+        /* ─ EYE WRAPPER ─ */
+        .eye-wrap {
+            width: 72px;
+            height: 44px;
+            margin: 0 auto 16px;
             position: relative;
+            cursor: none;
         }
 
-        .eye-svg { width: 60px; height: 60px; overflow: visible; }
+        .eye-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            filter: drop-shadow(0 0 8px rgba(0,180,216,.35));
+        }
 
-        .eye-outline, .eye-iris {
-            fill: none;
-            stroke-width: 1.4;
+        /* Esclerótica */
+        .e-sclera {
+            fill: #fff;
             stroke: var(--accent);
+            stroke-width: 1.6;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
+        /* Iris externo */
+        .e-iris-outer {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 1.4;
+            opacity: .6;
+        }
+        /* Iris relleno degradado */
+        .e-iris-fill { fill: url(#irisGrad); }
 
-        #eyePupil { fill: var(--accent); }
-        #eyeLid   { fill: #ffffff; }
+        /* Pupila */
+        .e-pupil {
+            fill: var(--navy);
+            transition: r .15s ease;
+        }
+        /* Reflejo */
+        .e-glint {
+            fill: rgba(255,255,255,.75);
+            pointer-events: none;
+        }
+        /* Venas decorativas muy sutiles */
+        .e-vein {
+            stroke: rgba(220,80,80,.18);
+            stroke-width: .6;
+            fill: none;
+            stroke-linecap: round;
+        }
+        /* Pestañas */
+        .e-lash {
+            stroke: var(--navy);
+            stroke-width: 1.2;
+            stroke-linecap: round;
+            fill: none;
+        }
+        /* Párpado (para el parpadeo) */
+        .e-lid {
+            fill: var(--card-bg);
+            pointer-events: none;
+        }
 
+        /* ─ NOMBRE ─ */
         .brand-name {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 400;
-            color: var(--navy-900);
-            letter-spacing: -.02em;
+            color: var(--navy);
+            letter-spacing: -.025em;
             line-height: 1.1;
         }
         .brand-name::after { content: "."; color: var(--accent); }
 
         .brand-sub {
             font-size: 9px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: .28em;
+            letter-spacing: .3em;
             color: var(--accent);
             margin-top: 5px;
         }
 
-        /* ══ ENCABEZADO FORMULARIO ══ */
+        /* ══ HEADING ══ */
         .login-heading {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1rem;
+            margin-bottom: 1.6rem;
+            padding-bottom: 1.1rem;
             border-bottom: 1px solid var(--border);
         }
-
         .login-heading h2 {
-            font-size: 21px;
+            font-size: 22px;
             font-weight: 400;
-            color: var(--navy-900);
+            color: var(--navy);
             letter-spacing: -.01em;
         }
-
         .login-heading p {
             font-size: 12px;
             color: var(--text-muted);
@@ -148,181 +178,194 @@
             align-items: flex-start;
             gap: 10px;
             padding: 11px 14px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 13px;
             border: 1px solid transparent;
-            margin-bottom: 1.5rem;
-            animation: alertIn .4s var(--ease-out) both;
+            margin-bottom: 1.4rem;
+            animation: alertIn .4s var(--ease-spring) both;
         }
         .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-
         .alert-error   { color: var(--danger);  background: rgba(220,38,38,.07);  border-color: rgba(220,38,38,.2);  border-left: 3px solid var(--danger); }
         .alert--success { color: var(--success); background: rgba(5,150,105,.07);  border-color: rgba(5,150,105,.2);  border-left: 3px solid var(--success); }
         .alert--warning { color: var(--warning); background: rgba(217,119,6,.07);  border-color: rgba(217,119,6,.2);  border-left: 3px solid var(--warning); }
 
-        /* ══ INPUTS ══ */
+        /* ══ FLOATING LABEL FIELDS ══ */
         .field-group {
-            margin-bottom: 1.1rem;
+            position: relative;
+            margin-bottom: 1.3rem;
         }
 
+        /* Label flotante */
         .field-label {
-            display: block;
-            font-size: 10px;
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition:
+                top        .22s var(--ease-spring),
+                transform  .22s var(--ease-spring),
+                font-size  .22s var(--ease-spring),
+                color      .18s ease,
+                left       .22s var(--ease-spring);
+            z-index: 2;
+            background: transparent;
+            padding: 0 4px;
+            letter-spacing: .01em;
+        }
+
+        /* Estado flotado: cuando tiene foco o contenido */
+        .field-input:focus  ~ .field-label,
+        .field-input:not(:placeholder-shown) ~ .field-label {
+            top: 0px;
+            transform: translateY(-50%);
+            font-size: 9.5px;
             font-weight: 700;
             letter-spacing: .14em;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            transition: color .2s;
+            color: var(--accent);
+            background: var(--card-bg);
+            left: 12px;
         }
 
-        .field-wrap {
-            position: relative;
-        }
-
+        /* Input base */
         .field-input {
             width: 100%;
-            padding: .75rem 1rem;
-            padding-right: 2.75rem;
-            background: #F9FAFB;
+            padding: 18px 48px 6px 16px;
+            background: #F8FAFC;
             border: 1.5px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--text);
-            font-size: 14px;
+            font-size: 15px;
             font-family: var(--font);
+            font-weight: 500;
             outline: none;
             caret-color: var(--accent);
             transition: border-color .2s, background .2s, box-shadow .2s;
+            position: relative;
+            z-index: 1;
         }
+        /* Ocultar placeholder real — lo simula el label flotante */
+        .field-input::placeholder { color: transparent; }
 
-        .field-input:focus {
-            border-color: var(--border-focus);
+        .field-input:hover  { border-color: #94A3B8; background: #F1F5F9; }
+        .field-input:focus  {
+            border-color: var(--accent);
             background: #fff;
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        /* Autofill */
+        /* Autofill: evitar fondo azul del navegador */
         .field-input:-webkit-autofill,
         .field-input:-webkit-autofill:hover,
         .field-input:-webkit-autofill:focus {
             -webkit-text-fill-color: var(--text) !important;
-            -webkit-box-shadow: 0 0 0 1000px #F9FAFB inset !important;
+            -webkit-box-shadow: 0 0 0 1000px #F8FAFC inset !important;
         }
 
-        /* Label sube cuando el campo tiene foco */
-        .field-group:focus-within .field-label {
-            color: var(--accent);
+        /* ─ Puntos de contraseña MÁS GRANDES ─ */
+        input[type="password"].field-input {
+            font-size: 28px;
+        letter-spacing: 6px;
+            padding-top: 14px;
+            padding-bottom: 2px;
         }
 
-        /* Icono dentro del input */
+        /* Icono / toggle derecha */
+        .field-icon-btn,
         .field-icon {
             position: absolute;
-            right: .9rem;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
+            z-index: 3;
             color: var(--text-muted);
             display: flex;
             align-items: center;
             pointer-events: none;
         }
-
-        .field-icon svg {
-            width: 16px; height: 16px;
-            stroke: currentColor; fill: none;
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* Toggle contraseña */
-        .toggle-pass {
-            position: absolute;
-            right: .75rem;
-            top: 50%;
-            transform: translateY(-50%);
+        .field-icon-btn {
             background: none;
             border: none;
             cursor: pointer;
-            padding: .25rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            border-radius: 4px;
-            transition: color .2s;
+            pointer-events: all;
+            padding: 6px;
+            border-radius: 8px;
+            transition: color .18s, background .18s;
         }
-        .toggle-pass:hover { color: var(--accent); }
-        .toggle-pass svg {
-            width: 16px; height: 16px;
+        .field-icon-btn:hover { color: var(--accent); background: var(--accent-dim); }
+        .field-icon-btn svg,
+        .field-icon svg {
+            width: 17px; height: 17px;
             fill: none; stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            stroke-width: 1.9;
+            stroke-linecap: round; stroke-linejoin: round;
+            display: block;
         }
 
         /* ══ BOTÓN INGRESAR ══ */
         .login-btn {
             width: 100%;
-            margin-top: 1.4rem;
-            padding: 1rem;
+            margin-top: 1.5rem;
+            padding: 15px;
             border-radius: 999px;
-            background-color: var(--accent);
+            background: var(--accent);
             color: #fff;
             font-size: 11px;
             font-weight: 700;
             font-family: var(--font);
-            letter-spacing: .22em;
+            letter-spacing: .24em;
             text-transform: uppercase;
             cursor: pointer;
             border: none;
-            box-shadow: 0 6px 20px -8px rgba(0,180,216,.5);
-            transition: filter .2s, transform .1s, box-shadow .2s;
+            box-shadow:
+                0 4px 14px -2px rgba(0,180,216,.45),
+                inset 0 1px 0 rgba(255,255,255,.18);
+            transition: filter .18s, transform .1s, box-shadow .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, transparent 60%);
+            pointer-events: none;
         }
         .login-btn:hover  {
-            filter: brightness(1.1);
-            box-shadow: 0 8px 28px -6px rgba(0,180,216,.55);
+            filter: brightness(1.08);
+            box-shadow: 0 8px 28px -4px rgba(0,180,216,.55), inset 0 1px 0 rgba(255,255,255,.18);
+            transform: translateY(-1px);
         }
-        .login-btn:active { transform: scale(.98); }
+        .login-btn:active { transform: scale(.98) translateY(0); }
 
         /* ══ FOOTER ══ */
-        .login-footer {
-            text-align: center;
-            margin-top: 1.25rem;
+        .divider {
+            display: flex; align-items: center; gap: .75rem;
+            margin: 1.4rem 0 0;
+            font-size: 10px; letter-spacing: .1em; color: var(--text-muted);
         }
-
+        .divider::before, .divider::after {
+            content: ""; flex: 1; height: 1px; background: var(--border);
+        }
+        .login-footer { text-align: center; margin-top: .9rem; }
         .login-footer a {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            text-decoration: none;
-            letter-spacing: .04em;
-            transition: color .2s;
+            font-size: 12px; color: var(--text-muted);
+            text-decoration: none; letter-spacing: .03em;
+            transition: color .18s;
         }
         .login-footer a:hover { color: var(--accent); }
 
-        /* ══ SEPARADOR DECORATIVO ══ */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-            margin: 1.25rem 0 0;
-            color: var(--border);
-            font-size: 10px;
-            letter-spacing: .1em;
-            color: var(--text-muted);
-        }
-        .divider::before, .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
         /* ══ ANIMACIONES ══ */
-        @keyframes cardUp  { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes alertIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardUp  { from { opacity:0; transform:translateY(28px) scale(.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes alertIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 
         /* ══ RESPONSIVE ══ */
-        @media (max-width: 600px) {
-            .login-card { padding: 1.75rem 1.5rem 1.5rem; border-radius: 16px; }
+        @media (max-width:520px) {
+            .login-card { padding: 2rem 1.5rem 1.75rem; border-radius: 18px; }
         }
     </style>
 </head>
@@ -331,26 +374,63 @@
 <div class="login-page">
     <div class="login-card">
 
-        <!-- ── MARCA ── -->
+        <!-- ── MARCA + OJO ── -->
         <div class="login-brand">
-            <div class="eye-container" id="eyeContainer">
-                <svg class="eye-svg" id="eyeSvg" viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg">
-                    <clipPath id="eyeClip">
-                        <ellipse cx="32" cy="20" rx="30" ry="18"/>
-                    </clipPath>
-                    <path class="eye-outline" id="eyeOutline"
-                          d="M2 20 C 10 4, 54 4, 62 20 C 54 36, 10 36, 2 20 Z"/>
-                    <circle class="eye-iris" id="eyeIris" cx="32" cy="20" r="9"/>
-                    <circle id="eyePupil" cx="32" cy="20" r="3.5"/>
-                    <rect id="eyeLid" x="1" y="-40" width="62" height="40"
-                          clip-path="url(#eyeClip)"/>
+
+            <div class="eye-wrap" id="eyeWrap" style="width:90px;height:54px;margin:0 auto 16px">
+                <svg class="eye-svg" id="eyeSvg" viewBox="0 0 80 48"
+                    xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 10px rgba(0,180,216,.3))">
+                    <defs>
+                        <radialGradient id="irisGrad" cx="42%" cy="38%" r="55%">
+                            <stop offset="0%"   stop-color="#48CAE4"/>
+                            <stop offset="50%"  stop-color="#0096C7"/>
+                            <stop offset="100%" stop-color="#023E8A"/>
+                        </radialGradient>
+                        <clipPath id="eyeClip">
+                            <path d="M2 24 C 16 4, 64 4, 78 24 C 64 44, 16 44, 2 24 Z"/>
+                        </clipPath>
+                    </defs>
+
+                    <!-- Todo el contenido del ojo en un grupo que se anima para parpadear -->
+                    <g id="eyeGraphics" style="transform-origin:40px 24px;transform-box:fill-box">
+
+                        <!-- Esclerótica -->
+                        <path fill="#fff" stroke="var(--accent)" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            d="M2 24 C 16 4, 64 4, 78 24 C 64 44, 16 44, 2 24 Z"/>
+
+                        <!-- Iris relleno -->
+                        <circle id="eyeIrisFill" fill="url(#irisGrad)"
+                                cx="40" cy="24" r="12" clip-path="url(#eyeClip)"/>
+
+                        <!-- Anillo del iris -->
+                        <circle id="eyeIrisRing" fill="none"
+                                stroke="rgba(0,120,180,.4)" stroke-width="1.2"
+                                cx="40" cy="24" r="12" clip-path="url(#eyeClip)"/>
+
+                        <!-- Pupila -->
+                        <circle id="eyePupil" fill="#0D1B2A"
+                                cx="40" cy="24" r="5.5" clip-path="url(#eyeClip)"/>
+
+                        <!-- Reflejo principal -->
+                        <ellipse id="eyeGlint" fill="rgba(255,255,255,.8)"
+                                cx="43" cy="20.5" rx="2.4" ry="1.5"
+                                transform="rotate(-20 43 20.5)"
+                                clip-path="url(#eyeClip)"/>
+
+                        <!-- Reflejo secundario -->
+                        <circle fill="rgba(255,255,255,.4)"
+                                cx="37.5" cy="22.5" r="1"
+                                clip-path="url(#eyeClip)"/>
+                    </g>
                 </svg>
             </div>
+
             <div class="brand-name">Mi Óptica</div>
             <div class="brand-sub">mi mejor visión</div>
         </div>
 
-        <!-- ── ENCABEZADO ── -->
+        <!-- ── HEADING ── -->
         <div class="login-heading">
             <h2>Iniciar sesión</h2>
             <p>Ingresa tus credenciales para continuar</p>
@@ -371,44 +451,39 @@
         </div>
 
         <!-- ── FORMULARIO ── -->
-        <form th:action="@{/login}" method="post" autocomplete="on" id="loginForm">
+        <form th:action="@{/login}" method="post" autocomplete="on">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-            <!-- Usuario -->
+            <!-- ─ USUARIO (floating label) ─ -->
             <div class="field-group">
+                <input type="text"
+                       id="username" name="username"
+                       class="field-input"
+                       placeholder=" "
+                       required autofocus autocomplete="username">
                 <label for="username" class="field-label">Usuario</label>
-                <div class="field-wrap">
-                    <input type="text"
-                           id="username" name="username"
-                           class="field-input"
-                           placeholder="Ingresa tu usuario"
-                           required autofocus autocomplete="username">
-                    <span class="field-icon">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                    </span>
-                </div>
+                <span class="field-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                </span>
             </div>
 
-            <!-- Contraseña -->
+            <!-- ─ CONTRASEÑA (floating label + toggle) ─ -->
             <div class="field-group">
+                <input type="password"
+                       id="password" name="password"
+                       class="field-input"
+                       placeholder=" "
+                       required autocomplete="current-password">
                 <label for="password" class="field-label">Contraseña</label>
-                <div class="field-wrap">
-                    <input type="password"
-                           id="password" name="password"
-                           class="field-input"
-                           placeholder="••••••••"
-                           required autocomplete="current-password">
-                    <button type="button" class="toggle-pass" id="togglePass"
-                            tabindex="-1" aria-label="Mostrar contraseña">
-                        <svg id="iconoOjo" viewBox="0 0 24 24">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
+                <button type="button" class="field-icon-btn" id="togglePass"
+                        tabindex="-1" aria-label="Mostrar contraseña">
+                    <svg id="iconoOjo" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Botón -->
             <button type="submit" class="login-btn">Ingresar</button>
         </form>
 
@@ -424,74 +499,174 @@
 </div>
 
 <script>
-/* ── TOGGLE CONTRASEÑA ── */
-const passInput = document.getElementById('password');
-const iconoOjo  = document.getElementById('iconoOjo');
-const SVG_OPEN   = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-const SVG_CLOSED = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+/* ══════════════════════════════════════════════
+   OJO QUE SIGUE EL CURSOR — versión mejorada
+   ══════════════════════════════════════════════ */
+(function () {
+    const pupil    = document.getElementById('eyePupil');
+    const irisFill = document.getElementById('eyeIrisFill');
+    const irisRing = document.getElementById('eyeIrisRing');
+    const glint    = document.getElementById('eyeGlint');
+    const eyeWrap  = document.getElementById('eyeWrap');
 
-document.getElementById('togglePass').addEventListener('click', function () {
-    if (passInput.type === 'password') {
-        passInput.type = 'text';
-        iconoOjo.innerHTML = SVG_CLOSED;
-        this.setAttribute('aria-label', 'Ocultar contraseña');
-    } else {
-        passInput.type = 'password';
-        iconoOjo.innerHTML = SVG_OPEN;
-        this.setAttribute('aria-label', 'Mostrar contraseña');
+    const BASE_X = 40, BASE_Y = 24, MAX_MOVE = 6;
+    let rafId = null, targetX = BASE_X, targetY = BASE_Y;
+    let currentX = BASE_X, currentY = BASE_Y;
+
+    // ── Seguimiento del cursor ────────────────────────────────────
+    document.addEventListener('mousemove', function (e) {
+        if (window._eyeLookingAway && window._eyeLookingAway()) return;
+        const rect  = eyeWrap.getBoundingClientRect();
+        const cx    = rect.left + rect.width  / 2;
+        const cy    = rect.top  + rect.height / 2;
+        const dx    = e.clientX - cx;
+        const dy    = e.clientY - cy;
+        const dist  = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        const maxD  = Math.hypot(window.innerWidth, window.innerHeight) * 0.5;
+        const move  = MAX_MOVE * Math.pow(Math.min(dist / maxD, 1), 0.55);
+
+        targetX = BASE_X + Math.cos(angle) * move;
+        targetY = BASE_Y + Math.sin(angle) * move;
+        if (!rafId) rafId = requestAnimationFrame(animateEye);
+    }, { passive: true });
+
+    function animateEye() {
+        rafId = null;
+        currentX += (targetX - currentX) * 0.12;
+        currentY += (targetY - currentY) * 0.12;
+        const px = currentX, py = currentY;
+
+        pupil.setAttribute('cx', px);
+        pupil.setAttribute('cy', py);
+        irisFill.setAttribute('cx', BASE_X + (px - BASE_X) * 0.45);
+        irisFill.setAttribute('cy', BASE_Y + (py - BASE_Y) * 0.45);
+        irisRing.setAttribute('cx', BASE_X + (px - BASE_X) * 0.45);
+        irisRing.setAttribute('cy', BASE_Y + (py - BASE_Y) * 0.45);
+        glint.setAttribute('cx', px + 3);
+        glint.setAttribute('cy', py - 3.5);
+
+        if (Math.hypot(targetX - currentX, targetY - currentY) > 0.01)
+            rafId = requestAnimationFrame(animateEye);
     }
-});
 
-/* ── OJO QUE SIGUE EL MOUSE ── */
-const eyeContainer = document.getElementById('eyeContainer');
-const eyePupil     = document.getElementById('eyePupil');
-const eyeIris      = document.getElementById('eyeIris');
-const EYE_CX = 32, EYE_CY = 20, MAX_MOVE = 5;
+    // ── Parpadeo ─────────────────────────────────────────────────
+    let blinkTimer  = null;   // timeout del próximo parpadeo
+    let isBlinking  = false;  // ← flag para evitar parpadeos simultáneos
 
-document.addEventListener('mousemove', function (e) {
-    const rect    = eyeContainer.getBoundingClientRect();
-    const centerX = rect.left + rect.width  / 2;
-    const centerY = rect.top  + rect.height / 2;
-    const dx = e.clientX - centerX;
-    const dy = e.clientY - centerY;
-    const dist    = Math.sqrt(dx * dx + dy * dy);
-    const maxDist = Math.max(window.innerWidth, window.innerHeight) * 0.4;
-    const factor  = Math.min(dist / maxDist, 1);
-    const angle   = Math.atan2(dy, dx);
-    const mx = Math.cos(angle) * MAX_MOVE * factor;
-    const my = Math.sin(angle) * MAX_MOVE * factor;
+    function blink(onDone) {
+        if (isBlinking) return;          // ya está parpadeando, ignorar
+        isBlinking = true;
 
-    eyePupil.setAttribute('cx', EYE_CX + mx);
-    eyePupil.setAttribute('cy', EYE_CY + my);
-    eyeIris.setAttribute('cx',  EYE_CX + mx * 0.5);
-    eyeIris.setAttribute('cy',  EYE_CY + my * 0.5);
-});
+        const g      = document.getElementById('eyeGraphics');
+        const FRAMES = 12;
+        let f = 0;
 
-/* ── PARPADEO ALEATORIO ── */
-const eyeLid = document.getElementById('eyeLid');
+        const iv = setInterval(() => {
+            f++;
+            const scale = f <= FRAMES / 2
+                ? 1 - (f / (FRAMES / 2))
+                : (f - FRAMES / 2) / (FRAMES / 2);
 
-function blink() {
-    let pos = -40;
-    const down = setInterval(() => {
-        pos += 4;
-        eyeLid.setAttribute('y', pos);
-        if (pos >= 2) {
-            clearInterval(down);
-            setTimeout(() => {
-                const up = setInterval(() => {
-                    pos -= 4;
-                    eyeLid.setAttribute('y', pos);
-                    if (pos <= -40) {
-                        clearInterval(up);
-                        eyeLid.setAttribute('y', -40);
-                    }
-                }, 12);
-            }, 80);
+            g.style.transform = `scaleY(${Math.max(0, scale)})`;
+
+            if (f >= FRAMES) {
+                clearInterval(iv);
+                g.style.transform = 'scaleY(1)';
+                isBlinking = false;
+                if (onDone) onDone();  // callback al terminar
+            }
+        }, 14);
+    }
+
+    function scheduleBlink() {
+        clearTimeout(blinkTimer);   // cancelar cualquier timer previo
+        blinkTimer = setTimeout(() => {
+            blink(scheduleBlink);   // al terminar, programar el siguiente
+        }, 2800 + Math.random() * 4200);
+    }
+
+    // Guiño al entrar al ojo — cancela el timer automático y hace uno inmediato
+    eyeWrap.addEventListener('mouseenter', () => {
+        clearTimeout(blinkTimer);
+        setTimeout(() => {
+            blink(scheduleBlink);  // al terminar el guiño, retoma el ciclo normal
+        }, 200);
+    });
+
+    // Arrancar el ciclo
+    scheduleBlink();
+})();
+
+/* ══════════════════════════════════════════════
+   TOGGLE CONTRASEÑA
+   ══════════════════════════════════════════════ */
+   (function () {
+    const passInput = document.getElementById('password');
+    const iconoOjo  = document.getElementById('iconoOjo');
+    const btn       = document.getElementById('togglePass');
+    const pupil     = document.getElementById('eyePupil');
+    const irisFill  = document.getElementById('eyeIrisFill');
+    const irisRing  = document.getElementById('eyeIrisRing');
+    const glint     = document.getElementById('eyeGlint');
+
+    const SVG_OPEN   = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    const SVG_CLOSED = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+    // Posición "mirando a otro lado"
+    const LOOK_AWAY_X = 45;
+    const LOOK_AWAY_Y = 18;
+    const BASE_X = 40, BASE_Y = 24;
+
+    let lookingAway = false;
+
+    // Función para mover el ojo suavemente a una posición
+    function moveEyeTo(tx, ty, duration = 280) {
+        const start = performance.now();
+        const startX = parseFloat(pupil.getAttribute('cx') || BASE_X);
+        const startY = parseFloat(pupil.getAttribute('cy') || BASE_Y);
+
+        function step(now) {
+            const t = Math.min((now - start) / duration, 1);
+            // Easing out cubic
+            const e = 1 - Math.pow(1 - t, 3);
+            const x = startX + (tx - startX) * e;
+            const y = startY + (ty - startY) * e;
+
+            pupil.setAttribute('cx', x);
+            pupil.setAttribute('cy', y);
+            irisFill.setAttribute('cx', BASE_X + (x - BASE_X) * 0.45);
+            irisFill.setAttribute('cy', BASE_Y + (y - BASE_Y) * 0.45);
+            irisRing.setAttribute('cx', BASE_X + (x - BASE_X) * 0.45);
+            irisRing.setAttribute('cy', BASE_Y + (y - BASE_Y) * 0.45);
+            glint.setAttribute('cx', x + 3);
+            glint.setAttribute('cy', y - 3.5);
+
+            if (t < 1) requestAnimationFrame(step);
         }
-    }, 12);
-    setTimeout(blink, 2500 + Math.random() * 3500);
-}
-setTimeout(blink, 1500 + Math.random() * 2000);
+        requestAnimationFrame(step);
+    }
+
+    btn.addEventListener('click', function () {
+        const show = passInput.type === 'password';
+        passInput.type     = show ? 'text'     : 'password';
+        iconoOjo.innerHTML = show ? SVG_CLOSED : SVG_OPEN;
+        btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+
+        if (show) {
+            // Mostrar contraseña → ojo voltea avergonzado
+            lookingAway = true;
+            moveEyeTo(LOOK_AWAY_X, LOOK_AWAY_Y, 300);
+        } else {
+            // Ocultar → vuelve al centro
+            lookingAway = false;
+            moveEyeTo(BASE_X, BASE_Y, 250);
+        }
+    });
+
+    // Exponer el flag para que el seguimiento del cursor lo respete
+    window._eyeLookingAway = () => lookingAway;
+})();
 </script>
 
 </body>
