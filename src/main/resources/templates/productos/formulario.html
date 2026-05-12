@@ -1,9 +1,24 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
  
 <head th:replace="~{fragments/layout :: head('Producto')}"></head>
+
+<!-- Tom Select — buscador de proveedores -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.bootstrap5.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
+<style>
+    .ts-wrapper { width: 100%; }
+    .ts-control {
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+        box-shadow: none !important;
+    }
+    .ts-dropdown { border-radius: 8px !important; font-size: 13px !important; z-index: 9999 !important; box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; }
+</style>
+
 <body>
 <div th:replace="~{fragments/layout :: sidebar}"></div>
  
@@ -45,6 +60,7 @@
             <input type="hidden" id="hColor"     name="color"                 th:value="${producto.color}"/>
             <input type="hidden" id="hModelo"    name="modelo"                th:value="${producto.modelo}"/>
             <input type="hidden" id="hMarca"     name="marca.idMarca"         th:value="${producto.marca != null ? producto.marca.idMarca : ''}"/>
+            <input type="hidden" id="hProveedor" name="proveedor.idProveedor" th:value="${producto.proveedor != null ? producto.proveedor.idProveedor : ''}"/>
             <input type="hidden" id="hCategoria" name="categoria.idCategoria" th:value="${producto.categoria != null ? producto.categoria.idCategoria : ''}"/>
             <input type="hidden" id="hTipoL"     name="tipoLente.idTipo"               th:value="${producto.tipoLente != null ? producto.tipoLente.idTipo : ''}"/>
             <input type="hidden" id="hMaterialL" name="materialLente.idMaterial"       th:value="${producto.materialLente != null ? producto.materialLente.idMaterial : ''}"/>
@@ -112,10 +128,15 @@
                         <div class="form-group"><label class="form-label">Código *</label><input type="text" id="vCodigoA" class="form-control" placeholder="Ej: BZ128/BLK" th:value="${producto.codigo}"></div>
                         <div class="form-group"><label class="form-label">Nombre / Detalle *</label><input type="text" id="vDetalleA" class="form-control" placeholder="Ej: Armazón Baron BZ128 Negro" th:value="${producto.detalle}"></div>
                     </div>
-                    <div class="form-row form-row-3">
+                    <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button></div></div>
-                        <div class="form-group"><label class="form-label">Modelo</label><input type="text" id="vModeloA" class="form-control" placeholder="Ej: BZ128" th:value="${producto.modelo}"></div>
-                        <div class="form-group"><label class="form-label">Color</label><input type="text" id="vColorA" class="form-control" placeholder="Ej: Negro, Café" th:value="${producto.color}"></div>
+                        <div class="form-group">
+                            <label class="form-label">Proveedor</label>
+                            <select id="vProveedorA" class="form-select tom-select-proveedor" placeholder="Buscar proveedor...">
+                                <option value="">— Buscar proveedor —</option>
+                                <option th:each="p : ${proveedores}" th:value="${p.idProveedor}" th:text="${p.nombre + (p.empresa != null and !p.empresa.isBlank() ? ' (' + p.empresa + ')' : '')}" th:selected="${producto.proveedor != null and producto.proveedor.idProveedor == p.idProveedor}"></option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Material</label><select id="vMaterialA" class="form-select"><option value="">— Selecciona —</option><option value="ACERO_INOXIDABLE" th:selected="${producto.materialArmazon == 'ACERO_INOXIDABLE'}">Acero Inoxidable</option><option value="TITANIUM" th:selected="${producto.materialArmazon == 'TITANIUM'}">Titanium</option><option value="ALUMINIO" th:selected="${producto.materialArmazon == 'ALUMINIO'}">Aluminio</option><option value="MONEL" th:selected="${producto.materialArmazon == 'MONEL'}">Monel</option><option value="ACETATO" th:selected="${producto.materialArmazon == 'ACETATO'}">Acetato</option><option value="TR90" th:selected="${producto.materialArmazon == 'TR90'}">TR-90</option><option value="INYECTADO" th:selected="${producto.materialArmazon == 'INYECTADO'}">Inyectado</option></select></div>
@@ -146,10 +167,28 @@
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px"><input type="checkbox" th:id="'chkA'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockArmazon(this)"><span class="fw-600" th:text="${s.nombre}"></span></label>
                         <div th:id="'divA'+${s.idSucursal}" style="display:none">
-                            <div class="form-row form-row-3">
+                            <div class="form-row form-row-3" style="margin-bottom:16px">
                                 <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:id="'existA_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:id="'costoA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:id="'precioA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0"></div>
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" th:id="'costoA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
+                                <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" th:id="'utilidadA_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group">
+                                    <label class="form-label">IVA (%)</label>
+                                    <select th:id="'ivaA_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)">
+                                        <option value="0">Sin IVA (0%)</option>
+                                        <option value="5">5%</option>
+                                        <option value="12">12%</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Precio de Venta (Q)</label>
+                                    <div style="position:relative">
+                                        <input type="number" th:id="'precioA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -196,7 +235,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Categoría (Tipo de Lentes)</label>
-                            <select id="vTipoL" class="form-select" onchange="consultarPrecio()">
+                            <select id="vTipoL" class="form-select">
                                 <option value="">— Selecciona —</option>
                                 <option th:each="t : ${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}" th:selected="${producto.tipoLente != null and producto.tipoLente.idTipo == t.idTipo}"></option>
                             </select>
@@ -207,7 +246,7 @@
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Familia (Material)</label>
-                            <select id="vMaterialL" class="form-select" onchange="consultarPrecio()">
+                            <select id="vMaterialL" class="form-select">
                                 <option value="">— Selecciona —</option>
                                 <option th:each="m : ${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}" th:selected="${producto.materialLente != null and producto.materialLente.idMaterial == m.idMaterial}"></option>
                             </select>
@@ -231,7 +270,7 @@
                     <div class="form-row form-row-3">
                         <div class="form-group">
                             <label class="form-label">Tratamiento (DB)</label>
-                            <select id="vTratamientoL" class="form-select" onchange="consultarPrecio()">
+                            <select id="vTratamientoL" class="form-select">
                                 <option value="">— Selecciona —</option>
                                 <option th:each="t : ${tratamientos}" th:value="${t.idTratamiento}" th:text="${t.nombre}" th:selected="${producto.tratamientoLente != null and producto.tratamientoLente.idTratamiento == t.idTratamiento}"></option>
                             </select>
@@ -265,14 +304,9 @@
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Proveedor</label>
-                            <select id="vProveedorL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option value="CASA_OPTICA"     th:selected="${producto.proveedorLente == 'CASA_OPTICA'}">Casa Óptica</option>
-                                <option value="SERDEL"          th:selected="${producto.proveedorLente == 'SERDEL'}">Serdel</option>
-                                <option value="LAB_CILIAR"      th:selected="${producto.proveedorLente == 'LAB_CILIAR'}">Laboratorio Ciliar</option>
-                                <option value="SOLUCION_OPTICA" th:selected="${producto.proveedorLente == 'SOLUCION_OPTICA'}">Solución Óptica</option>
-                                <option value="TOPEX"           th:selected="${producto.proveedorLente == 'TOPEX'}">Topex</option>
-                                <option value="ARCO_IRIS"       th:selected="${producto.proveedorLente == 'ARCO_IRIS'}">Arco Iris</option>
+                            <select id="vProveedorL" class="form-select tom-select-proveedor" placeholder="Buscar proveedor...">
+                                <option value="">— Buscar proveedor —</option>
+                                <option th:each="p : ${proveedores}" th:value="${p.idProveedor}" th:text="${p.nombre + (p.empresa != null and !p.empresa.isBlank() ? ' (' + p.empresa + ')' : '')}" th:selected="${producto.proveedor != null and producto.proveedor.idProveedor == p.idProveedor}"></option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -288,74 +322,40 @@
                 </div>
             </div>
  
-            <!-- Precios -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <div class="card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" style="color:var(--turquesa);vertical-align:middle;margin-right:6px"><text x="12" y="17" text-anchor="middle" font-size="16" font-weight="700" font-family="serif" stroke="none" fill="currentColor">Q</text></svg>
-                        Precios
-                    </div>
-                </div>
-                <div class="card-body" style="padding:20px">
-                    <div id="precioAutoBox" style="display:none;margin-bottom:20px;padding:16px 20px;background:rgba(39,194,201,0.08);border:1px solid rgba(39,194,201,0.25);border-radius:10px">
-                        <div class="fw-600" style="color:var(--turquesa);margin-bottom:10px"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Precio sugerido según combinación</div>
-                        <div style="display:flex;gap:32px">
-                            <div><div class="text-gris text-sm">Costo sugerido</div><div class="fw-600" style="font-size:20px" id="lblCosto">—</div></div>
-                            <div><div class="text-gris text-sm">Precio Venta sugerido</div><div class="fw-600" style="font-size:20px;color:var(--turquesa)" id="lblPrecio">—</div></div>
-                        </div>
-                        <div style="font-size:11px;color:var(--text-gris);margin-top:8px">Puedes modificar los valores abajo si necesitas ajustarlos.</div>
-                    </div>
-                    <div id="precioNoEncontrado" style="display:none;margin-bottom:16px;padding:12px 16px;background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.2);border-radius:8px;font-size:13px;color:var(--amarillo)">
-                        <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> No hay precio configurado para esta combinación. Ingresa el precio manualmente.
-                    </div>
-                    <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" id="vCostoL" class="form-control" min="0" step="0.01" placeholder="0.00" th:value="${producto.costoLente}" oninput="calcularPrecioVenta()"></div>
-                        <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" id="vUtilidadL" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" th:value="${producto.utilidadLente}" oninput="calcularPrecioVenta()"></div>
-                    </div>
-                    <div class="form-row form-row-2">
-                        <div class="form-group">
-                            <label class="form-label">IVA (%)</label>
-                            <select id="vIvaL" class="form-select" onchange="calcularPrecioVenta()">
-                                <option value="0"  th:selected="${producto.ivaLente == null or producto.ivaLente == 0}">Sin IVA (0%)</option>
-                                <option value="5"  th:selected="${producto.ivaLente == 5}">5%</option>
-                                <option value="12" th:selected="${producto.ivaLente == 12}">12%</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Precio de Venta (Q)</label>
-                            <div style="position:relative">
-                                <input type="number" id="vPrecioVentaL" class="form-control" min="0" step="0.01" placeholder="0.00" th:value="${producto.precioVentaLente}" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
-                                <span id="badgePrecioAuto" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;background:var(--turquesa);color:#000;padding:2px 6px;border-radius:4px;font-weight:700">AUTO</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
- 
-            <!-- ── Stock inicial: SOLO EXISTENCIA ─────────── -->
+            <!-- ── Stock Inicial por Sucursal ─────────── -->
             <div th:if="${!editando}" class="card mb-3">
                 <div class="card-header">
                     <div class="card-title">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
                         Stock Inicial por Sucursal
                     </div>
-                    <span style="font-size:12px;color:var(--text-gris)">El costo y precio se toman del panel de Precios.</span>
                 </div>
                 <div class="card-body" style="padding:20px">
-                    <div th:each="s : ${sucursales}"
-                         style="margin-bottom:12px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
-                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-                            <input type="checkbox"
-                                   th:id="'chkL'+${s.idSucursal}"
-                                   th:attr="data-suc=${s.idSucursal}"
-                                   onchange="toggleStockLente(this)">
-                            <span class="fw-600" th:text="${s.nombre}"></span>
-                        </label>
-                        <div th:id="'divL'+${s.idSucursal}" style="display:none;margin-top:12px">
-                            <div class="form-group" style="max-width:220px">
-                                <label class="form-label">Cantidad inicial</label>
-                                <input type="number" th:id="'existL_'+${s.idSucursal}"
-                                       class="form-control" min="0" step="1" value="0" placeholder="0">
+                    <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px"><input type="checkbox" th:id="'chkL'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockLente(this)"><span class="fw-600" th:text="${s.nombre}"></span></label>
+                        <div th:id="'divL'+${s.idSucursal}" style="display:none">
+                            <div class="form-row form-row-3" style="margin-bottom:16px">
+                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:id="'existL_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
+                                <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" th:id="'utilidadL_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group">
+                                    <label class="form-label">IVA (%)</label>
+                                    <select th:id="'ivaL_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)">
+                                        <option value="0">Sin IVA (0%)</option>
+                                        <option value="5">5%</option>
+                                        <option value="12">12%</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Precio de Venta (Q)</label>
+                                    <div style="position:relative">
+                                        <input type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -384,6 +384,15 @@
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button></div></div>
+                        <div class="form-group">
+                            <label class="form-label">Proveedor</label>
+                            <select id="vProveedorO" class="form-select tom-select-proveedor" placeholder="Buscar proveedor...">
+                                <option value="">— Buscar proveedor —</option>
+                                <option th:each="p : ${proveedores}" th:value="${p.idProveedor}" th:text="${p.nombre + (p.empresa != null and !p.empresa.isBlank() ? ' (' + p.empresa + ')' : '')}" th:selected="${producto.proveedor != null and producto.proveedor.idProveedor == p.idProveedor}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Color (opcional)</label><input type="text" id="vColorO" class="form-control" placeholder="Ej: Azul" th:value="${producto.color}"></div>
                     </div>
                     <div class="form-row form-row-2">
@@ -398,10 +407,28 @@
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px"><input type="checkbox" th:id="'chkO'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockOtro(this)"><span class="fw-600" th:text="${s.nombre}"></span></label>
                         <div th:id="'divO'+${s.idSucursal}" style="display:none">
-                            <div class="form-row form-row-3">
+                            <div class="form-row form-row-3" style="margin-bottom:16px">
                                 <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:id="'existO_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
-                                <div class="form-group"><label class="form-label">Costo (Q)</label><input type="number" th:id="'costoO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0"></div>
-                                <div class="form-group"><label class="form-label">Precio Venta (Q)</label><input type="number" th:id="'precioO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" value="0"></div>
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" th:id="'costoO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
+                                <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" th:id="'utilidadO_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group">
+                                    <label class="form-label">IVA (%)</label>
+                                    <select th:id="'ivaO_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)">
+                                        <option value="0">Sin IVA (0%)</option>
+                                        <option value="5">5%</option>
+                                        <option value="12">12%</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Precio de Venta (Q)</label>
+                                    <div style="position:relative">
+                                        <input type="number" th:id="'precioO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -430,15 +457,26 @@
 const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
 const TITULOS = { ARMAZON:'Armazón', LENTE:'Lente', LIMPIEZA:'Producto de Limpieza', ACCESORIO:'Accesorio' };
 const CAMPOS = {
-    ARMAZON:  { codigo:'vCodigoA',detalle:'vDetalleA',desc:'vDescA',color:'vColorA',unidad:'vUnidadA',marca:'vMarcaA',categoria:null,modelo:'vModeloA',tipoL:null,matL:null,tratL:null,materialA:'vMaterialA',familiaA:'vFamiliaA',formaA:'vFormaA',segmentoA:'vSegmentoA',gamaA:'vGamaA',medHoriz:'vMedHorizA',medVert:'vMedVertA',medDiag:'vMedDiagA',medPuente:'vMedPuenteA',medVar:'vMedVarrillaA' },
-    LENTE:    { codigo:'vCodigoL',detalle:'vDetalleL',desc:'vDescL',color:'vColorL',unidad:null,marca:'vMarcaL',categoria:null,modelo:null,tipoL:'vTipoL',matL:'vMaterialL',tratL:'vTratamientoL',clasif:'vClasifL',subFamilia:'vSubFamiliaL',rango:'vRangoL',proveedor:'vProveedorL',codInterno:'vCodInternoL',costo:'vCostoL',utilidad:'vUtilidadL',iva:'vIvaL',precioVenta:'vPrecioVentaL' },
-    LIMPIEZA: { codigo:'vCodigoO',detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null },
-    ACCESORIO:{ codigo:'vCodigoO',detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null }
+    ARMAZON:  { proveedor:'vProveedorA', codigo:'vCodigoA',detalle:'vDetalleA',desc:'vDescA',color:'vColorA',unidad:'vUnidadA',marca:'vMarcaA',categoria:null,modelo:'vModeloA',tipoL:null,matL:null,tratL:null,materialA:'vMaterialA',familiaA:'vFamiliaA',formaA:'vFormaA',segmentoA:'vSegmentoA',gamaA:'vGamaA',medHoriz:'vMedHorizA',medVert:'vMedVertA',medDiag:'vMedDiagA',medPuente:'vMedPuenteA',medVar:'vMedVarrillaA' },
+    LENTE:    { proveedor:'vProveedorL', codigo:'vCodigoL',detalle:'vDetalleL',desc:'vDescL',color:'vColorL',unidad:null,marca:'vMarcaL',categoria:null,modelo:null,tipoL:'vTipoL',matL:'vMaterialL',tratL:'vTratamientoL',clasif:'vClasifL',subFamilia:'vSubFamiliaL',rango:'vRangoL',proveedorLente:'vProveedorL',codInterno:'vCodInternoL',costo:'vCostoL',utilidad:'vUtilidadL',iva:'vIvaL',precioVenta:'vPrecioVentaL' },
+    LIMPIEZA: { proveedor:'vProveedorO', codigo:'vCodigoO',detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null },
+    ACCESORIO:{ proveedor:'vProveedorO', codigo:'vCodigoO',detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null }
 };
  
 document.addEventListener('DOMContentLoaded', () => {
     if (tipoInicial && tipoInicial !== '' && tipoInicial !== 'GENERAL') seleccionarTipo(tipoInicial);
     else document.getElementById('panelTipos').style.display = 'block';
+
+    // Inicializar Tom Select para los proveedores
+    document.querySelectorAll('.tom-select-proveedor').forEach((el) => {
+        new TomSelect(el, {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            }
+        });
+    });
 });
  
 function seleccionarTipo(tipo) {
@@ -448,7 +486,7 @@ function seleccionarTipo(tipo) {
     if (card) card.classList.add('activo');
     document.getElementById('hTipo').value = tipo;
     if (tipo === 'ARMAZON')    document.getElementById('panelArmazon').style.display = 'block';
-    else if (tipo === 'LENTE') { document.getElementById('panelLente').style.display = 'block'; consultarPrecio(); }
+    else if (tipo === 'LENTE') { document.getElementById('panelLente').style.display = 'block'; }
     else { document.getElementById('tituloOtro').textContent = TITULOS[tipo] + ' — Datos'; document.getElementById('panelOtro').style.display = 'block'; }
 }
  
@@ -470,16 +508,25 @@ function _toggleStock(chk, pre) {
     if (hidden) hidden.value = chk.checked ? '1' : '0';
 }
  
-function calcularPrecioVenta() {
-    const costo    = parseFloat(document.getElementById('vCostoL')?.value)    || 0;
-    const utilidad = parseFloat(document.getElementById('vUtilidadL')?.value) || 0;
-    const iva      = parseFloat(document.getElementById('vIvaL')?.value)      || 0;
-    if (costo <= 0) return;
+function calcularPrecioFila(elemento) {
+    const re = /^(costo|utilidad|iva|precio)(A|L|O)_(\d+)$/;
+    const parts = elemento.id.match(re);
+    if (!parts) return;
+    const pre = parts[2];
+    const sid = parts[3];
+    const costoInput = document.getElementById('costo' + pre + '_' + sid);
+    const utilInput  = document.getElementById('utilidad' + pre + '_' + sid);
+    const ivaInput   = document.getElementById('iva' + pre + '_' + sid);
+    const precioInput= document.getElementById('precio' + pre + '_' + sid);
+    const costo = parseFloat(costoInput?.value) || 0;
+    const utilidad = parseFloat(utilInput?.value) || 0;
+    const iva = parseFloat(ivaInput?.value) || 0;
+    if (costo <= 0) {
+        if (precioInput) precioInput.value = '';
+        return;
+    }
     const precioFinal = costo * (1 + utilidad / 100) * (1 + iva / 100);
-    const input = document.getElementById('vPrecioVentaL');
-    if (input) input.value = precioFinal.toFixed(2);
-    const badge = document.getElementById('badgePrecioAuto');
-    if (badge) badge.style.display = costo > 0 ? 'block' : 'none';
+    if (precioInput) precioInput.value = precioFinal.toFixed(2);
 }
  
 function sincronizarYValidar() {
@@ -500,6 +547,7 @@ function sincronizarYValidar() {
     document.getElementById('hModelo').value    = c.modelo   ? (document.getElementById(c.modelo)?.value   || '') : '';
     document.getElementById('hMarca').value     = c.marca    ? (document.getElementById(c.marca)?.value    || '') : '';
     document.getElementById('hCategoria').value = '';
+    document.getElementById('hProveedor').value = c.proveedor  ? (document.getElementById(c.proveedor)?.value  || '') : '';
     document.getElementById('hTipoL').value     = c.tipoL    ? (document.getElementById(c.tipoL)?.value    || '') : '';
     document.getElementById('hMaterialL').value = c.matL     ? (document.getElementById(c.matL)?.value     || '') : '';
     document.getElementById('hTratL').value     = c.tratL    ? (document.getElementById(c.tratL)?.value    || '') : '';
@@ -521,16 +569,8 @@ function sincronizarYValidar() {
         document.getElementById('hClasifL').value      = document.getElementById(c.clasif)?.value      || '';
         document.getElementById('hSubFamiliaL').value  = document.getElementById(c.subFamilia)?.value  || '';
         document.getElementById('hRangoL').value       = document.getElementById(c.rango)?.value       || '';
-        document.getElementById('hProveedorL').value   = document.getElementById(c.proveedor)?.value   || '';
         document.getElementById('hCodInternoL').value  = document.getElementById(c.codInterno)?.value  || '';
-        const costoVal  = document.getElementById(c.costo)?.value       || '0';
-        const precioVal = document.getElementById(c.precioVenta)?.value || '0';
-        document.getElementById('hCostoL').value       = costoVal;
-        document.getElementById('hUtilidadL').value    = document.getElementById(c.utilidad)?.value || '';
-        document.getElementById('hIvaL').value         = document.getElementById(c.iva)?.value     || '0';
-        document.getElementById('hPrecioVentaL').value = precioVal;
- 
-        // Stock total = suma de sucursales activas
+
         let totalStock = 0;
         [1,2].forEach(sid => {
             const div = document.getElementById('divL' + sid);
@@ -539,30 +579,10 @@ function sincronizarYValidar() {
             }
         });
         document.getElementById('hStockL').value = totalStock;
- 
-        // Llenar hiddens de sucursal con existencia individual y precio/costo del panel
-        [1,2].forEach(sid => {
-            const div    = document.getElementById('divL' + sid);
-            const hidden = document.getElementById('sucActiva_' + sid);
-            if (div) {
-                const activo = div.style.display !== 'none';
-                if (hidden) hidden.value = activo ? '1' : '0';
-                if (activo) {
-                    const exist = document.getElementById('existL_' + sid);
-                    document.getElementById('hExistencia_' + sid).value = exist?.value || 0;
-                    document.getElementById('hCosto_'      + sid).value = costoVal;   // del panel Precios
-                    document.getElementById('hPrecio_'     + sid).value = precioVal;  // del panel Precios
-                }
-            } else {
-                if (hidden) hidden.value = '0';
-            }
-        });
-        alerta.style.display = 'none';
-        return true;
     }
  
     alerta.style.display = 'none';
-    const prefijos = { ARMAZON:'A', LIMPIEZA:'O', ACCESORIO:'O' };
+    const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
     const pre = prefijos[tipo] || 'O';
     [1,2].forEach(sid => {
         const div    = document.getElementById('div' + pre + sid);
@@ -583,29 +603,7 @@ function sincronizarYValidar() {
     return true;
 }
  
-async function consultarPrecio() {
-    const idTipo        = document.getElementById('vTipoL')?.value;
-    const idMaterial    = document.getElementById('vMaterialL')?.value;
-    const idTratamiento = document.getElementById('vTratamientoL')?.value;
-    document.getElementById('precioAutoBox').style.display      = 'none';
-    document.getElementById('precioNoEncontrado').style.display = 'none';
-    if (!idTipo || !idMaterial || !idTratamiento) return;
-    try {
-        const r    = await fetch(`/productos/api/precio-lente?idTipo=${idTipo}&idMaterial=${idMaterial}&idTratamiento=${idTratamiento}`);
-        const data = await r.json();
-        if (data.ok) {
-            document.getElementById('lblCosto').textContent  = 'Q ' + parseFloat(data.costo).toFixed(2);
-            document.getElementById('lblPrecio').textContent = 'Q ' + parseFloat(data.precioVenta).toFixed(2);
-            document.getElementById('precioAutoBox').style.display = 'flex';
-            const ic = document.getElementById('vCostoL');
-            const ip = document.getElementById('vPrecioVentaL');
-            if (ic && !ic.value) ic.value = parseFloat(data.costo).toFixed(2);
-            if (ip && !ip.value) ip.value = parseFloat(data.precioVenta).toFixed(2);
-        } else {
-            document.getElementById('precioNoEncontrado').style.display = 'block';
-        }
-    } catch(e) { console.error(e); }
-}
+
  
 async function agregarMarca(selectId) {
     const nombre = prompt('Nombre de la nueva marca:');

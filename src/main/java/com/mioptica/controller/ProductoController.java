@@ -2,6 +2,7 @@ package com.mioptica.controller;
  
 import com.mioptica.model.*;
 import com.mioptica.service.ProductoService;
+import com.mioptica.service.ProveedorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class ProductoController {
  
     private final ProductoService productoService;
+    private final ProveedorService proveedorService;
  
     // ─── LISTA ────────────────────────────────────────────────────
     @GetMapping
@@ -89,6 +91,7 @@ public class ProductoController {
         model.addAttribute("tiposLente",   productoService.listarTiposLente());
         model.addAttribute("materiales",   productoService.listarMateriales());
         model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("proveedores",  proveedorService.listarActivos());
         model.addAttribute("editando",     false);
         model.addAttribute("activePage",   "productos");
         return "productos/formulario";
@@ -106,6 +109,7 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+            model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("editando",     true);
             model.addAttribute("activePage",   "productos");
             return "productos/formulario";
@@ -145,6 +149,7 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+            model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("editando",     producto.getIdProducto() != null);
             model.addAttribute("activePage",   "productos");
             return "productos/formulario";
@@ -164,6 +169,7 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+            model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("editando",     producto.getIdProducto() != null);
             model.addAttribute("activePage",   "productos");
             return "productos/formulario";

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Proveedores')}"></head>
+
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+
+    <div class="topbar">
+        <div>
+            <div class="topbar-title"> Proveedores</div>
+            <div class="topbar-sub" th:text="${proveedores.size()} + ' resultado(s) encontrados'"></div>
+        </div>
+        <div class="topbar-actions">
+            <button sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" class="btn btn-primary" onclick="abrirModalNuevo()"> Agregar Proveedor</button>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
+        <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon turquesa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2" ry="2"/><path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg></div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${totalActivos}">0</div>
+                    <div class="stat-label">Proveedores activos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon rojo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${totalInactivos}">0</div>
+                    <div class="stat-label">Inactivos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amarillo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${proveedores.size()}">0</div>
+                    <div class="stat-label">En total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <div class="card-title">Listado de Proveedores</div>
+                <input type="text" id="fRap" class="form-control" style="width:250px" placeholder="Filtro rápido..." oninput="filtrarTabla(this.value)">
+            </div>
+
+            <div class="table-wrapper">
+                <table class="table" id="tblProveedores">
+                    <thead>
+                        <tr>
+                            <th>Nombre / Empresa</th>
+                            <th>NIT</th>
+                            <th>Contacto</th>
+                            <th>Teléfono / Correo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${proveedores.isEmpty()}">
+                            <td colspan="6" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                                <div style="margin-top:10px">No se encontraron proveedores.</div>
+                                <button sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" class="btn btn-primary btn-sm" style="margin-top:12px" onclick="abrirModalNuevo()">
+                                     Registrar Proveedor
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr th:each="p : ${proveedores}">
+                            <!-- Nombre y Empresa -->
+                            <td>
+                                <div class="fw-600" th:text="${p.nombre}"></div>
+                                <div class="text-sm text-gris" th:if="${p.empresa != null and !p.empresa.isBlank()}" th:text="${p.empresa}"></div>
+                            </td>
+
+                            <!-- NIT -->
+                            <td>
+                                <span class="text-sm" th:text="${p.nit} ?: '—'"></span>
+                            </td>
+
+                            <!-- Contacto -->
+                            <td>
+                                <span class="text-sm" th:text="${p.contacto} ?: '—'"></span>
+                            </td>
+
+                            <!-- Teléfono y Correo -->
+                            <td>
+                                <div class="text-sm" th:text="${p.telefono} ?: '—'"></div>
+                                <div class="text-sm" style="color:var(--turquesa)" th:if="${p.correo != null and !p.correo.isBlank()}" th:text="${p.correo}"></div>
+                            </td>
+
+                            <!-- Estado -->
+                            <td>
+                                <span th:class="${p.activo} ? 'badge badge--success' : 'badge badge--danger'"
+                                      th:text="${p.activo} ? 'Activo' : 'Inactivo'"></span>
+                            </td>
+
+                            <!-- Acciones -->
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="icon-btn icon-btn--info has-tip"
+                                            data-tip="Ver Detalles"
+                                            style="color: var(--turquesa); background: rgba(39,194,201,0.1);"
+                                            th:attr="onclick=|abrirModalDetalles('${p.nombre}', '${p.empresa ?: ''}', '${p.contacto ?: ''}', '${p.telefono ?: ''}', '${p.telefono2 ?: ''}', '${p.correo ?: ''}', '${p.nit ?: ''}', '${p.direccion ?: ''}', '${p.condicionPago ?: ''}', ${p.diasCredito ?: 0}, '${p.notas ?: ''}')|">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+
+                                    <button sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" type="button" class="icon-btn icon-btn--metal has-tip"
+                                            data-tip="Editar Proveedor"
+                                            th:attr="onclick=|abrirModalEditar(${p.idProveedor}, '${p.nombre}', '${p.empresa ?: ''}', '${p.contacto ?: ''}', '${p.telefono ?: ''}', '${p.telefono2 ?: ''}', '${p.correo ?: ''}', '${p.nit ?: ''}', '${p.direccion ?: ''}')|">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+
+                                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/proveedores/toggle/{id}(id=${p.idProveedor})}" method="post" style="display:inline" onsubmit="return confirm('¿Cambiar estado de este proveedor?')">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit"
+                                                th:class="${p.activo} ? 'icon-btn icon-btn--danger has-tip' : 'icon-btn icon-btn--success has-tip'"
+                                                th:attr="data-tip=${p.activo} ? 'Desactivar Proveedor' : 'Activar Proveedor'">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M12 2v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                                <path d="M6.2 4.9a10 10 0 1 0 11.6 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Proveedor -->
+<div class="modal-overlay" id="modalProveedor">
+    <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">Nuevo Proveedor</div>
+            <button type="button" class="btn-close" onclick="cerrarModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gris-texto)">✖</button>
+        </div>
+        <form th:action="@{/proveedores/guardar}" method="post" th:object="${proveedor}">
+            <div class="modal-body" style="padding: 24px;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" id="idProveedor" th:field="*{idProveedor}">
+                
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Nombre Comercial *</label>
+                        <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required placeholder="Ej. Óptica Visión">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Razón Social / Empresa</label>
+                        <input type="text" id="empresa" th:field="*{empresa}" class="form-control" placeholder="Ej. Visión S.A.">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Contacto (Vendedor)</label>
+                        <input type="text" id="contacto" th:field="*{contacto}" class="form-control" placeholder="Nombre de quien atiende">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NIT</label>
+                        <input type="text" id="nit" th:field="*{nit}" class="form-control" placeholder="Opcional">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Teléfono 1</label>
+                        <input type="text" id="telefono" th:field="*{telefono}" class="form-control" placeholder="Teléfono principal">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono 2</label>
+                        <input type="text" id="telefono2" th:field="*{telefono2}" class="form-control" placeholder="Opcional">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" id="correo" th:field="*{correo}" class="form-control" placeholder="ejemplo@correo.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Dirección</label>
+                    <textarea id="direccion" th:field="*{direccion}" class="form-control" rows="2" placeholder="Dirección completa"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Proveedor</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Detalles Proveedor -->
+<div class="modal-overlay" id="modalDetalles">
+    <div class="modal" style="max-width: 600px;">
+        <div class="modal-header">
+            <div class="modal-title">Detalles del Proveedor</div>
+            <button type="button" class="btn-close" onclick="document.getElementById('modalDetalles').classList.remove('show')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gris-texto)">✖</button>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div>
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Nombre Comercial</div>
+                    <div id="detNombre" style="font-size:15px;font-weight:600;margin-bottom:12px"></div>
+                    
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Empresa / Razón Social</div>
+                    <div id="detEmpresa" style="font-size:14px;margin-bottom:12px"></div>
+                    
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Contacto</div>
+                    <div id="detContacto" style="font-size:14px;margin-bottom:12px"></div>
+                    
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">NIT</div>
+                    <div id="detNit" style="font-size:14px;margin-bottom:12px"></div>
+                </div>
+                <div>
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Teléfono 1</div>
+                    <div id="detTel1" style="font-size:14px;margin-bottom:12px"></div>
+                    
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Teléfono 2</div>
+                    <div id="detTel2" style="font-size:14px;margin-bottom:12px"></div>
+                    
+                    <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Correo Electrónico</div>
+                    <div id="detCorreo" style="font-size:14px;margin-bottom:12px;color:var(--turquesa)"></div>
+                </div>
+            </div>
+            
+            <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px;margin-top:8px">Dirección</div>
+            <div id="detDireccion" style="font-size:14px;margin-bottom:16px"></div>
+            
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);padding:16px;border-radius:8px">
+                <div style="display:flex;gap:24px;margin-bottom:8px">
+                    <div>
+                        <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Condición de Pago</div>
+                        <div id="detCondicion" style="font-size:14px;font-weight:600"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px">Días de Crédito</div>
+                        <div id="detDias" style="font-size:14px;font-weight:600"></div>
+                    </div>
+                </div>
+                <div style="font-size:11px;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px;margin-top:12px">Notas Adicionales</div>
+                <div id="detNotas" style="font-size:13px;color:var(--gris-texto)"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalDetalles').classList.remove('show')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirModalDetalles(nombre, empresa, contacto, tel, tel2, correo, nit, direccion, condicion, dias, notas) {
+        document.getElementById('detNombre').textContent = nombre || '—';
+        document.getElementById('detEmpresa').textContent = empresa || '—';
+        document.getElementById('detContacto').textContent = contacto || '—';
+        document.getElementById('detNit').textContent = nit || '—';
+        document.getElementById('detTel1').textContent = tel || '—';
+        document.getElementById('detTel2').textContent = tel2 || '—';
+        document.getElementById('detCorreo').textContent = correo || '—';
+        document.getElementById('detDireccion').textContent = direccion || '—';
+        document.getElementById('detCondicion').textContent = condicion || '—';
+        document.getElementById('detDias').textContent = dias || '0';
+        document.getElementById('detNotas').textContent = notas || 'Sin notas.';
+        document.getElementById('modalDetalles').classList.add('show');
+    }
+
+    function filtrarTabla(q) {
+        q = q.toLowerCase();
+        document.querySelectorAll('#tblProveedores tbody tr').forEach(tr => {
+            if (tr.children.length === 1) return; // ignore empty state row
+            tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    function abrirModalNuevo() {
+        document.getElementById('modalTitle').textContent = 'Nuevo Proveedor';
+        document.getElementById('idProveedor').value = '';
+        document.getElementById('nombre').value = '';
+        document.getElementById('empresa').value = '';
+        document.getElementById('contacto').value = '';
+        document.getElementById('telefono').value = '';
+        document.getElementById('telefono2').value = '';
+        document.getElementById('correo').value = '';
+        document.getElementById('nit').value = '';
+        document.getElementById('direccion').value = '';
+        document.getElementById('modalProveedor').classList.add('show');
+    }
+
+    function abrirModalEditar(id, nombre, empresa, contacto, tel, tel2, correo, nit, direccion) {
+        document.getElementById('modalTitle').textContent = 'Editar Proveedor';
+        document.getElementById('idProveedor').value = id;
+        document.getElementById('nombre').value = nombre;
+        document.getElementById('empresa').value = empresa;
+        document.getElementById('contacto').value = contacto;
+        document.getElementById('telefono').value = tel;
+        document.getElementById('telefono2').value = tel2;
+        document.getElementById('correo').value = correo;
+        document.getElementById('nit').value = nit;
+        document.getElementById('direccion').value = direccion;
+        document.getElementById('modalProveedor').classList.add('show');
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalProveedor').classList.remove('show');
+    }
+</script>
+
+</body>
+</html>

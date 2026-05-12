@@ -33,6 +33,10 @@ public class Producto {
     @JoinColumn(name = "id_marca")
     private Marca marca;
  
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_proveedor")
+    private Proveedor proveedor;
+ 
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
  
