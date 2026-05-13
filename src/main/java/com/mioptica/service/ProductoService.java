@@ -158,6 +158,29 @@ public class ProductoService {
                     kardexRepo.save(k);
                 }
             }
+        } else {
+            // Producto existente: Actualizar solo Costo y Precio, NO Existencia.
+            for (Sucursal suc : sucursalRepo.findByActivoTrue()) {
+                String sid = String.valueOf(suc.getIdSucursal());
+                String activa = stockParams.getOrDefault("sucActiva_" + sid, "0");
+                if (!"1".equals(activa)) continue;
+
+                BigDecimal costo;
+                BigDecimal precio;
+                if ("LENTE".equals(guardado.getTipoProducto())) {
+                    costo  = guardado.getCostoLente()       != null ? guardado.getCostoLente()       : parseBD(stockParams.get("costo_"  + sid));
+                    precio = guardado.getPrecioVentaLente() != null ? guardado.getPrecioVentaLente() : parseBD(stockParams.get("precio_" + sid));
+                } else {
+                    costo  = parseBD(stockParams.get("costo_"  + sid));
+                    precio = parseBD(stockParams.get("precio_" + sid));
+                }
+
+                inventarioRepo.findByProductoAndSucursal(guardado, suc).ifPresent(inv -> {
+                    inv.setCosto(costo);
+                    inv.setPrecioVenta(precio);
+                    inventarioRepo.save(inv);
+                });
+            }
         }
  
         return guardado;

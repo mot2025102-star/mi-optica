@@ -221,7 +221,7 @@
             <div class="modal-body">
                 <div id="ajNombre" class="fw-600 mb-3" style="font-size:15px;color:var(--turquesa)"></div>
 
-                <div class="form-row form-row-3">
+                <div class="form-row form-row-2">
                     <div class="form-group">
                         <label class="form-label">Existencia nueva *</label>
                         <input type="number" id="ajExist" name="existencia"
@@ -230,12 +230,7 @@
                     <div class="form-group">
                         <label class="form-label">Costo unitario</label>
                         <input type="number" id="ajCosto" name="costo"
-                               class="form-control" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Precio de venta</label>
-                        <input type="number" id="ajPrecio" name="precio"
-                               class="form-control" min="0" step="0.01">
+                               class="form-control bg-light" min="0" step="0.01" readonly="readonly" style="cursor:not-allowed">
                     </div>
                 </div>
 
@@ -299,7 +294,6 @@ function abrirAjuste(idProd, idSuc, exist, costo, precio, nombre) {
     document.getElementById('ajSuc').value    = idSuc;
     document.getElementById('ajExist').value  = exist;
     document.getElementById('ajCosto').value  = costo;
-    document.getElementById('ajPrecio').value = precio;
     document.getElementById('ajNombre').textContent = nombre;
     document.getElementById('modalAjuste').classList.add('show');
 }

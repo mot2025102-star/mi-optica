@@ -161,36 +161,50 @@
                     <div class="form-group"><label class="form-label">Descripción (opcional)</label><textarea id="vDescA" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea></div>
                 </div>
             </div>
-            <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title">Stock Inicial por Sucursal</div></div>
+            <div class="card mb-3">
+                <div class="card-header"><div class="card-title" th:text="${editando} ? 'Precios por Sucursal' : 'Stock Inicial por Sucursal'"></div></div>
                 <div class="card-body" style="padding:20px">
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
-                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px"><input type="checkbox" th:id="'chkA'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockArmazon(this)"><span class="fw-600" th:text="${s.nombre}"></span></label>
-                        <div th:id="'divA'+${s.idSucursal}" style="display:none">
-                            <div class="form-row form-row-3" style="margin-bottom:16px">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:id="'existA_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" th:id="'costoA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
-                                <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" th:id="'utilidadA_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group">
-                                    <label class="form-label">IVA (%)</label>
-                                    <select th:id="'ivaA_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)">
-                                        <option value="0">Sin IVA (0%)</option>
-                                        <option value="5">5%</option>
-                                        <option value="12">12%</option>
-                                    </select>
+                        <th:block th:with="inv=${invMap != null ? invMap[s.idSucursal] : null}">
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+                                <input type="checkbox" th:id="'chkA'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockArmazon(this)" th:checked="${inv != null}">
+                                <span class="fw-600" th:text="${s.nombre}"></span>
+                            </label>
+                            <div th:id="'divA'+${s.idSucursal}" th:style="${inv != null} ? 'display:block' : 'display:none'">
+                                <div class="form-row form-row-3" style="margin-bottom:16px" th:if="${!editando}">
+                                    <div class="form-group"><label class="form-label">Existencia inicial</label><input type="number" th:id="'existA_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Precio de Venta (Q)</label>
-                                    <div style="position:relative">
-                                        <input type="number" th:id="'precioA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
+                                <div class="form-row form-row-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Costo del Producto (Q)</label>
+                                        <input type="number" th:id="'costoA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)" th:value="${inv != null ? inv.costo : ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Utilidad (%)</label>
+                                        <input sec:authorize="hasRole('ADMINISTRADOR')" type="number" th:id="'utilidadA_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)">
+                                        <input sec:authorize="!hasRole('ADMINISTRADOR')" type="number" th:id="'utilidadA_'+${s.idSucursal}" class="form-control bg-light" min="0" max="999" step="0.01" placeholder="0.00" readonly="readonly">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-2">
+                                    <div class="form-group">
+                                        <label class="form-label">IVA (%)</label>
+                                        <select th:id="'ivaA_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)" sec:authorize="hasRole('ADMINISTRADOR')">
+                                            <option value="0">Sin IVA (0%)</option><option value="5">5%</option><option value="12">12%</option>
+                                        </select>
+                                        <select th:id="'ivaA_'+${s.idSucursal}" class="form-select bg-light" onchange="calcularPrecioFila(this)" sec:authorize="!hasRole('ADMINISTRADOR')" style="pointer-events:none">
+                                            <option value="0">Sin IVA (0%)</option><option value="5">5%</option><option value="12">12%</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Precio de Venta (Q)</label>
+                                        <div style="position:relative">
+                                            <input sec:authorize="hasRole('ADMINISTRADOR')" type="number" th:id="'precioA_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700" oninput="calcularUtilidadFila(this)" th:value="${inv != null ? inv.precioVenta : ''}">
+                                            <input sec:authorize="!hasRole('ADMINISTRADOR')" type="number" th:id="'precioA_'+${s.idSucursal}" class="form-control bg-light" min="0" step="0.01" placeholder="0.00" style="font-weight:700" readonly="readonly" th:value="${inv != null ? inv.precioVenta : ''}">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </th:block>
                     </div>
                 </div>
             </div>
@@ -323,41 +337,55 @@
             </div>
  
             <!-- ── Stock Inicial por Sucursal ─────────── -->
-            <div th:if="${!editando}" class="card mb-3">
+            <div class="card mb-3">
                 <div class="card-header">
                     <div class="card-title">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--turquesa);vertical-align:middle;margin-right:6px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-                        Stock Inicial por Sucursal
+                        <span th:text="${editando} ? 'Precios por Sucursal' : 'Stock Inicial por Sucursal'"></span>
                     </div>
                 </div>
                 <div class="card-body" style="padding:20px">
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
-                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px"><input type="checkbox" th:id="'chkL'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockLente(this)"><span class="fw-600" th:text="${s.nombre}"></span></label>
-                        <div th:id="'divL'+${s.idSucursal}" style="display:none">
-                            <div class="form-row form-row-3" style="margin-bottom:16px">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:id="'existL_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
-                                <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" th:id="'utilidadL_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group">
-                                    <label class="form-label">IVA (%)</label>
-                                    <select th:id="'ivaL_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)">
-                                        <option value="0">Sin IVA (0%)</option>
-                                        <option value="5">5%</option>
-                                        <option value="12">12%</option>
-                                    </select>
+                        <th:block th:with="inv=${invMap != null ? invMap[s.idSucursal] : null}">
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+                                <input type="checkbox" th:id="'chkL'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockLente(this)" th:checked="${inv != null}">
+                                <span class="fw-600" th:text="${s.nombre}"></span>
+                            </label>
+                            <div th:id="'divL'+${s.idSucursal}" th:style="${inv != null} ? 'display:block' : 'display:none'">
+                                <div class="form-row form-row-3" style="margin-bottom:16px" th:if="${!editando}">
+                                    <div class="form-group"><label class="form-label">Existencia inicial</label><input type="number" th:id="'existL_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Precio de Venta (Q)</label>
-                                    <div style="position:relative">
-                                        <input type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
+                                <div class="form-row form-row-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Costo del Producto (Q)</label>
+                                        <input type="number" th:id="'costoL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)" th:value="${inv != null ? inv.costo : ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Utilidad (%)</label>
+                                        <input sec:authorize="hasRole('ADMINISTRADOR')" type="number" th:id="'utilidadL_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)">
+                                        <input sec:authorize="!hasRole('ADMINISTRADOR')" type="number" th:id="'utilidadL_'+${s.idSucursal}" class="form-control bg-light" min="0" max="999" step="0.01" placeholder="0.00" readonly="readonly">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-2">
+                                    <div class="form-group">
+                                        <label class="form-label">IVA (%)</label>
+                                        <select th:id="'ivaL_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)" sec:authorize="hasRole('ADMINISTRADOR')">
+                                            <option value="0">Sin IVA (0%)</option><option value="5">5%</option><option value="12">12%</option>
+                                        </select>
+                                        <select th:id="'ivaL_'+${s.idSucursal}" class="form-select bg-light" onchange="calcularPrecioFila(this)" sec:authorize="!hasRole('ADMINISTRADOR')" style="pointer-events:none">
+                                            <option value="0">Sin IVA (0%)</option><option value="5">5%</option><option value="12">12%</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Precio de Venta (Q)</label>
+                                        <div style="position:relative">
+                                            <input sec:authorize="hasRole('ADMINISTRADOR')" type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700" oninput="calcularUtilidadFila(this)" th:value="${inv != null ? inv.precioVenta : ''}">
+                                            <input sec:authorize="!hasRole('ADMINISTRADOR')" type="number" th:id="'precioL_'+${s.idSucursal}" class="form-control bg-light" min="0" step="0.01" placeholder="0.00" style="font-weight:700" readonly="readonly" th:value="${inv != null ? inv.precioVenta : ''}">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </th:block>
                     </div>
                 </div>
             </div>
@@ -401,36 +429,50 @@
                     <div class="form-group"><label class="form-label">Descripción (opcional)</label><textarea id="vDescO" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea></div>
                 </div>
             </div>
-            <div th:if="${!editando}" class="card mb-3">
-                <div class="card-header"><div class="card-title">Stock Inicial por Sucursal</div></div>
+            <div class="card mb-3">
+                <div class="card-header"><div class="card-title" th:text="${editando} ? 'Precios por Sucursal' : 'Stock Inicial por Sucursal'"></div></div>
                 <div class="card-body" style="padding:20px">
                     <div th:each="s : ${sucursales}" style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.07)">
-                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px"><input type="checkbox" th:id="'chkO'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockOtro(this)"><span class="fw-600" th:text="${s.nombre}"></span></label>
-                        <div th:id="'divO'+${s.idSucursal}" style="display:none">
-                            <div class="form-row form-row-3" style="margin-bottom:16px">
-                                <div class="form-group"><label class="form-label">Existencia</label><input type="number" th:id="'existO_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group"><label class="form-label">Costo del Producto (Q)</label><input type="number" th:id="'costoO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
-                                <div class="form-group"><label class="form-label">Utilidad (%)</label><input type="number" th:id="'utilidadO_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)"></div>
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group">
-                                    <label class="form-label">IVA (%)</label>
-                                    <select th:id="'ivaO_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)">
-                                        <option value="0">Sin IVA (0%)</option>
-                                        <option value="5">5%</option>
-                                        <option value="12">12%</option>
-                                    </select>
+                        <th:block th:with="inv=${invMap != null ? invMap[s.idSucursal] : null}">
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+                                <input type="checkbox" th:id="'chkO'+${s.idSucursal}" th:attr="data-suc=${s.idSucursal}" onchange="toggleStockOtro(this)" th:checked="${inv != null}">
+                                <span class="fw-600" th:text="${s.nombre}"></span>
+                            </label>
+                            <div th:id="'divO'+${s.idSucursal}" th:style="${inv != null} ? 'display:block' : 'display:none'">
+                                <div class="form-row form-row-3" style="margin-bottom:16px" th:if="${!editando}">
+                                    <div class="form-group"><label class="form-label">Existencia inicial</label><input type="number" th:id="'existO_'+${s.idSucursal}" class="form-control" min="0" step="1" value="0"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Precio de Venta (Q)</label>
-                                    <div style="position:relative">
-                                        <input type="number" th:id="'precioO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700">
+                                <div class="form-row form-row-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Costo del Producto (Q)</label>
+                                        <input type="number" th:id="'costoO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)" th:value="${inv != null ? inv.costo : ''}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Utilidad (%)</label>
+                                        <input sec:authorize="hasRole('ADMINISTRADOR')" type="number" th:id="'utilidadO_'+${s.idSucursal}" class="form-control" min="0" max="999" step="0.01" placeholder="0.00" oninput="calcularPrecioFila(this)">
+                                        <input sec:authorize="!hasRole('ADMINISTRADOR')" type="number" th:id="'utilidadO_'+${s.idSucursal}" class="form-control bg-light" min="0" max="999" step="0.01" placeholder="0.00" readonly="readonly">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-2">
+                                    <div class="form-group">
+                                        <label class="form-label">IVA (%)</label>
+                                        <select th:id="'ivaO_'+${s.idSucursal}" class="form-select" onchange="calcularPrecioFila(this)" sec:authorize="hasRole('ADMINISTRADOR')">
+                                            <option value="0">Sin IVA (0%)</option><option value="5">5%</option><option value="12">12%</option>
+                                        </select>
+                                        <select th:id="'ivaO_'+${s.idSucursal}" class="form-select bg-light" onchange="calcularPrecioFila(this)" sec:authorize="!hasRole('ADMINISTRADOR')" style="pointer-events:none">
+                                            <option value="0">Sin IVA (0%)</option><option value="5">5%</option><option value="12">12%</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Precio de Venta (Q)</label>
+                                        <div style="position:relative">
+                                            <input sec:authorize="hasRole('ADMINISTRADOR')" type="number" th:id="'precioO_'+${s.idSucursal}" class="form-control" min="0" step="0.01" placeholder="0.00" style="background:rgba(39,194,201,0.06);border-color:rgba(39,194,201,0.3);font-weight:700" oninput="calcularUtilidadFila(this)" th:value="${inv != null ? inv.precioVenta : ''}">
+                                            <input sec:authorize="!hasRole('ADMINISTRADOR')" type="number" th:id="'precioO_'+${s.idSucursal}" class="form-control bg-light" min="0" step="0.01" placeholder="0.00" style="font-weight:700" readonly="readonly" th:value="${inv != null ? inv.precioVenta : ''}">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </th:block>
                     </div>
                 </div>
             </div>
@@ -477,6 +519,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Calcular utilidad inicial si hay precios cargados
+    document.querySelectorAll('input[id^="precio"]').forEach(el => {
+        if (el.value && parseFloat(el.value) > 0) {
+            calcularUtilidadFila(el);
+        }
+    });
 });
  
 function seleccionarTipo(tipo) {
@@ -522,11 +571,34 @@ function calcularPrecioFila(elemento) {
     const utilidad = parseFloat(utilInput?.value) || 0;
     const iva = parseFloat(ivaInput?.value) || 0;
     if (costo <= 0) {
-        if (precioInput) precioInput.value = '';
+        if (precioInput && !precioInput.readOnly) precioInput.value = '';
         return;
     }
     const precioFinal = costo * (1 + utilidad / 100) * (1 + iva / 100);
-    if (precioInput) precioInput.value = precioFinal.toFixed(2);
+    if (precioInput && !precioInput.readOnly) precioInput.value = precioFinal.toFixed(2);
+}
+
+function calcularUtilidadFila(elemento) {
+    const re = /^(costo|utilidad|iva|precio)(A|L|O)_(\d+)$/;
+    const parts = elemento.id.match(re);
+    if (!parts) return;
+    const pre = parts[2];
+    const sid = parts[3];
+    const costoInput = document.getElementById('costo' + pre + '_' + sid);
+    const utilInput  = document.getElementById('utilidad' + pre + '_' + sid);
+    const ivaInput   = document.getElementById('iva' + pre + '_' + sid);
+    const precioInput= document.getElementById('precio' + pre + '_' + sid);
+    const costo = parseFloat(costoInput?.value) || 0;
+    const precio = parseFloat(precioInput?.value) || 0;
+    const iva = parseFloat(ivaInput?.value) || 0;
+    if (costo <= 0 || !utilInput || utilInput.readOnly) return;
+    
+    // precio = costo * (1 + utilidad/100) * (1 + iva/100)
+    // precio / (costo * (1 + iva/100)) = 1 + utilidad/100
+    // utilidad = ((precio / (costo * (1 + iva/100))) - 1) * 100
+    const factorIva = 1 + (iva / 100);
+    const utilidad = ((precio / (costo * factorIva)) - 1) * 100;
+    utilInput.value = utilidad > 0 ? utilidad.toFixed(2) : 0;
 }
  
 function sincronizarYValidar() {

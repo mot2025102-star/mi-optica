@@ -3,6 +3,7 @@ package com.mioptica.controller;
 import com.mioptica.model.*;
 import com.mioptica.service.ProductoService;
 import com.mioptica.service.ProveedorService;
+import com.mioptica.service.InventarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class ProductoController {
  
     private final ProductoService productoService;
     private final ProveedorService proveedorService;
+    private final InventarioService inventarioService;
  
     // ─── LISTA ────────────────────────────────────────────────────
     @GetMapping
@@ -102,6 +104,12 @@ public class ProductoController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
     public String editar(@PathVariable Integer id, Model model, RedirectAttributes ra) {
         return productoService.findById(id).map(p -> {
+            var inventarios = inventarioService.listarTodo().stream()
+                    .filter(i -> i.getProducto().getIdProducto().equals(p.getIdProducto()))
+                    .toList();
+            var invMap = new HashMap<Integer, Inventario>();
+            inventarios.forEach(i -> invMap.put(i.getSucursal().getIdSucursal(), i));
+
             model.addAttribute("producto",     p);
             model.addAttribute("categorias",   productoService.listarCategorias());
             model.addAttribute("marcas",       productoService.listarMarcas());
@@ -110,6 +118,7 @@ public class ProductoController {
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
             model.addAttribute("proveedores",  proveedorService.listarActivos());
+            model.addAttribute("invMap",       invMap);
             model.addAttribute("editando",     true);
             model.addAttribute("activePage",   "productos");
             return "productos/formulario";

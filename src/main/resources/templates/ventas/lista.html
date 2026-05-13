@@ -97,13 +97,14 @@
                             <th sec:authorize="hasRole('ADMINISTRADOR')">Sucursal</th>
                             <th style="text-align:right">Desc.</th>
                             <th style="text-align:right">Total</th>
+                            <th sec:authorize="hasAnyRole('ADMINISTRADOR', 'CONTADOR')" style="text-align:right">Utilidad (%)</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${ventas.isEmpty()}">
-                            <td colspan="9" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                            <td colspan="10" style="text-align:center;padding:50px;color:var(--gris-texto)">
                                 <div style="font-size:40px"></div>
                                 <div style="margin-top:10px">Sin ventas en el período seleccionado.</div>
                                 <a th:href="@{/ventas/nueva}" class="btn btn-primary btn-sm" style="margin-top:12px"> Registrar venta</a>
@@ -121,6 +122,11 @@
                             </td>
                             <td style="text-align:right" class="fw-600 text-verde"
                                 th:text="${v.total != null} ? 'Q ' + ${#numbers.formatDecimal(v.total,1,'COMMA',2,'POINT')} : 'Q 0.00'">
+                            </td>
+                            <td sec:authorize="hasAnyRole('ADMINISTRADOR', 'CONTADOR')" style="text-align:right" class="text-sm">
+                                <span th:classappend="${utilidadPorVenta.get(v.idVenta) != null and utilidadPorVenta.get(v.idVenta) < 0} ? 'text-danger fw-600' : 'text-success fw-600'"
+                                      th:text="${utilidadPorVenta.get(v.idVenta) != null} ? ${#numbers.formatDecimal(utilidadPorVenta.get(v.idVenta), 1, 'COMMA', 2, 'POINT')} + '%' : '0.00%'">
+                                </span>
                             </td>
                             <td>
                                 <span th:class="${v.estado == 'Pagada'} ? 'badge badge--success' : 'badge badge--danger'"
@@ -191,6 +197,7 @@
                             <td style="text-align:right" class="fw-600 text-cyan"
                                 th:text="'Q ' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">
                             </td>
+                            <td sec:authorize="hasAnyRole('ADMINISTRADOR', 'CONTADOR')"></td>
                             <td colspan="2"></td>
                         </tr>
                     </tfoot>
@@ -260,19 +267,23 @@ async function verDetalle(id, num) {
     </div>`;
     h += '<div class="table-wrapper"><table class="table"><thead><tr><th>Código</th><th>Producto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Precio</th><th style="text-align:right">Desc.</th><th style="text-align:right">Subtotal</th></tr></thead><tbody>';
     d.items.forEach(it => {
+        let descHtml = 'Q 0.00';
+        if (parseFloat(it.descuento) > 0) {
+            descHtml = `Q ${parseFloat(it.descuento).toFixed(2)} (${parseFloat(it.descPct).toFixed(0)}%)`;
+        }
         h += `<tr>
             <td class="text-cyan text-sm fw-600">${it.codigo}</td>
             <td>${it.detalle}</td>
             <td style="text-align:center">${it.cantidad}</td>
             <td style="text-align:right">Q ${parseFloat(it.precio).toFixed(2)}</td>
-            <td style="text-align:right">${parseFloat(it.descuento)>0?'Q ' + parseFloat(it.descuento).toFixed(2):'—'}</td>
+            <td style="text-align:right">${descHtml}</td>
             <td style="text-align:right" class="fw-600">Q ${parseFloat(it.subtotal).toFixed(2)}</td>
         </tr>`;
     });
     h += '</tbody></table></div>';
     h += `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-borde)">
         <div><span class="text-gris text-sm">Subtotal: </span><span class="fw-600">Q ${parseFloat(d.info.subtotal).toFixed(2)}</span></div>
-        ${parseFloat(d.info.descuento)>0?`<div><span class="text-gris text-sm">Descuento: </span><span class="fw-600 text-warning">- Q ${parseFloat(d.info.descuento).toFixed(2)}</span></div>`:''}
+        ${parseFloat(d.info.descuento)>0?`<div><span class="text-gris text-sm">Descuento Global (${parseFloat(d.info.descPct).toFixed(0)}%): </span><span class="fw-600 text-warning">- Q ${parseFloat(d.info.descuento).toFixed(2)}</span></div>`:''}
         <div style="font-size:18px"><span class="text-gris text-sm">TOTAL: </span><span class="fw-600 text-cyan">Q ${parseFloat(d.info.total).toFixed(2)}</span></div>
     </div>`;
     document.getElementById('detBody').innerHTML = h;

@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import java.math.RoundingMode;
+
 @Service
 @RequiredArgsConstructor
 public class VentaService {
@@ -81,8 +83,12 @@ public class VentaService {
                 .map(VentaRequest.ItemVenta::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal descGlobal = req.getDescuentoGlobal() != null
+        BigDecimal pctGlobal = req.getDescuentoGlobal() != null
                 ? req.getDescuentoGlobal() : BigDecimal.ZERO;
+
+        BigDecimal descGlobal = subtotal
+                .multiply(pctGlobal)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
         BigDecimal total = subtotal.subtract(descGlobal).max(BigDecimal.ZERO);
 
@@ -119,7 +125,13 @@ public class VentaService {
             det.setProducto(prod);
             det.setCantidad(item.getCantidad());
             det.setPrecioUnitario(item.getPrecioUnitario() != null ? item.getPrecioUnitario() : BigDecimal.ZERO);
-            det.setDescuento(item.getDescuento() != null ? item.getDescuento() : BigDecimal.ZERO);
+            BigDecimal pctFila = item.getDescuento() != null ? item.getDescuento() : BigDecimal.ZERO;
+            BigDecimal precioUnit = item.getPrecioUnitario() != null ? item.getPrecioUnitario() : BigDecimal.ZERO;
+            BigDecimal cantFila   = item.getCantidad() != null      ? item.getCantidad()       : BigDecimal.ZERO;
+            BigDecimal montoDescFila = precioUnit.multiply(cantFila)
+                    .multiply(pctFila)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            det.setDescuento(montoDescFila);
             det.setSubtotal(item.getSubtotal() != null ? item.getSubtotal() : BigDecimal.ZERO);
             venta.getDetalles().add(det);
 

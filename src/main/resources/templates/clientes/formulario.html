@@ -190,6 +190,101 @@
                     </div>
                 </div>
 
+                <!-- ── SECCIÓN: Datos Empresariales ─────────────── -->
+                <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
+                    🏢 Datos Empresariales
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de la empresa</label>
+                        <input type="text"
+                            th:field="*{empresaNombre}"
+                            class="form-control"
+                            placeholder="Empresa donde trabaja el cliente">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contacto / Encargado</label>
+                        <input type="text"
+                            th:field="*{empresaContacto}"
+                            class="form-control"
+                            placeholder="Jefe, RRHH o persona de contacto">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Teléfono de la empresa</label>
+                        <input type="text"
+                            th:field="*{empresaTelefono}"
+                            class="form-control"
+                            placeholder="2222-0000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Correo electrónico empresarial</label>
+                        <input type="email"
+                            th:field="*{empresaCorreo}"
+                            class="form-control"
+                            placeholder="empresa@correo.com">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-3">
+                    <!-- Departamento -->
+                    <div class="form-group">
+                        <label class="form-label">Departamento</label>
+                        <select th:field="*{empresaDepartamento}" class="form-select">
+                            <option value="">— Seleccionar —</option>
+                            <option value="Guatemala">Guatemala</option>
+                            <option value="Alta Verapaz">Alta Verapaz</option>
+                            <option value="Baja Verapaz">Baja Verapaz</option>
+                            <option value="Chimaltenango">Chimaltenango</option>
+                            <option value="Chiquimula">Chiquimula</option>
+                            <option value="El Progreso">El Progreso</option>
+                            <option value="Escuintla">Escuintla</option>
+                            <option value="Huehuetenango">Huehuetenango</option>
+                            <option value="Izabal">Izabal</option>
+                            <option value="Jalapa">Jalapa</option>
+                            <option value="Jutiapa">Jutiapa</option>
+                            <option value="Petén">Petén</option>
+                            <option value="Quetzaltenango">Quetzaltenango</option>
+                            <option value="Quiché">Quiché</option>
+                            <option value="Retalhuleu">Retalhuleu</option>
+                            <option value="Sacatepéquez">Sacatepéquez</option>
+                            <option value="San Marcos">San Marcos</option>
+                            <option value="Santa Rosa">Santa Rosa</option>
+                            <option value="Sololá">Sololá</option>
+                            <option value="Suchitepéquez">Suchitepéquez</option>
+                            <option value="Totonicapán">Totonicapán</option>
+                            <option value="Zacapa">Zacapa</option>
+                        </select>
+                    </div>
+
+                    <!-- Municipio -->
+                    <div class="form-group">
+                        <label class="form-label">Municipio</label>
+                        <select th:field="*{empresaMunicipio}" class="form-select">
+                            <option value="">— Seleccionar —</option>
+                            <option th:each="m : ${ {'Guatemala','Mixco','Villa Nueva','San Miguel Petapa','Chinautla','Amatitlán','Santa Catarina Pinula','Fraijanes','Villa Canales','San José Pinula','Quetzaltenango','Huehuetenango','Cobán','Escuintla','Mazatenango','Otro'} }"
+                                    th:value="${m}"
+                                    th:text="${m}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Zona -->
+                    <div class="form-group">
+                        <label class="form-label">Zona</label>
+                        <select th:field="*{empresaZona}" class="form-select">
+                            <option value="">Sin zona</option>
+                            <option th:each="z : ${#numbers.sequence(1,25)}"
+                                    th:value="${z}"
+                                    th:text="'Zona ' + ${z}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- ── SECCIÓN: Notas ────────────────────────────── -->
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin:20px 0 14px">
                      Notas

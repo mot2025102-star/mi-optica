@@ -69,6 +69,31 @@ public class VentaController {
         long cantPeriodo = ventas.stream()
                 .filter(v -> !"Anulada".equals(v.getEstado())).count();
 
+        // ++ TAREA 1: Calcular Utilidad (%) por cada venta ++
+        java.util.Map<Integer, java.math.BigDecimal> utilidadPorVenta = new java.util.HashMap<>();
+        for (com.mioptica.model.Venta v : ventas) {
+            java.math.BigDecimal costoVenta = java.math.BigDecimal.ZERO;
+            for (com.mioptica.model.DetalleVenta d : v.getDetalles()) {
+                java.math.BigDecimal costoItem = java.math.BigDecimal.ZERO;
+                if (d.getProducto() != null && v.getSucursal() != null) {
+                    var invOpt = inventarioRepo.findByProductoAndSucursal(d.getProducto(), v.getSucursal());
+                    if (invOpt.isPresent() && invOpt.get().getCosto() != null) {
+                        costoItem = invOpt.get().getCosto();
+                    }
+                }
+                costoVenta = costoVenta.add(costoItem.multiply(d.getCantidad()));
+            }
+
+            if (v.getTotal() != null && v.getTotal().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                java.math.BigDecimal ganancia = v.getTotal().subtract(costoVenta);
+                java.math.BigDecimal utilidadPct = ganancia.multiply(new java.math.BigDecimal("100")).divide(v.getTotal(), 2, java.math.RoundingMode.HALF_UP);
+                utilidadPorVenta.put(v.getIdVenta(), utilidadPct);
+            } else {
+                utilidadPorVenta.put(v.getIdVenta(), java.math.BigDecimal.ZERO);
+            }
+        }
+        model.addAttribute("utilidadPorVenta", utilidadPorVenta);
+
         model.addAttribute("ventas",       ventas);
         model.addAttribute("totalPeriodo", totalPeriodo);
         model.addAttribute("cantPeriodo",  cantPeriodo);
@@ -199,14 +224,22 @@ public class VentaController {
     public ResponseEntity<Map<String, Object>> detalle(@PathVariable Integer id) {
         return ventaService.findById(id)
                 .map(v -> {
-                    var items = v.getDetalles().stream().map(d -> Map.<String, Object>of(
+                    var items = v.getDetalles().stream().map(d -> {
+                        java.math.BigDecimal subtotalBase = d.getPrecioUnitario().multiply(d.getCantidad());
+                        java.math.BigDecimal descPct = java.math.BigDecimal.ZERO;
+                        if (subtotalBase.compareTo(java.math.BigDecimal.ZERO) > 0 && d.getDescuento() != null) {
+                            descPct = d.getDescuento().multiply(new java.math.BigDecimal("100")).divide(subtotalBase, 2, java.math.RoundingMode.HALF_UP);
+                        }
+                        return Map.<String, Object>of(
                             "codigo",    d.getProducto().getCodigo(),
                             "detalle",   d.getProducto().getDetalle(),
                             "cantidad",  d.getCantidad(),
                             "precio",    d.getPrecioUnitario(),
                             "descuento", d.getDescuento(),
+                            "descPct",   descPct,
                             "subtotal",  d.getSubtotal()
-                    )).toList();
+                        );
+                    }).toList();
 
                     Map<String, Object> info = new java.util.HashMap<>();
                     info.put("factura",     v.getNumeroFactura());
@@ -217,6 +250,13 @@ public class VentaController {
                     info.put("sucursal",    v.getSucursal().getNombre());
                     info.put("subtotal",    v.getSubtotal());
                     info.put("descuento",   v.getDescuento());
+                    
+                    java.math.BigDecimal globalDescPct = java.math.BigDecimal.ZERO;
+                    if (v.getSubtotal() != null && v.getSubtotal().compareTo(java.math.BigDecimal.ZERO) > 0 && v.getDescuento() != null) {
+                        globalDescPct = v.getDescuento().multiply(new java.math.BigDecimal("100")).divide(v.getSubtotal(), 2, java.math.RoundingMode.HALF_UP);
+                    }
+                    info.put("descPct",     globalDescPct);
+                    
                     info.put("total",       v.getTotal());
                     info.put("estado",      v.getEstado());
                     info.put("observacion", v.getObservacion() != null ? v.getObservacion() : "");

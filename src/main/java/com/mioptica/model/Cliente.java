@@ -61,6 +61,28 @@ public class Cliente {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
+    // ── DATOS EMPRESARIALES ───────────────────────────────────────────
+    @Column(name = "empresa_nombre",   length = 150)
+    private String empresaNombre;
+
+    @Column(name = "empresa_contacto", length = 100)
+    private String empresaContacto;
+
+    @Column(name = "empresa_telefono", length = 20)
+    private String empresaTelefono;
+
+    @Column(name = "empresa_correo",   length = 100)
+    private String empresaCorreo;
+
+    @Column(name = "empresa_departamento", length = 80)
+    private String empresaDepartamento;
+
+    @Column(name = "empresa_municipio", length = 80)
+    private String empresaMunicipio;
+
+    @Column(name = "empresa_zona", length = 10)
+    private String empresaZona;
+
     // Calcula edad en años
     public Integer getEdad() {
         if (fechaNacimiento == null) return null;
