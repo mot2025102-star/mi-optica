@@ -71,25 +71,9 @@
                         </select>
                     </div>
 
-                    <!-- Filtro por vendedor -->
-                    <div style="min-width:160px">
-                        <label class="form-label">Vendedor</label>
-                        <select name="idVendedor" class="form-select">
-                            <option value="0" th:selected="${idVendedor==0}">Todos</option>
-                            <option th:each="v : ${vendedores}"
-                                    th:value="${v.idUsuario}"
-                                    th:text="${v.nombreCompleto}"
-                                    th:selected="${idVendedor == v.idUsuario}">
-                            </option>
-                        </select>
-                    </div>
+                   
 
-                    <div style="display:flex;gap:8px;align-items:flex-end">
-                        <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Filtrar</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="setMes()">Este mes</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="setAyer()">Ayer</button>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="setSemana()">Esta semana</button>
-                    </div>
+                   
                 </form>
             </div>
         </div>
@@ -147,10 +131,7 @@
                th:class="${tab=='categoria'} ? 'btn btn-primary' : 'btn btn-secondary'">
                  Por categoría
             </a>
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='detalle')}"
-               th:class="${tab=='detalle'} ? 'btn btn-primary' : 'btn btn-secondary'">
-                 Detalle
-            </a>
+            
         </div>
 
         <!-- ── Tab Productos ── -->
@@ -167,6 +148,7 @@
                                 <th>Producto</th>
                                 <th style="text-align:center">Unidades</th>
                                 <th style="text-align:right">Total Q</th>
+                                <th style="text-align:right">Margen Q</th>
                                 <th style="text-align:center;width:180px">% del total</th>
                             </tr>
                         </thead>
@@ -182,6 +164,10 @@
                                 <td style="text-align:center" th:text="${f.cantidad}"></td>
                                 <td style="text-align:right" class="fw-600 text-verde"
                                     th:text="'Q ' + ${#numbers.formatDecimal(f.total,1,'COMMA',2,'POINT')}">
+                                </td>
+                                <td style="text-align:right" class="fw-600"
+                                    th:style="${f.margen.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'color:var(--verde);text-align:right' : 'color:#f87171;text-align:right'"
+                                    th:text="'Q ' + ${#numbers.formatDecimal(f.margen,1,'COMMA',2,'POINT')}">
                                 </td>
                                 <td style="text-align:center">
                                     <div style="display:flex;align-items:center;gap:8px">
@@ -299,57 +285,7 @@
             </div>
         </div>
 
-        <!-- ── Tab Detalle ── -->
-        <div th:if="${tab == 'detalle'}">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title"> Detalle de ventas</div>
-                </div>
-                <div class="table-wrapper">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>N° Factura</th>
-                                <th>Fecha</th>
-                                <th>Vendedor</th>
-                                <th>Categoría</th>
-                                <th>Producto / Modelo</th>
-                                <th style="text-align:center">Cant.</th>
-                                <th style="text-align:right">Total Q</th>
-                                <th>Forma pago</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${datos.detalleVentas == null or datos.detalleVentas.isEmpty()}">
-                                <td colspan="8" style="text-align:center;padding:40px;color:var(--gris-texto)">
-                                    Sin ventas en el período.
-                                </td>
-                            </tr>
-                            <tr th:each="d : ${datos.detalleVentas}">
-                                <td class="fw-600 text-turquesa" th:text="${d.numeroFactura}"></td>
-                                <td class="text-sm" th:text="${#temporals.format(d.fecha,'dd/MM/yyyy')}"></td>
-                                <td th:text="${d.vendedor}"></td>
-                                <td>
-                                    <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(39,194,201,0.12);color:var(--turquesa)"
-                                          th:text="${d.categoria}">
-                                    </span>
-                                </td>
-                                <td class="fw-600" th:text="${d.producto}"></td>
-                                <td style="text-align:center" th:text="${d.cantidad}"></td>
-                                <td style="text-align:right" class="text-verde fw-600"
-                                    th:text="'Q ' + ${#numbers.formatDecimal(d.precioVenta,1,'COMMA',2,'POINT')}">
-                                </td>
-                                <td>
-                                    <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(251,191,36,0.12);color:var(--amarillo)"
-                                          th:text="${d.formaPago}">
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+       
 
     </div>
 </div>
@@ -388,26 +324,8 @@ if (labels.length > 0) {
     });
 }
 
-function setMes() {
-    const d = new Date();
-    document.querySelector('[name="fi"]').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
-    document.querySelector('[name="ff"]').value = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().split('T')[0];
-    document.querySelector('form').submit();
-}
-function setSemana() {
-    const d = new Date();
-    const lunes = new Date(d); lunes.setDate(d.getDate() - d.getDay() + 1);
-    document.querySelector('[name="fi"]').value = lunes.toISOString().split('T')[0];
-    document.querySelector('[name="ff"]').value = d.toISOString().split('T')[0];
-    document.querySelector('form').submit();
-}
-function setAyer() {
-    const a = new Date(); a.setDate(a.getDate() - 1);
-    const v = a.toISOString().split('T')[0];
-    document.querySelector('[name="fi"]').value = v;
-    document.querySelector('[name="ff"]').value = v;
-    document.querySelector('form').submit();
-}
+
+
 </script>
 </body>
 </html>

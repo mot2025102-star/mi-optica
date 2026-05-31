@@ -16,4 +16,6 @@ public class VentaDetalleDTO {
     private Long       cantidad;
     private BigDecimal precioVenta;
     private String     formaPago;
+    private BigDecimal costo;      // ── NUEVO
+    private BigDecimal margen;     // ── NUEVO (precioVenta - costo)
 }

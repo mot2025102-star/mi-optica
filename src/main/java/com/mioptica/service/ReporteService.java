@@ -31,17 +31,21 @@ public class ReporteService {
 
     // ─── Helper: Object[] → ReporteFilaDTO ───────────────────────
     private List<ReporteFilaDTO> toDTO(List<Object[]> rows, BigDecimal totalGeneral) {
-        List<ReporteFilaDTO> lista = new ArrayList<>();
-        for (Object[] row : rows) {
-            String     etiqueta = row[0] != null ? row[0].toString() : "—";
-            Long       cantidad = row[1] instanceof Number ? ((Number) row[1]).longValue() : 0L;
-            BigDecimal total    = toBD(row[2]);
-            BigDecimal pct      = totalGeneral.compareTo(BigDecimal.ZERO) == 0
-                                ? BigDecimal.ZERO
-                                : total.multiply(BigDecimal.valueOf(100))
-                                       .divide(totalGeneral, 1, RoundingMode.HALF_UP);
-            lista.add(new ReporteFilaDTO(etiqueta, cantidad, total, pct));
-        }
+    List<ReporteFilaDTO> lista = new ArrayList<>();
+    for (Object[] row : rows) {
+        String     etiqueta = row[0] != null ? row[0].toString() : "—";
+        Long       cantidad = row[1] instanceof Number ? ((Number) row[1]).longValue() : 0L;
+        BigDecimal total    = toBD(row[2]);
+        BigDecimal pct      = totalGeneral.compareTo(BigDecimal.ZERO) == 0
+                            ? BigDecimal.ZERO
+                            : total.multiply(BigDecimal.valueOf(100))
+                                   .divide(totalGeneral, 1, RoundingMode.HALF_UP);
+        // row[3] es costoTotal si viene de topProductos, sino null
+        BigDecimal costoTotal = row.length > 3 ? toBD(row[3]) : BigDecimal.ZERO;
+        BigDecimal margen     = total.subtract(costoTotal);
+        lista.add(new ReporteFilaDTO(etiqueta, cantidad, total, pct, margen));
+    }
+
         return lista;
     }
 
@@ -64,10 +68,12 @@ public class ReporteService {
             Long       cantidad      = row[5] instanceof Number ? ((Number) row[5]).longValue() : 0L;
             BigDecimal precioVenta   = toBD(row[6]);
             String     formaPago     = row[7] != null ? row[7].toString() : "—";
-
+            BigDecimal costo  = toBD(row[8]);
+            BigDecimal margen = precioVenta.subtract(costo);    
             lista.add(new VentaDetalleDTO(numeroFactura, fecha, vendedor,
-                    categoria, producto, cantidad, precioVenta, formaPago));
-        }
+        categoria, producto, cantidad, precioVenta, formaPago,
+        costo, margen));
+            }
         return lista;
     }
 
@@ -87,9 +93,9 @@ public class ReporteService {
                 ? totalGeneral.divide(BigDecimal.valueOf(cantFacturas), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        List<ReporteFilaDTO> porProducto  = toDTO(reporteRepo.topProductos(fi, ff, idSuc),       totalGeneral);
+        List<ReporteFilaDTO> porProducto  = toDTO(reporteRepo.topProductos(fi, ff, idSuc, idCategoria),       totalGeneral);
         List<ReporteFilaDTO> porVendedor  = toDTO(reporteRepo.ventasPorVendedor(fi, ff, idSuc),  totalGeneral);
-        List<ReporteFilaDTO> porCategoria = toDTO(reporteRepo.ventasPorCategoria(fi, ff, idSuc), totalGeneral);
+        List<ReporteFilaDTO> porCategoria = toDTO(reporteRepo.ventasPorCategoria(fi, ff, idSuc, idCategoria), totalGeneral);
 
         List<Object[]>   rawDia     = reporteRepo.ventasPorDia(fi, ff, idSuc);
         List<String>     diasLabels = new ArrayList<>();

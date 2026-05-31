@@ -11,4 +11,6 @@ public class ReporteFilaDTO {
     private Long       cantidad;
     private BigDecimal total;
     private BigDecimal porcentaje;
+    private BigDecimal margen;     // ── NUEVO
 }
+
