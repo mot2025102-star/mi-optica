@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+
 import java.util.List;
 
 @Repository
@@ -48,4 +50,25 @@ public interface FichaClinicaRepository extends JpaRepository<FichaClinica, Inte
 
     // Historial de fichas de un cliente
     List<FichaClinica> findByClienteIdClienteOrderByFechaDesc(Integer idCliente);
+    // Fichas por rango de fecha
+    @Query("SELECT f FROM FichaClinica f " +
+           "JOIN FETCH f.cliente " +
+           "JOIN FETCH f.sucursal " +
+           "WHERE f.fecha BETWEEN :fi AND :ff " +
+           "ORDER BY f.fecha DESC")
+    List<FichaClinica> findByFechaBetweenOrderByFechaDesc(
+            @Param("fi") LocalDate fi,
+            @Param("ff") LocalDate ff);
+
+    // Fichas por rango de fecha y sucursal
+    @Query("SELECT f FROM FichaClinica f " +
+           "JOIN FETCH f.cliente " +
+           "JOIN FETCH f.sucursal " +
+           "WHERE f.fecha BETWEEN :fi AND :ff " +
+           "AND f.sucursal.idSucursal = :idSuc " +
+           "ORDER BY f.fecha DESC")
+    List<FichaClinica> findByFechaBetweenAndSucursalOrderByFechaDesc(
+            @Param("fi") LocalDate fi,
+            @Param("ff") LocalDate ff,
+            @Param("idSuc") Integer idSuc);
 }

@@ -1,13 +1,14 @@
 package com.mioptica.service;
 
 import com.mioptica.dto.VentaDetalleDTO;
+import com.mioptica.model.FichaClinica;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-
+import com.mioptica.model.FichaClinica;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -181,4 +182,142 @@ public class ExportService {
         document.close();
         return out.toByteArray();
     }
+    // ─── EXCEL FICHAS CLÍNICAS ────────────────────────────────────
+public byte[] exportarFichasClinicas(List<FichaClinica> fichas, LocalDate fi, LocalDate ff) throws Exception {
+    try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        Sheet sheet = workbook.createSheet("Fichas Clínicas");
+
+        // Estilos
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setColor(IndexedColors.WHITE.getIndex());
+        headerStyle.setFont(headerFont);
+        headerStyle.setFillForegroundColor(IndexedColors.DARK_TEAL.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+
+        // Título
+        Row titulo = sheet.createRow(0);
+        Cell celdaTitulo = titulo.createCell(0);
+        celdaTitulo.setCellValue("Mi Óptica — Fichas Clínicas del " + fi + " al " + ff);
+        CellStyle tituloStyle = workbook.createCellStyle();
+        Font tituloFont = workbook.createFont();
+        tituloFont.setBold(true);
+        tituloFont.setFontHeightInPoints((short) 13);
+        tituloStyle.setFont(tituloFont);
+        celdaTitulo.setCellStyle(tituloStyle);
+
+        // Encabezados
+        Row header = sheet.createRow(2);
+        String[] columnas = {"#", "N° Ficha", "Fecha", "NIT", "Cliente",
+                             "Optometrista", "Total Q", "Abono Q",
+                             "Saldo Q", "Estado Entrega", "Fecha Entrega"};
+        for (int i = 0; i < columnas.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(columnas[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Datos
+        int rowNum = 3;
+        int num = 1;
+        for (FichaClinica f : fichas) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(num++);
+            row.createCell(1).setCellValue(f.getIdFicha());
+            row.createCell(2).setCellValue(f.getFecha() != null ? f.getFecha().toString() : "");
+            row.createCell(3).setCellValue(f.getCliente().getNit() != null ? f.getCliente().getNit() : "CF");
+            row.createCell(4).setCellValue(f.getCliente().getNombre());
+            row.createCell(5).setCellValue(f.getOptometrista().getNombreCompleto());
+            row.createCell(6).setCellValue(formatoQuetzales(f.getTotal()));
+            row.createCell(7).setCellValue(formatoQuetzales(f.getAbono()));
+            row.createCell(8).setCellValue(formatoQuetzales(f.getSaldo()));
+            row.createCell(9).setCellValue(f.getEstadoEntrega() != null ? f.getEstadoEntrega() : "—");
+            row.createCell(10).setCellValue(f.getFechaEntrega() != null ? f.getFechaEntrega().toString() : "—");
+            for (int i = 0; i <= 10; i++) row.getCell(i).setCellStyle(dataStyle);
+        }
+
+        for (int i = 0; i <= 10; i++) sheet.autoSizeColumn(i);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        return out.toByteArray();
+    }
+}
+
+// ─── EXCEL SALDOS PENDIENTES ──────────────────────────────────
+public byte[] exportarSaldosPendientes(List<FichaClinica> fichas) throws Exception {
+    try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        Sheet sheet = workbook.createSheet("Saldos Pendientes");
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setColor(IndexedColors.WHITE.getIndex());
+        headerStyle.setFont(headerFont);
+        headerStyle.setFillForegroundColor(IndexedColors.DARK_TEAL.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+
+        // Título
+        Row titulo = sheet.createRow(0);
+        Cell celdaTitulo = titulo.createCell(0);
+        celdaTitulo.setCellValue("Mi Óptica — Saldos Pendientes");
+        CellStyle tituloStyle = workbook.createCellStyle();
+        Font tituloFont = workbook.createFont();
+        tituloFont.setBold(true);
+        tituloFont.setFontHeightInPoints((short) 13);
+        tituloStyle.setFont(tituloFont);
+        celdaTitulo.setCellStyle(tituloStyle);
+
+        // Encabezados
+        Row header = sheet.createRow(2);
+        String[] columnas = {"#", "N° Ficha", "Fecha", "Cliente", "Teléfono",
+                             "Total Q", "Abono Q", "Saldo Q",
+                             "Días Pendiente", "Estado Entrega"};
+        for (int i = 0; i < columnas.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(columnas[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Datos
+        int rowNum = 3;
+        int num = 1;
+        for (FichaClinica f : fichas) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(num++);
+            row.createCell(1).setCellValue(f.getIdFicha());
+            row.createCell(2).setCellValue(f.getFecha() != null ? f.getFecha().toString() : "");
+            row.createCell(3).setCellValue(f.getCliente().getNombre());
+            row.createCell(4).setCellValue(f.getCliente().getTelefono() != null ? f.getCliente().getTelefono() : "—");
+            row.createCell(5).setCellValue(formatoQuetzales(f.getTotal()));
+            row.createCell(6).setCellValue(formatoQuetzales(f.getAbono()));
+            row.createCell(7).setCellValue(formatoQuetzales(f.getSaldo()));
+            row.createCell(8).setCellValue(f.getDiasPendiente());
+            row.createCell(9).setCellValue(f.getEstadoEntrega() != null ? f.getEstadoEntrega() : "—");
+            for (int i = 0; i <= 9; i++) row.getCell(i).setCellStyle(dataStyle);
+        }
+
+        for (int i = 0; i <= 9; i++) sheet.autoSizeColumn(i);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        return out.toByteArray();
+    }
+}
+
 }

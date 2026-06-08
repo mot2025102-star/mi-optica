@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Reportes de Fichas')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Reportes de Fichas</div>
+            <div class="topbar-sub"
+                 th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}">
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <a th:href="@{/reportes}" class="btn btn-secondary">Reportes de Ventas</a>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Filtro de fechas -->
+        <div class="card mb-3">
+            <div class="card-body" style="padding:14px 20px">
+                <form th:action="@{/reportes/fichas}" method="get"
+                      style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div>
+                            <label class="form-label">Desde</label>
+                            <input type="date" name="fi" class="form-control" th:value="${fi}">
+                        </div>
+                        <span class="text-gris" style="margin-top:20px">al</span>
+                        <div>
+                            <label class="form-label">Hasta</label>
+                            <input type="date" name="ff" class="form-control" th:value="${ff}">
+                        </div>
+                    </div>
+
+                    <div th:if="${esAdmin}" style="min-width:180px">
+                        <label class="form-label">Sucursal</label>
+                        <select name="idSucursal" class="form-select">
+                            <option value="0" th:selected="${idSucursal==0}">Todas</option>
+                            <option th:each="s : ${sucursales}"
+                                    th:value="${s.idSucursal}"
+                                    th:text="${s.nombre}"
+                                    th:selected="${idSucursal == s.idSucursal}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"
+                            style="display:inline-flex;align-items:center;gap:6px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             style="width:14px;height:14px">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        Filtrar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Botones de reportes -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Generar Reportes Excel</div>
+            </div>
+            <div class="card-body" style="padding:24px;display:flex;gap:16px;flex-wrap:wrap">
+
+                <!-- Ficha Clínica -->
+                <a th:href="@{/reportes/fichas/exportar/clinicas(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
+                   class="btn btn-secondary"
+                   style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 32px;min-width:180px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span style="font-weight:600;font-size:14px">Ficha Clínica</span>
+                    <span style="font-size:11px;color:var(--gris-texto)">Excel por período</span>
+                </a>
+
+                <!-- Saldos Pendientes -->
+                <a th:href="@{/reportes/fichas/exportar/saldos(idSucursal=${idSucursal})}"
+                   class="btn btn-secondary"
+                   style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 32px;min-width:180px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <span style="font-weight:600;font-size:14px">Saldos Pendientes</span>
+                    <span style="font-size:11px;color:var(--gris-texto)">Fichas con saldo > 0</span>
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

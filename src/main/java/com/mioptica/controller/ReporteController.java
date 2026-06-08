@@ -1,6 +1,7 @@
 package com.mioptica.controller;
  
 import com.mioptica.dto.VentaDetalleDTO;
+import com.mioptica.model.FichaClinica;
 import com.mioptica.repository.CategoriaRepository;
 import com.mioptica.repository.SucursalRepository;
 import com.mioptica.repository.UsuarioRepository;
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
- 
+import com.mioptica.model.FichaClinica;
+import com.mioptica.repository.FichaClinicaRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +36,7 @@ public class ReporteController {
     private final SucursalRepository  sucursalRepo;
     private final CategoriaRepository categoriaRepo;
     private final CorteCajaService    corteCajaService;
+    private final FichaClinicaRepository fichaClinicaRepo;
  
     // ══════════════════════════════════════════════════════════════
     // ─── REPORTES DE VENTAS ───────────────────────────────────────
@@ -266,4 +269,93 @@ public class ReporteController {
         }
         return "redirect:/corte-caja?fecha=" + fecha + "&idSucursal=" + idSucursal;
     }
+    // ══════════════════════════════════════════════════════════════
+// ─── REPORTES DE FICHAS ───────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+@GetMapping("/reportes/fichas")
+public String reportesFichas(
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fi,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ff,
+        @RequestParam(defaultValue = "0") Integer idSucursal,
+        @AuthenticationPrincipal UserDetails ud,
+        Model model) {
+
+    if (fi == null) fi = LocalDate.now().withDayOfMonth(1);
+    if (ff == null) ff = LocalDate.now();
+
+    var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
+    boolean esAdmin = usuario.esAdmin();
+    if (!esAdmin && usuario.getSucursal() != null)
+        idSucursal = usuario.getSucursal().getIdSucursal();
+
+    model.addAttribute("fi",         fi);
+    model.addAttribute("ff",         ff);
+    model.addAttribute("idSucursal", idSucursal);
+    model.addAttribute("esAdmin",    esAdmin);
+    model.addAttribute("sucursales", sucursalRepo.findByActivoTrue());
+    model.addAttribute("activePage", "reportes");
+    return "reportes/fichas";
+}
+
+// ─── EXPORTAR FICHAS CLÍNICAS ─────────────────────────────────
+@GetMapping("/reportes/fichas/exportar/clinicas")
+@ResponseBody
+public ResponseEntity<byte[]> exportarFichasClinicas(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fi,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ff,
+        @RequestParam(defaultValue = "0") Integer idSucursal,
+        @AuthenticationPrincipal UserDetails ud) {
+    try {
+        var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
+        boolean esAdmin = usuario.esAdmin();
+        if (!esAdmin && usuario.getSucursal() != null)
+            idSucursal = usuario.getSucursal().getIdSucursal();
+
+        List<FichaClinica> fichas = idSucursal == 0
+                ? fichaClinicaRepo.findByFechaBetweenOrderByFechaDesc(fi, ff)
+                : fichaClinicaRepo.findByFechaBetweenAndSucursalOrderByFechaDesc(fi, ff, idSucursal);
+
+        byte[] archivo = exportService.exportarFichasClinicas(fichas, fi, ff);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=fichas_clinicas_" + fi + "_" + ff + ".xlsx")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(archivo);
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
+
+// ─── EXPORTAR SALDOS PENDIENTES ───────────────────────────────
+@GetMapping("/reportes/fichas/exportar/saldos")
+@ResponseBody
+public ResponseEntity<byte[]> exportarSaldosPendientes(
+        @RequestParam(defaultValue = "0") Integer idSucursal,
+        @AuthenticationPrincipal UserDetails ud) {
+    try {
+        var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
+        boolean esAdmin = usuario.esAdmin();
+        if (!esAdmin && usuario.getSucursal() != null)
+            idSucursal = usuario.getSucursal().getIdSucursal();
+
+        List<FichaClinica> fichas = idSucursal == 0
+                ? fichaClinicaRepo.findConSaldoPendiente()
+                : fichaClinicaRepo.findConSaldoPendienteBySucursal(idSucursal);
+
+        byte[] archivo = exportService.exportarSaldosPendientes(fichas);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=saldos_pendientes.xlsx")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(archivo);
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
 }

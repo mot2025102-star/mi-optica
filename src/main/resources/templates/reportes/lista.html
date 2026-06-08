@@ -15,13 +15,14 @@
                  th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}">
             </div>
         </div>
-        <div class="topbar-actions">
+        <div class= "topbar-actions">
             <a th:href="@{/corte-caja}" class="btn btn-secondary"> Corte de Caja</a>
             <a th:href="@{/reportes/exportar/excel(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
                class="btn btn-secondary"> Excel</a>
             <a th:href="@{/reportes/exportar/pdf(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
                class="btn btn-secondary"> PDF</a>
             <button class="btn btn-secondary" onclick="window.print()"> Imprimir</button>
+            <a th:href="@{/reportes/fichas}" class="btn btn-secondary"> Reporte Fichas</a>
         </div>
     </div>
 
