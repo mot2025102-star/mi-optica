@@ -46,6 +46,10 @@ public class Cliente {
     @Column(name = "ocupacion", length = 100)
     private String ocupacion;
 
+    /** Edad en años. Se puede ingresar manualmente o calcular desde fechaNacimiento. */
+    @Column(name = "edad")
+    private Integer edad;
+
     @Column(name = "direccion", length = 200)
     private String direccion;
 
@@ -83,8 +87,8 @@ public class Cliente {
     @Column(name = "empresa_zona", length = 10)
     private String empresaZona;
 
-    // Calcula edad en años
-    public Integer getEdad() {
+    /** Calcula edad en años a partir de la fecha de nacimiento (si existe). */
+    public Integer getEdadCalculada() {
         if (fechaNacimiento == null) return null;
         return LocalDate.now().getYear() - fechaNacimiento.getYear();
     }

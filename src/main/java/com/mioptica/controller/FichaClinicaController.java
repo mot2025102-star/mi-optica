@@ -39,13 +39,13 @@ public class FichaClinicaController {
 
         List<FichaClinica> fichas = fichaService.listarTodas();
 
-        // Filtrar por nombre de cliente si hay búsqueda
         if (!q.isBlank()) {
             String qLower = q.toLowerCase();
             fichas = fichas.stream()
                     .filter(f -> f.getCliente().getNombre().toLowerCase().contains(qLower))
                     .toList();
         }
+
         long entregasPendientes = fichas.stream()
             .filter(f -> !"Entregado".equals(f.getEstadoEntrega()) && f.getFechaEntrega() != null)
             .count();
@@ -53,10 +53,12 @@ public class FichaClinicaController {
             .filter(f -> f.getSaldo() != null && f.getSaldo().compareTo(BigDecimal.ZERO) > 0)
             .count();
 
-        model.addAttribute("fichas",     fichas);
-        model.addAttribute("q",          q);
-        model.addAttribute("esAdmin",    esAdmin);
-        model.addAttribute("activePage", "fichas");
+        model.addAttribute("fichas",              fichas);
+        model.addAttribute("q",                   q);
+        model.addAttribute("esAdmin",             esAdmin);
+        model.addAttribute("entregasPendientes",  entregasPendientes);
+        model.addAttribute("conSaldo",            conSaldo);
+        model.addAttribute("activePage",          "fichas");
         return "fichas/lista";
     }
 
@@ -73,17 +75,16 @@ public class FichaClinicaController {
         ficha.setFecha(LocalDate.now());
         ficha.setOptometrista(usuario);
 
-        // Si viene de un cliente específico, prellenar
         if (idCliente != null) {
             clienteRepo.findById(idCliente).ifPresent(ficha::setCliente);
         }
 
-        model.addAttribute("ficha",       ficha);
-        model.addAttribute("clientes",    clienteRepo.findByActivoTrueOrderByNombreAsc());
-        model.addAttribute("sucursales",  sucursalRepo.findByActivoTrue());
-        model.addAttribute("optometras",  usuarioRepo.findAll());
-        model.addAttribute("editando",    false);
-        model.addAttribute("activePage",  "fichas");
+        model.addAttribute("ficha",      ficha);
+        model.addAttribute("clientes",   clienteRepo.findByActivoTrueOrderByNombreAsc());
+        model.addAttribute("sucursales", sucursalRepo.findByActivoTrue());
+        model.addAttribute("optometras", usuarioRepo.findAll());
+        model.addAttribute("editando",   false);
+        model.addAttribute("activePage", "fichas");
         return "fichas/formulario";
     }
 
@@ -113,7 +114,51 @@ public class FichaClinicaController {
             RedirectAttributes ra) {
 
         try {
-            // ── Construir JSON de historia clínica ────────────────
+            // ── RX SUBJETIVO ──────────────────────────────────────
+            ficha.setSubOdEsfera(params.getOrDefault("sub_odEsfera",   ""));
+            ficha.setSubOdCilindro(params.getOrDefault("sub_odCilindro",""));
+            ficha.setSubOdEje(params.getOrDefault("sub_odEje",         ""));
+            ficha.setSubOdAdicion(params.getOrDefault("sub_odAdicion", ""));
+            ficha.setSubOiEsfera(params.getOrDefault("sub_oiEsfera",   ""));
+            ficha.setSubOiCilindro(params.getOrDefault("sub_oiCilindro",""));
+            ficha.setSubOiEje(params.getOrDefault("sub_oiEje",         ""));
+            ficha.setSubOiAdicion(params.getOrDefault("sub_oiAdicion", ""));
+
+            // ── RX FINAL ──────────────────────────────────────────
+            ficha.setRxOdEsfera(params.getOrDefault("rx_odEsfera",     ""));
+            ficha.setRxOdCilindro(params.getOrDefault("rx_odCilindro", ""));
+            ficha.setRxOdEje(params.getOrDefault("rx_odEje",           ""));
+            ficha.setRxOdAdicion(params.getOrDefault("rx_odAdicion",   ""));
+            ficha.setRxOiEsfera(params.getOrDefault("rx_oiEsfera",     ""));
+            ficha.setRxOiCilindro(params.getOrDefault("rx_oiCilindro", ""));
+            ficha.setRxOiEje(params.getOrDefault("rx_oiEje",           ""));
+            ficha.setRxOiAdicion(params.getOrDefault("rx_oiAdicion",   ""));
+
+            parseBigDecimal(params.get("rx_odAltura")).ifPresent(ficha::setRxOdAltura);
+            parseBigDecimal(params.get("rx_oiAltura")).ifPresent(ficha::setRxOiAltura);
+            parseBigDecimal(params.get("rx_dip")).ifPresent(ficha::setRxDip);
+            parseBigDecimal(params.get("rx_ndpOd")).ifPresent(ficha::setRxNdpOd);
+            parseBigDecimal(params.get("rx_ndpOi")).ifPresent(ficha::setRxNdpOi);
+
+            // ── SUGERENCIA DE MATERIALES ──────────────────────────
+            ficha.setSugTipoLente(params.getOrDefault("sug_tipoLente",     ""));
+            ficha.setSugMaterialLente(params.getOrDefault("sug_materialLente",""));
+            ficha.setSugColor(params.getOrDefault("sug_color",             ""));
+            ficha.setSugObservaciones(params.getOrDefault("sug_observaciones",""));
+
+            // Tratamientos sugeridos → guardar como lista separada por comas
+            String[] tratamientos = {"antireflejo","bloqueador_luz_azul","filtro_solar",
+                "fotocromatico","polarizado","endurecido","hidrofobico","uv"};
+            StringBuilder sugTrat = new StringBuilder();
+            for (String t : tratamientos) {
+                if (params.containsKey("sug_trat_" + t)) {
+                    if (sugTrat.length() > 0) sugTrat.append(",");
+                    sugTrat.append(t);
+                }
+            }
+            ficha.setSugTratamientos(sugTrat.toString());
+
+            // ── HISTORIA CLÍNICA (JSON) ───────────────────────────
             StringBuilder json = new StringBuilder("{");
 
             // Síntomas
@@ -135,7 +180,7 @@ public class FichaClinicaController {
             // Signos
             json.append("\"signos\":[");
             String[] signos = {"entrecierra_ojos","parpadeo_excesivo","enrojecimiento",
-                "inflamacion_palpebral","conjuntiva_hiperémica","pupilas_anomalas",
+                "inflamacion_palpebral","conjuntiva_hiperemica","pupilas_anomalas",
                 "catarata_aparente","estrabismo_evidente","nistagmo"};
             first = true;
             for (String s : signos) {
@@ -160,7 +205,7 @@ public class FichaClinicaController {
                 }
             }
             json.append("],");
-            json.append("\"medicamentos\":\"").append(params.getOrDefault("hc_medicamentos","")).append("\",");
+            json.append("\"medicamentos\":\"").append(esc(params.get("hc_medicamentos"))).append("\",");
 
             // Antecedentes familiares
             json.append("\"antecedentes_familiares\":[");
@@ -175,54 +220,77 @@ public class FichaClinicaController {
                 }
             }
             json.append("],");
-            json.append("\"antfam_otros\":\"").append(params.getOrDefault("hc_antfam_otros","")).append("\",");
+            json.append("\"antfam_otros\":\"").append(esc(params.get("hc_antfam_otros"))).append("\",");
 
             // Historia visual
-            json.append("\"usa_lentes\":\"").append(params.getOrDefault("hc_usa_lentes","")).append("\",");
-            json.append("\"ultimo_examen\":\"").append(params.getOrDefault("hc_ultimo_examen","")).append("\",");
-            json.append("\"satisfaccion\":\"").append(params.getOrDefault("hc_satisfaccion","")).append("\",");
-            json.append("\"tiempo_uso\":\"").append(params.getOrDefault("hc_tiempo_uso","")).append("\",");
+            json.append("\"usa_lentes\":\"").append(esc(params.get("hc_usa_lentes"))).append("\",");
+            json.append("\"ultimo_examen\":\"").append(esc(params.get("hc_ultimo_examen"))).append("\",");
+            json.append("\"satisfaccion\":\"").append(esc(params.get("hc_satisfaccion"))).append("\",");
+            json.append("\"tiempo_uso\":\"").append(esc(params.get("hc_tiempo_uso"))).append("\",");
+
+            // Tipos de lente usados
+            json.append("\"tipos_lente_usados\":[");
+            String[] tiposLente = {"monofocal","bifocal","progresivo","lectura"};
+            first = true;
+            for (String t : tiposLente) {
+                if (params.containsKey("hc_tipo_lente_" + t)) {
+                    if (!first) json.append(",");
+                    json.append("\"").append(t).append("\"");
+                    first = false;
+                }
+            }
+            json.append("],");
+
+            // Antecedentes visuales
+            json.append("\"antecedentes_visuales\":[");
+            String[] antVis = {"miopia","hipermetropia","astigmatismo","presbicia",
+                "ambliopia","estrabismo_vis","cirugias_oculares"};
+            first = true;
+            for (String s : antVis) {
+                if (params.containsKey("hc_antvis_" + s)) {
+                    if (!first) json.append(",");
+                    json.append("\"").append(s).append("\"");
+                    first = false;
+                }
+            }
+            json.append("],");
 
             // Hábitos visuales
-            json.append("\"horas_pantalla\":\"").append(params.getOrDefault("hc_horas_pantalla","")).append("\",");
-            json.append("\"distancia_trabajo\":\"").append(params.getOrDefault("hc_distancia_trabajo","")).append("\",");
-            json.append("\"iluminacion\":\"").append(params.getOrDefault("hc_iluminacion","")).append("\",");
+            json.append("\"horas_pantalla\":\"").append(esc(params.get("hc_horas_pantalla"))).append("\",");
+            json.append("\"distancia_trabajo\":\"").append(esc(params.get("hc_distancia_trabajo"))).append("\",");
+            json.append("\"iluminacion\":\"").append(esc(params.get("hc_iluminacion"))).append("\",");
+
+            // Actividades frecuentes
+            json.append("\"actividades\":[");
+            String[] actividades = {"lectura","computadora","celular","conduccion","manualidades"};
+            first = true;
+            for (String a : actividades) {
+                if (params.containsKey("hc_actividad_" + a)) {
+                    if (!first) json.append(",");
+                    json.append("\"").append(a).append("\"");
+                    first = false;
+                }
+            }
+            json.append("],");
 
             // Pruebas preliminares
-            json.append("\"cover_test\":\"").append(params.getOrDefault("hc_cover_test","")).append("\",");
-            json.append("\"ojo_dominante\":\"").append(params.getOrDefault("hc_ojo_dominante","")).append("\",");
-            json.append("\"motilidad\":\"").append(params.getOrDefault("hc_motilidad","")).append("\",");
-            json.append("\"pio_od\":\"").append(params.getOrDefault("hc_pio_od","")).append("\",");
-            json.append("\"pio_oi\":\"").append(params.getOrDefault("hc_pio_oi","")).append("\",");
-
-            // Graduación actual (receta final)
-            json.append("\"rx\":{");
-            json.append("\"od_esfera\":\"").append(params.getOrDefault("rx_odEsfera","")).append("\",");
-            json.append("\"od_cilindro\":\"").append(params.getOrDefault("rx_odCilindro","")).append("\",");
-            json.append("\"od_eje\":\"").append(params.getOrDefault("rx_odEje","")).append("\",");
-            json.append("\"od_adicion\":\"").append(params.getOrDefault("rx_odAdicion","")).append("\",");
-            json.append("\"od_altura\":\"").append(params.getOrDefault("rx_odAltura","")).append("\",");
-            json.append("\"oi_esfera\":\"").append(params.getOrDefault("rx_oiEsfera","")).append("\",");
-            json.append("\"oi_cilindro\":\"").append(params.getOrDefault("rx_oiCilindro","")).append("\",");
-            json.append("\"oi_eje\":\"").append(params.getOrDefault("rx_oiEje","")).append("\",");
-            json.append("\"oi_adicion\":\"").append(params.getOrDefault("rx_oiAdicion","")).append("\",");
-            json.append("\"oi_altura\":\"").append(params.getOrDefault("rx_oiAltura","")).append("\",");
-            json.append("\"dip\":\"").append(params.getOrDefault("rx_dip","")).append("\",");
-            json.append("\"ndp_od\":\"").append(params.getOrDefault("rx_ndpOd","")).append("\",");
-            json.append("\"ndp_oi\":\"").append(params.getOrDefault("rx_ndpOi","")).append("\"");
-            json.append("}");
+            json.append("\"cover_test\":\"").append(esc(params.get("hc_cover_test"))).append("\",");
+            json.append("\"ojo_dominante\":\"").append(esc(params.get("hc_ojo_dominante"))).append("\",");
+            json.append("\"motilidad\":\"").append(esc(params.get("hc_motilidad"))).append("\",");
+            json.append("\"pio_od\":\"").append(esc(params.get("hc_pio_od"))).append("\",");
+            json.append("\"pio_oi\":\"").append(esc(params.get("hc_pio_oi"))).append("\"");
 
             json.append("}");
-
             ficha.setHistoriaClinica(json.toString());
 
             fichaService.guardar(ficha);
             ra.addFlashAttribute("mensajeOk",
-                    ficha.getIdFicha() == null
+                ficha.getIdFicha() == null
                     ? "Ficha clínica creada correctamente."
                     : "Ficha clínica actualizada correctamente.");
+
         } catch (Exception e) {
-            ra.addFlashAttribute("mensajeError", e.getMessage());
+            ra.addFlashAttribute("mensajeError", "Error al guardar: " + e.getMessage());
         }
         return "redirect:/fichas";
     }
@@ -237,5 +305,23 @@ public class FichaClinicaController {
             ra.addFlashAttribute("mensajeError", e.getMessage());
         }
         return "redirect:/fichas";
+    }
+
+    // ─── Helpers privados ─────────────────────────────────────────
+
+    /** Escapa comillas para no romper el JSON manual */
+    private String esc(String s) {
+        if (s == null) return "";
+        return s.replace("\"", "\\\"");
+    }
+
+    /** Parsea BigDecimal de forma segura, retorna empty si es null o vacío */
+    private java.util.Optional<BigDecimal> parseBigDecimal(String s) {
+        if (s == null || s.isBlank()) return java.util.Optional.empty();
+        try {
+            return java.util.Optional.of(new BigDecimal(s));
+        } catch (NumberFormatException e) {
+            return java.util.Optional.empty();
+        }
     }
 }

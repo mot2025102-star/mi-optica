@@ -88,20 +88,19 @@
                 </div>
             </div>
 
-            <!-- ── GRADUACIÓN ─────────────────────────────────── -->
+            <!-- ── LENSOMETRÍA ────────────────────────────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Graduación</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Lensometría</div>
+                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Graduación de los lentes que trae actualmente el paciente</div>
                 </div>
                 <div class="card-body">
 
-                    <!-- Datalists -->
                     <datalist id="dl-esfera"></datalist>
                     <datalist id="dl-cilindro"></datalist>
                     <datalist id="dl-eje"></datalist>
                     <datalist id="dl-adicion"></datalist>
 
-                    <!-- Tabla de graduación -->
                     <div style="overflow-x:auto">
                         <table style="width:100%;border-collapse:collapse;font-size:13px">
                             <thead>
@@ -373,18 +372,13 @@
                 </div>
             </div>
 
-            <!-- ── PRUEBAS PRELIMINARES ───────────────────────── -->
+            <!-- ── AGUDEZA VISUAL ──────────────────────────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Pruebas Preliminares</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Agudeza Visual</div>
                 </div>
                 <div class="card-body">
-
-                    <!-- Agudeza visual -->
-                    <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">
-                        Agudeza Visual
-                    </div>
-                    <div class="form-row form-row-4" style="margin-bottom:20px">
+                    <div class="form-row form-row-4">
                         <div class="form-group">
                             <label class="form-label">AV OD s/c</label>
                             <input type="text" name="avOdSc" class="form-control"
@@ -406,6 +400,15 @@
                                    placeholder="20/20" th:value="${ficha.avOiCc}">
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ── PRUEBAS PRELIMINARES ───────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Pruebas Preliminares</div>
+                </div>
+                <div class="card-body">
 
                     <!-- Cover test / dominancia -->
                     <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">
@@ -416,13 +419,9 @@
                             <label class="form-label">Cover Test</label>
                             <select name="hc_cover_test" class="form-select">
                                 <option value="">— Selecciona —</option>
-                                <option value="Ortoforia">Ortoforia</option>
-                                <option value="Esoforia">Esoforia</option>
-                                <option value="Exoforia">Exoforia</option>
-                                <option value="Hiperforia OD">Hiperforia OD</option>
-                                <option value="Hiperforia OI">Hiperforia OI</option>
-                                <option value="Esotropia">Esotropia</option>
-                                <option value="Exotropia">Exotropia</option>
+                                <option value="OD">OD (Ojo derecho)</option>
+                                <option value="OI">OI (Ojo izquierdo)</option>
+                                <option value="AO">AO (Ambos ojos)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -463,11 +462,81 @@
                 </div>
             </div>
 
-            <!-- ── GRADUACIÓN ACTUAL (RECETA FINAL) ──────────── -->
+            <!-- ── RX SUBJETIVO ─────────────────────────────────── -->
             <div class="card mb-3">
                 <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
-                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Graduación Actual — Receta Final</div>
-                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Resultado final de la consulta</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> RX Subjetivo</div>
+                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Refracción subjetiva obtenida durante la consulta</div>
+                </div>
+                <div class="card-body">
+                    <datalist id="dl-sub-esfera"></datalist>
+                    <datalist id="dl-sub-cilindro"></datalist>
+                    <datalist id="dl-sub-eje"></datalist>
+                    <datalist id="dl-sub-adicion"></datalist>
+
+                    <div style="overflow-x:auto">
+                        <table style="width:100%;border-collapse:collapse;font-size:13px">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.03)">
+                                    <th style="padding:10px 14px;text-align:left;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Ojo</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Esfera</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Cilindro</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Eje</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Adición</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- OD -->
+                                <tr style="border-bottom:1px solid var(--gris-borde)">
+                                    <td style="padding:10px 14px;font-weight:700;color:var(--turquesa)">OD (Derecho)</td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_odEsfera" class="form-control" list="dl-sub-esfera"
+                                               placeholder="Ej: -1.50" style="text-align:center" th:value="${ficha.subOdEsfera}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_odCilindro" class="form-control" list="dl-sub-cilindro"
+                                               placeholder="Ej: -0.75" style="text-align:center" th:value="${ficha.subOdCilindro}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_odEje" class="form-control" list="dl-sub-eje"
+                                               placeholder="Ej: 90" style="text-align:center" th:value="${ficha.subOdEje}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_odAdicion" class="form-control" list="dl-sub-adicion"
+                                               placeholder="Ej: +1.00" style="text-align:center" th:value="${ficha.subOdAdicion}">
+                                    </td>
+                                </tr>
+                                <!-- OI -->
+                                <tr>
+                                    <td style="padding:10px 14px;font-weight:700;color:var(--amarillo)">OI (Izquierdo)</td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_oiEsfera" class="form-control" list="dl-sub-esfera"
+                                               placeholder="Ej: -1.50" style="text-align:center" th:value="${ficha.subOiEsfera}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_oiCilindro" class="form-control" list="dl-sub-cilindro"
+                                               placeholder="Ej: -0.75" style="text-align:center" th:value="${ficha.subOiCilindro}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_oiEje" class="form-control" list="dl-sub-eje"
+                                               placeholder="Ej: 90" style="text-align:center" th:value="${ficha.subOiEje}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="sub_oiAdicion" class="form-control" list="dl-sub-adicion"
+                                               placeholder="Ej: +1.00" style="text-align:center" th:value="${ficha.subOiAdicion}">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── RX FINAL ─────────────────────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> RX Final</div>
+                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Resultado final de la consulta — receta entregada al paciente</div>
                 </div>
                 <div class="card-body">
                     <datalist id="dl-rx-esfera"></datalist>
@@ -489,19 +558,19 @@
                             <tbody>
                                 <tr style="border-bottom:1px solid var(--gris-borde)">
                                     <td style="padding:10px 14px;font-weight:700;color:var(--turquesa)">OD (Derecho)</td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_odEsfera"   class="form-control" list="dl-rx-esfera"   placeholder="Ej: -1.50" style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_odCilindro" class="form-control" list="dl-rx-cilindro" placeholder="Ej: -0.75" style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_odEje"      class="form-control" list="dl-rx-eje"      placeholder="Ej: 90"    style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_odAdicion"  class="form-control" list="dl-rx-adicion"  placeholder="Ej: +1.00" style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="number" name="rx_odAltura" class="form-control" min="10" max="40" step="0.5" placeholder="Ej: 24" style="text-align:center"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_odEsfera"   class="form-control" list="dl-rx-esfera"   placeholder="Ej: -1.50" style="text-align:center" th:value="${ficha.rxOdEsfera}"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_odCilindro" class="form-control" list="dl-rx-cilindro" placeholder="Ej: -0.75" style="text-align:center" th:value="${ficha.rxOdCilindro}"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_odEje"      class="form-control" list="dl-rx-eje"      placeholder="Ej: 90"    style="text-align:center" th:value="${ficha.rxOdEje}"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_odAdicion"  class="form-control" list="dl-rx-adicion"  placeholder="Ej: +1.00" style="text-align:center" th:value="${ficha.rxOdAdicion}"></td>
+                                    <td style="padding:6px 10px"><input type="number" name="rx_odAltura" class="form-control" min="10" max="40" step="0.5" placeholder="Ej: 24" style="text-align:center" th:value="${ficha.rxOdAltura}"></td>
                                 </tr>
                                 <tr>
                                     <td style="padding:10px 14px;font-weight:700;color:var(--amarillo)">OI (Izquierdo)</td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_oiEsfera"   class="form-control" list="dl-rx-esfera"   placeholder="Ej: -1.50" style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_oiCilindro" class="form-control" list="dl-rx-cilindro" placeholder="Ej: -0.75" style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_oiEje"      class="form-control" list="dl-rx-eje"      placeholder="Ej: 90"    style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="text" name="rx_oiAdicion"  class="form-control" list="dl-rx-adicion"  placeholder="Ej: +1.00" style="text-align:center"></td>
-                                    <td style="padding:6px 10px"><input type="number" name="rx_oiAltura" class="form-control" min="10" max="40" step="0.5" placeholder="Ej: 24" style="text-align:center"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_oiEsfera"   class="form-control" list="dl-rx-esfera"   placeholder="Ej: -1.50" style="text-align:center" th:value="${ficha.rxOiEsfera}"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_oiCilindro" class="form-control" list="dl-rx-cilindro" placeholder="Ej: -0.75" style="text-align:center" th:value="${ficha.rxOiCilindro}"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_oiEje"      class="form-control" list="dl-rx-eje"      placeholder="Ej: 90"    style="text-align:center" th:value="${ficha.rxOiEje}"></td>
+                                    <td style="padding:6px 10px"><input type="text" name="rx_oiAdicion"  class="form-control" list="dl-rx-adicion"  placeholder="Ej: +1.00" style="text-align:center" th:value="${ficha.rxOiAdicion}"></td>
+                                    <td style="padding:6px 10px"><input type="number" name="rx_oiAltura" class="form-control" min="10" max="40" step="0.5" placeholder="Ej: 24" style="text-align:center" th:value="${ficha.rxOiAltura}"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -513,19 +582,89 @@
                             <div class="form-group">
                                 <label class="form-label">D.I.P. — Distancia Interpupilar (mm)</label>
                                 <input type="number" name="rx_dip" class="form-control"
-                                       min="40" max="80" step="0.5" placeholder="Ej: 58.20">
+                                       min="40" max="80" step="0.5" placeholder="Ej: 58.20" th:value="${ficha.rxDip}">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">NDP OD (mm)</label>
                                 <input type="number" name="rx_ndpOd" class="form-control"
-                                       min="20" max="45" step="0.5" placeholder="Ej: 25">
+                                       min="20" max="45" step="0.5" placeholder="Ej: 25" th:value="${ficha.rxNdpOd}">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">NDP OI (mm)</label>
                                 <input type="number" name="rx_ndpOi" class="form-control"
-                                       min="20" max="45" step="0.5" placeholder="Ej: 25">
+                                       min="20" max="45" step="0.5" placeholder="Ej: 25" th:value="${ficha.rxNdpOi}">
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SUGERENCIA DE MATERIALES ────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> Sugerencia de Materiales</div>
+                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Recomendación del optometrista sobre los lentes a fabricar</div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row form-row-3" style="margin-bottom:16px">
+                        <div class="form-group">
+                            <label class="form-label">Tipo de lente</label>
+                            <select name="sug_tipoLente" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="Monofocal"  th:selected="${ficha.sugTipoLente == 'Monofocal'}">Monofocal</option>
+                                <option value="Bifocal"    th:selected="${ficha.sugTipoLente == 'Bifocal'}">Bifocal</option>
+                                <option value="Progresivo" th:selected="${ficha.sugTipoLente == 'Progresivo'}">Progresivo</option>
+                                <option value="Ocupacional" th:selected="${ficha.sugTipoLente == 'Ocupacional'}">Ocupacional</option>
+                                <option value="Lectura"    th:selected="${ficha.sugTipoLente == 'Lectura'}">Lectura</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Material del lente</label>
+                            <select name="sug_materialLente" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="CR-39"        th:selected="${ficha.sugMaterialLente == 'CR-39'}">CR-39 (orgánico)</option>
+                                <option value="Policarbonato" th:selected="${ficha.sugMaterialLente == 'Policarbonato'}">Policarbonato</option>
+                                <option value="Trivex"       th:selected="${ficha.sugMaterialLente == 'Trivex'}">Trivex</option>
+                                <option value="Alto índice 1.61" th:selected="${ficha.sugMaterialLente == 'Alto índice 1.61'}">Alto índice 1.61</option>
+                                <option value="Alto índice 1.67" th:selected="${ficha.sugMaterialLente == 'Alto índice 1.67'}">Alto índice 1.67</option>
+                                <option value="Alto índice 1.74" th:selected="${ficha.sugMaterialLente == 'Alto índice 1.74'}">Alto índice 1.74</option>
+                                <option value="Cristal"      th:selected="${ficha.sugMaterialLente == 'Cristal'}">Cristal mineral</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Color del lente</label>
+                            <select name="sug_color" class="form-select">
+                                <option value="">— Selecciona —</option>
+                                <option value="Blanco / Transparente" th:selected="${ficha.sugColor == 'Blanco / Transparente'}">Blanco / Transparente</option>
+                                <option value="Gris"   th:selected="${ficha.sugColor == 'Gris'}">Gris</option>
+                                <option value="Café"   th:selected="${ficha.sugColor == 'Café'}">Café</option>
+                                <option value="Verde"  th:selected="${ficha.sugColor == 'Verde'}">Verde</option>
+                                <option value="Azul"   th:selected="${ficha.sugColor == 'Azul'}">Azul</option>
+                                <option value="Otro"   th:selected="${ficha.sugColor == 'Otro'}">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:8px">
+                        <label class="form-label">Tratamientos sugeridos</label>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px">
+                        <th:block th:each="t : ${ {'antireflejo:Antireflejo','bloqueador_luz_azul:Bloqueador de luz azul','filtro_solar:Filtro / bloqueador de luz solar','fotocromatico:Fotocromático','polarizado:Polarizado','endurecido:Endurecido (anti-rayones)','hidrofobico:Hidrofóbico (repelente al agua)','uv:Protección UV'} }">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--texto)">
+                                <input type="checkbox" th:name="'sug_trat_' + ${#strings.substringBefore(t,':')}"
+                                       th:id="'sug_trat_' + ${#strings.substringBefore(t,':')}"
+                                       value="true"
+                                       style="width:16px;height:16px;accent-color:var(--turquesa)">
+                                <span th:text="${#strings.substringAfter(t,':')}"></span>
+                            </label>
+                        </th:block>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notas sobre los materiales</label>
+                        <textarea name="sug_observaciones" class="form-control" rows="2"
+                                  placeholder="Indicaciones adicionales sobre el armazón, lente o tratamientos sugeridos..."
+                                  th:text="${ficha.sugObservaciones}"></textarea>
                     </div>
                 </div>
             </div>
@@ -558,6 +697,7 @@
 // ── Llenar datalists de graduación ───────────────────────────
 
 function llenarDatalist(dl, opciones) {
+    if (!dl) return;
     opciones.forEach(v => {
         const o = document.createElement('option');
         o.value = v;
@@ -584,20 +724,23 @@ const adicionOpts = [];
 for (let v = 0; v <= 3; v += 0.25)
     adicionOpts.push('+' + v.toFixed(2));
 
+// Lensometría
 llenarDatalist(document.getElementById('dl-esfera'),   esferaOpts);
 llenarDatalist(document.getElementById('dl-cilindro'), cilindroOpts);
 llenarDatalist(document.getElementById('dl-eje'),      ejeOpts);
 llenarDatalist(document.getElementById('dl-adicion'),  adicionOpts);
 
-// Datalists para graduación actual (rx)
-const dlRxEsfera   = document.getElementById('dl-rx-esfera');
-const dlRxCilindro = document.getElementById('dl-rx-cilindro');
-const dlRxEje      = document.getElementById('dl-rx-eje');
-const dlRxAdicion  = document.getElementById('dl-rx-adicion');
-if (dlRxEsfera)   llenarDatalist(dlRxEsfera,   esferaOpts);
-if (dlRxCilindro) llenarDatalist(dlRxCilindro, cilindroOpts);
-if (dlRxEje)      llenarDatalist(dlRxEje,      ejeOpts);
-if (dlRxAdicion)  llenarDatalist(dlRxAdicion,  adicionOpts);
+// RX Subjetivo
+llenarDatalist(document.getElementById('dl-sub-esfera'),   esferaOpts);
+llenarDatalist(document.getElementById('dl-sub-cilindro'), cilindroOpts);
+llenarDatalist(document.getElementById('dl-sub-eje'),      ejeOpts);
+llenarDatalist(document.getElementById('dl-sub-adicion'),  adicionOpts);
+
+// RX Final
+llenarDatalist(document.getElementById('dl-rx-esfera'),   esferaOpts);
+llenarDatalist(document.getElementById('dl-rx-cilindro'), cilindroOpts);
+llenarDatalist(document.getElementById('dl-rx-eje'),      ejeOpts);
+llenarDatalist(document.getElementById('dl-rx-adicion'),  adicionOpts);
 
 </script>
 

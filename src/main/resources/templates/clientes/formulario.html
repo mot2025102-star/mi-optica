@@ -96,12 +96,14 @@
                     <div class="form-group">
                         <label class="form-label">Fecha de nacimiento</label>
                         <input type="date"
+                               id="fechaNacimiento"
                                th:field="*{fechaNacimiento}"
-                               class="form-control">
+                               class="form-control"
+                               onchange="calcularEdad()">
                     </div>
                 </div>
 
-                <div class="form-row form-row-2">
+                <div class="form-row form-row-3">
                     <!-- Sexo -->
                     <div class="form-group">
                         <label class="form-label">Sexo</label>
@@ -111,6 +113,17 @@
                             <option value="Femenino">Femenino</option>
                             <option value="Otro">Otro</option>
                         </select>
+                    </div>
+
+                    <!-- Edad -->
+                    <div class="form-group">
+                        <label class="form-label">Edad</label>
+                        <input type="number"
+                               id="edad"
+                               th:field="*{edad}"
+                               class="form-control"
+                               min="0" max="120"
+                               placeholder="Ej: 28">
                     </div>
 
                     <!-- Ocupación -->
@@ -312,6 +325,25 @@
 
     </div><!-- page-body -->
 </div><!-- main-content -->
+
+<script>
+    // Si el usuario llena la fecha de nacimiento y el campo Edad está vacío,
+    // se calcula automáticamente. El usuario puede sobreescribirla manualmente.
+    function calcularEdad() {
+        const fecha = document.getElementById('fechaNacimiento').value;
+        const edadInput = document.getElementById('edad');
+        if (!fecha) return;
+
+        const hoy = new Date();
+        const nacimiento = new Date(fecha);
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const m = hoy.getMonth() - nacimiento.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+            edad--;
+        }
+        edadInput.value = edad;
+    }
+</script>
 
 </body>
 </html>
