@@ -225,18 +225,22 @@ CREATE TABLE IF NOT EXISTS proveedores (
 
 -- ─── VENTAS ───────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ventas (
-    id_venta       INT            AUTO_INCREMENT PRIMARY KEY,
-    id_sucursal    INT            NOT NULL,
-    id_usuario     INT            NOT NULL,
-    id_cliente     INT,
-    numero_factura VARCHAR(20)    UNIQUE,
-    fecha          DATE           NOT NULL,
-    subtotal       DECIMAL(10,2)  DEFAULT 0,
-    descuento      DECIMAL(10,2)  DEFAULT 0,
-    total          DECIMAL(10,2)  DEFAULT 0,
-    estado         VARCHAR(20)    DEFAULT 'Pagada',
-    observacion    TEXT,
+    id_venta        INT            AUTO_INCREMENT PRIMARY KEY,
+    id_sucursal     INT            NOT NULL,
+    id_usuario      INT            NOT NULL,
+    id_cliente      INT,
+    numero_factura  VARCHAR(20)    UNIQUE,
+    fecha           DATE           NOT NULL,
+    subtotal        DECIMAL(10,2)  DEFAULT 0,
+    descuento       DECIMAL(10,2)  DEFAULT 0,
+    total           DECIMAL(10,2)  DEFAULT 0,
+    estado          VARCHAR(20)    DEFAULT 'Pagada',
+    observacion     TEXT,
+    fecha_entrega        DATE           DEFAULT NULL,   -- TAREA 2
+    lugar_entrega        VARCHAR(200)   DEFAULT NULL,   -- TAREA 3: donde se entregará
+    id_sucursal_entrega  INT            DEFAULT NULL,   -- TAREA 3: sucursal de entrega
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
+    FOREIGN KEY (id_sucursal_entrega) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente)
 );
@@ -262,9 +266,11 @@ CREATE TABLE IF NOT EXISTS recibos_caja (
     numero_recibo VARCHAR(20)    UNIQUE,
     fecha         DATE           NOT NULL,
     monto         DECIMAL(10,2)  NOT NULL,
-    forma_pago    VARCHAR(30)    DEFAULT 'Contado',
-    concepto      VARCHAR(200),
-    id_venta      INT,
+    forma_pago        VARCHAR(30)    DEFAULT 'Contado',
+    referencia        VARCHAR(100)   DEFAULT NULL,   -- TAREA 4: número de referencia
+    banco             VARCHAR(100)   DEFAULT NULL,   -- TAREA 4: banco emisor
+    concepto          VARCHAR(200),
+    id_venta          INT,
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal),
     FOREIGN KEY (id_usuario)  REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_cliente)  REFERENCES clientes(id_cliente),

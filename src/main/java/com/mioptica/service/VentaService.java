@@ -104,6 +104,22 @@ public class VentaService {
         venta.setEstado("Pagada");
         venta.setObservacion(req.getObservacion());
 
+        // TAREA 2: Fecha de entrega
+        if (req.getFechaEntrega() != null && !req.getFechaEntrega().isBlank()) {
+            venta.setFechaEntrega(LocalDate.parse(req.getFechaEntrega()));
+        }
+
+        // TAREA 3: Lugar y sucursal de entrega
+        if (req.getLugarEntrega() != null && !req.getLugarEntrega().isBlank()) {
+            venta.setLugarEntrega(req.getLugarEntrega());
+        }
+        if (req.getIdSucursalEntrega() != null) {
+            sucursalRepo.findById(req.getIdSucursalEntrega())
+                    .ifPresent(venta::setSucursalEntrega);
+        }
+
+        // Cliente (opcional)
+
         // Cliente (opcional)
         if (req.getIdCliente() != null) {
             clienteRepo.findById(req.getIdCliente())
@@ -172,6 +188,11 @@ public class VentaService {
         recibo.setFecha(LocalDate.now());
         recibo.setMonto(total);
         recibo.setFormaPago(req.getFormaPago() != null ? req.getFormaPago() : "Contado");
+        // TAREA 4: datos de transferencia
+        if ("Transferencia".equalsIgnoreCase(req.getFormaPago())) {
+            recibo.setReferencia(req.getReferenciaPago());
+            recibo.setBanco(req.getBancoPago());
+        }
         recibo.setConcepto("Pago factura " + numFactura);
         recibo.setVenta(venta);
         reciboRepo.save(recibo);
@@ -254,11 +275,11 @@ public class VentaService {
                 + String.format("%06d", corr.getValorActual());
     }
     
-    // ── Helper: orden desde receta externa ───────────────────────
+// ── Helper: orden desde receta externa ───────────────────────
     private void generarOrdenRecetaExterna(VentaRequest req, Venta venta,
                                         Sucursal sucursal, Usuario usuario) {
         try {
-            int next = ordenRepo.findMaxId().orElse(0) + 1;  // ← inyecta ordenRepo
+            int next = ordenRepo.findMaxId().orElse(0) + 1;
 
             OrdenLaboratorio orden = new OrdenLaboratorio();
             orden.setNumeroOrden(String.format("OL-%06d", next));
@@ -288,6 +309,24 @@ public class VentaService {
             orden.setPantoscopico(req.getRxPantoscopico());
             orden.setVertex(req.getRxVertex());
             orden.setPanoramico(req.getRxPanoramico());
+
+            // ── TAREA 1: Campos nuevos ─────────────────────────
+            orden.setOdDip(req.getRxDpOd());
+            orden.setOiDip(req.getRxDpOi());
+            orden.setOdAltura(req.getRxAlturaOd());
+            orden.setOiAltura(req.getRxAlturaOi());
+            // segmento y lente recomendado van en observaciones
+            StringBuilder obs = new StringBuilder();
+            if (req.getRxLenteRecomendado() != null && !req.getRxLenteRecomendado().isBlank()) {
+                obs.append("Lente recomendado: ").append(req.getRxLenteRecomendado()).append("\n");
+            }
+            if (req.getRxSegmento() != null && !req.getRxSegmento().isBlank()) {
+                obs.append("Segmento: ").append(req.getRxSegmento());
+            }
+            if (!obs.isEmpty()) {
+                orden.setObservaciones(obs.toString());
+            }
+            // ───────────────────────────────────────────────────
 
             ordenRepo.save(orden);
 

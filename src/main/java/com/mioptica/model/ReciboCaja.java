@@ -42,6 +42,13 @@ public class ReciboCaja {
     @Column(name = "forma_pago", length = 30)
     private String formaPago = "Contado";
 
+    // TAREA 4: Datos de transferencia
+    @Column(name = "referencia", length = 100)
+    private String referencia;
+
+    @Column(name = "banco", length = 100)
+    private String banco;
+
     @Column(name = "concepto", length = 200)
     private String concepto;
 

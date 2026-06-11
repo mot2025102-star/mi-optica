@@ -5,6 +5,7 @@ import com.mioptica.model.Inventario;
 import com.mioptica.model.Venta;
 import com.mioptica.repository.FichaClinicaRepository;
 import com.mioptica.repository.InventarioRepository;
+import com.mioptica.repository.SucursalRepository;
 import com.mioptica.repository.UsuarioRepository;
 import com.mioptica.service.VentaService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class VentaController {
     private final InventarioRepository    inventarioRepo;
     private final UsuarioRepository       usuarioRepo;
     private final FichaClinicaRepository  fichaRepo;
+    private final SucursalRepository      sucursalRepo;
 
     // ─── LISTA + FILTRO POR FECHA ─────────────────────────────────
     @GetMapping
@@ -115,9 +117,11 @@ public class VentaController {
                 ? inventarioRepo.findConStockBySucursal(idSuc)
                 : inventarioRepo.findTodosConProductoActivo();
 
-        model.addAttribute("stockDisponible", stock);
+       model.addAttribute("stockDisponible", stock);
         model.addAttribute("sucursal",        usuario.getSucursal() != null
                 ? usuario.getSucursal().getNombre() : "Sin sucursal");
+        // TAREA 3: lista de sucursales activas para el dropdown de entrega
+        model.addAttribute("sucursales", sucursalRepo.findByActivoTrue());
         model.addAttribute("activePage",      "ventas");
         return "ventas/nueva";
     }

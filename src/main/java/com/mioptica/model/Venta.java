@@ -53,6 +53,18 @@ public class Venta {
     @Column(name = "observacion", columnDefinition = "TEXT")
     private String observacion;
 
+    // TAREA 2: Fecha de entrega del pedido
+    @Column(name = "fecha_entrega")
+    private LocalDate fechaEntrega;
+
+    // TAREA 3: Lugar y sucursal de entrega
+    @Column(name = "lugar_entrega", length = 200)
+    private String lugarEntrega;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_sucursal_entrega")
+    private Sucursal sucursalEntrega;
+
     // Relación con el detalle (cascada: al guardar la venta, guarda el detalle)
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles = new ArrayList<>();

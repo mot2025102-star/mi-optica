@@ -133,6 +133,24 @@ public class ReporteService {
                 .map(Venta::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // TAREA 6: Ventas de la semana (lunes al domingo de la semana que contiene 'fecha')
+        LocalDate lunesSemana  = fecha.with(java.time.DayOfWeek.MONDAY);
+        LocalDate domingoSemana = fecha.with(java.time.DayOfWeek.SUNDAY);
+        List<Venta> ventasSemana = ventaRepo
+                .findByPeriodoYSucursal(lunesSemana, domingoSemana, idSucursal)
+                .stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
+        BigDecimal totalSemana = ventasSemana.stream()
+                .map(Venta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // TAREA 6: Ventas del mes (día 1 al último día del mes de 'fecha')
+        LocalDate primerDiaMes = fecha.withDayOfMonth(1);
+        LocalDate ultimoDiaMes = fecha.withDayOfMonth(fecha.lengthOfMonth());
+        List<Venta> ventasMes = ventaRepo
+                .findByPeriodoYSucursal(primerDiaMes, ultimoDiaMes, idSucursal)
+                .stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
+        BigDecimal totalMes = ventasMes.stream()
+                .map(Venta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
         BigDecimal totalDescuentos = ventas.stream()
                 .map(Venta::getDescuento)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -182,6 +200,15 @@ public class ReporteService {
         corte.put("fecha",           fecha);
         corte.put("ventas",          ventas);
         corte.put("totalVentas",     totalVentas);
+        // TAREA 6
+        corte.put("ventasSemana",    ventasSemana);
+        corte.put("totalSemana",     totalSemana);
+        corte.put("ventasMes",       ventasMes);
+        corte.put("totalMes",        totalMes);
+        corte.put("lunesSemana",     lunesSemana);
+        corte.put("domingoSemana",   domingoSemana);
+        corte.put("primerDiaMes",    primerDiaMes);
+        corte.put("ultimoDiaMes",    ultimoDiaMes);
         corte.put("totalDescuentos", totalDescuentos);
         corte.put("ventasAnuladas",  ventasAnuladas);
         corte.put("cantVentas",      (long) ventas.size());

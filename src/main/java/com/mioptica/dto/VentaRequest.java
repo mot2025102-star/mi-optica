@@ -1,8 +1,8 @@
 package com.mioptica.dto;
 
-import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Objeto que recibe el JSON del formulario de nueva venta.
@@ -35,6 +35,26 @@ public class VentaRequest {
     private String rxPantoscopico;
     private String rxVertex;
     private String rxPanoramico;
+
+    // ── TAREA 1: Campos nuevos ─────────────────────────────────────
+    private String rxDpOd;        // Distancia pupilar OD
+    private String rxDpOi;        // Distancia pupilar OI
+    private String rxAlturaOd;    // Altura OD
+    private String rxAlturaOi;    // Altura OI
+    private String rxSegmento;    // Segmento
+   private String rxLenteRecomendado; // Lente recomendado (tipo/material)
+
+    // TAREA 2: Fecha de entrega
+    private String fechaEntrega;       // formato "yyyy-MM-dd" viene del input date
+
+    // TAREA 3: Lugar y sucursal de entrega
+    private String  lugarEntrega;
+    private Integer idSucursalEntrega;
+
+    // TAREA 4: Datos de transferencia
+    private String referenciaPago;   // número de referencia
+    private String bancoPago;        // banco emisor
+    // ──────────────────────────────────────────────────────────────
 
     private Integer rxIdCliente; // cliente para la orden (puede ser null=CF)
 

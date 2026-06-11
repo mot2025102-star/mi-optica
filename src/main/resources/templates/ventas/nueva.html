@@ -212,6 +212,37 @@
                                         <input id="rxPanoramico" class="form-control form-control-sm" style="width:80px" placeholder="°">
                                     </div>
                                 </div>
+
+                                <!-- TAREA 1: Distancia pupilar, altura, segmento, lente recomendado -->
+                                <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px">
+                                    <div style="font-size:11px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📏 Medidas del Paciente</div>
+                                    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">DP OD</label>
+                                            <input id="rxDpOd" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">DP OI</label>
+                                            <input id="rxDpOi" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Altura OD</label>
+                                            <input id="rxAlturaOd" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Altura OI</label>
+                                            <input id="rxAlturaOi" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Segmento</label>
+                                            <input id="rxSegmento" class="form-control form-control-sm" style="width:100px" placeholder="ej: bifocal">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label class="form-label">Lente Recomendado</label>
+                                        <input id="rxLenteRecomendado" class="form-control form-control-sm" placeholder="ej: Antirreflex CR-39, Transitions 1.67...">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -222,7 +253,8 @@
                         <div class="form-row form-row-2">
                             <div class="form-group">
                                 <label class="form-label">Forma de pago *</label>
-                                <select id="formaPago" class="form-select">
+                                <select id="formaPago" class="form-select"
+                                        onchange="toggleTransferencia(this.value)">
                                     <option>Contado</option>
                                     <option>Tarjeta</option>
                                     <option>Transferencia</option>
@@ -235,6 +267,51 @@
                                     min="0" max="100" step="0.1" value="0" oninput="calcTotal()">
                             </div>
                         </div>
+                        <!-- TAREA 2: Fecha de entrega -->
+                        <!-- TAREA 2 + 3: Fecha de entrega, lugar y sucursal -->
+                        <div class="form-row form-row-2" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label class="form-label">📅 Fecha de entrega</label>
+                                <input type="date" id="fechaEntrega" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">🏪 Sucursal de entrega</label>
+                                <select id="idSucursalEntrega" class="form-select">
+                                    <option value="">— Sin asignar —</option>
+                                    <option th:each="s : ${sucursales}"
+                                            th:value="${s.idSucursal}"
+                                            th:text="${s.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label class="form-label">📍 Lugar / dirección de entrega</label>
+                            <input type="text" id="lugarEntrega" class="form-control"
+                                   placeholder="ej: Casa del cliente, Sucursal zona 10...">
+                        </div>
+
+                        <!-- TAREA 4: Datos de transferencia (oculto por defecto) -->
+                        <div id="cardTransferencia" style="display:none;margin-bottom:12px;
+                             padding:14px 16px;border:1px solid rgba(39,194,201,0.3);
+                             border-radius:10px;background:rgba(39,194,201,0.05)">
+                            <div style="font-size:11px;font-weight:700;color:var(--turquesa);
+                                        text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">
+                                🏦 Datos de la Transferencia
+                            </div>
+                            <div class="form-row form-row-2">
+                                <div class="form-group">
+                                    <label class="form-label">Banco</label>
+                                    <input type="text" id="bancoPago" class="form-control"
+                                           placeholder="ej: Banrural, BAC, G&T...">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">No. de referencia</label>
+                                    <input type="text" id="referenciaPago" class="form-control"
+                                           placeholder="ej: 0012345678">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group" style="margin-bottom:20px">
                             <label class="form-label">Observaciones</label>
                             <textarea id="observacion" class="form-control" rows="2"
@@ -310,13 +387,15 @@ function agregarFila() {
     div.style.cssText = 'display:grid;grid-template-columns:3fr 90px 110px 90px 110px 40px;gap:8px;align-items:center;margin-bottom:8px';
 
     // Opciones del select
-    const opts = STOCK.map(s =>
-        `<option value="${s.producto.idProducto}"
+    const opts = STOCK.map(s => {
+        const prov = s.producto.proveedor?.nombre ?? 'Sin proveedor';
+        return `<option value="${s.producto.idProducto}"
                  data-precio="${s.precioVenta ?? 0}"
-                 data-stock="${s.existencia ?? 0}">
+                 data-stock="${s.existencia ?? 0}"
+                 data-proveedor="${prov}">
             ${s.producto.codigo} — ${s.producto.detalle} (Stock: ${s.existencia})
-         </option>`
-    ).join('');
+         </option>`;
+    }).join('');
 
     div.innerHTML = `
         <select id="sel_${idx}" required>
@@ -355,15 +434,28 @@ function agregarFila() {
                 <div style="font-size:11px;color:var(--gris-texto,#888)">${data.text.match(/\(.*\)/)?.[0] || ''}</div>
             </div>`,
         },
-        onChange(value) {
+       onChange(value) {
             if (!value) return;
-            const sel   = document.getElementById('sel_' + idx);
-            const opt   = sel?.options[sel.selectedIndex];
+            const sel      = document.getElementById('sel_' + idx);
+            const opt      = sel?.options[sel.selectedIndex];
             if (!opt) return;
-            const precio = parseFloat(opt.dataset.precio || 0);
-            const stock  = parseFloat(opt.dataset.stock  || 0);
-            document.getElementById('precio_' + idx).value = precio > 0 ? precio.toFixed(2) : '';
-            document.getElementById('cant_'   + idx).max   = stock;
+            const precio   = parseFloat(opt.dataset.precio    || 0);
+            const stock    = parseFloat(opt.dataset.stock     || 0);
+            const proveedor = opt.dataset.proveedor || 'Sin proveedor';
+            document.getElementById('precio_'    + idx).value = precio > 0 ? precio.toFixed(2) : '';
+            document.getElementById('cant_'      + idx).max   = stock;
+            // TAREA 5: mostrar proveedor y precio debajo de la fila
+            let info = document.getElementById('info_' + idx);
+            if (!info) {
+                info = document.createElement('div');
+                info.id = 'info_' + idx;
+                info.style.cssText = 'grid-column:1/-1;font-size:11px;color:var(--gris-texto);' +
+                    'padding:4px 6px;background:rgba(255,255,255,0.03);border-radius:6px;' +
+                    'border-left:2px solid var(--turquesa);margin-bottom:4px';
+                document.getElementById('fila_' + idx).after(info);
+            }
+            info.innerHTML = `🏭 <span style="color:var(--turquesa);font-weight:600">${proveedor}</span>` +
+                `&nbsp;&nbsp;·&nbsp;&nbsp;💰 Precio lista: <span style="font-weight:600">Q ${precio.toFixed(2)}</span>`;
             calcFila(idx);
         }
     });
@@ -480,8 +572,13 @@ async function registrarVenta() {
     const payload = {
         idCliente:       parseInt(document.getElementById('idCliente').value) || null,
         formaPago:       document.getElementById('formaPago').value,
+        referenciaPago:  document.getElementById('referenciaPago')?.value || null,
+        bancoPago:       document.getElementById('bancoPago')?.value || null,
         descuentoGlobal: parseFloat(document.getElementById('descGlobal').value || 0),
         observacion:     document.getElementById('observacion').value,
+        fechaEntrega:       document.getElementById('fechaEntrega').value || null,
+        lugarEntrega:       document.getElementById('lugarEntrega').value || null,
+        idSucursalEntrega:  parseInt(document.getElementById('idSucursalEntrega').value) || null,
         items,
         recetaExterna,
         rxOdEsfera:     recetaExterna ? vRx('rxOdEsfera')    : null,
@@ -492,9 +589,16 @@ async function registrarVenta() {
         rxOiCilindro:   recetaExterna ? vRx('rxOiCilindro')  : null,
         rxOiEje:        recetaExterna ? vRx('rxOiEje')       : null,
         rxOiAdd:        recetaExterna ? vRx('rxOiAdd')       : null,
-        rxPantoscopico: recetaExterna ? vRx('rxPantoscopico'): null,
-        rxVertex:       recetaExterna ? vRx('rxVertex')      : null,
-        rxPanoramico:   recetaExterna ? vRx('rxPanoramico')  : null
+        rxPantoscopico:      recetaExterna ? vRx('rxPantoscopico')     : null,
+        rxVertex:            recetaExterna ? vRx('rxVertex')           : null,
+        rxPanoramico:        recetaExterna ? vRx('rxPanoramico')       : null,
+        // TAREA 1: campos nuevos
+        rxDpOd:              recetaExterna ? vRx('rxDpOd')             : null,
+        rxDpOi:              recetaExterna ? vRx('rxDpOi')             : null,
+        rxAlturaOd:          recetaExterna ? vRx('rxAlturaOd')         : null,
+        rxAlturaOi:          recetaExterna ? vRx('rxAlturaOi')         : null,
+        rxSegmento:          recetaExterna ? vRx('rxSegmento')         : null,
+        rxLenteRecomendado:  recetaExterna ? vRx('rxLenteRecomendado') : null
     };
 
     const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
@@ -534,6 +638,11 @@ function nuevaVenta() {
     location.reload();
 }
 // ── Primera fila al cargar ────────────────────────────────────────
+// TAREA 4: mostrar/ocultar panel de transferencia
+function toggleTransferencia(val) {
+    const card = document.getElementById('cardTransferencia');
+    if (card) card.style.display = val === 'Transferencia' ? 'block' : 'none';
+}
 agregarFila();
 </script>
 </body>
