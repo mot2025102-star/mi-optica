@@ -242,6 +242,11 @@
                                         <label class="form-label">Lente Recomendado</label>
                                         <input id="rxLenteRecomendado" class="form-control form-control-sm" placeholder="ej: Antirreflex CR-39, Transitions 1.67...">
                                     </div>
+                                    <!-- TAREA 7: Fecha estimada de entrega de la orden -->
+                                    <div class="form-group" style="margin-top:12px;margin-bottom:0">
+                                        <label class="form-label">📅 Fecha estimada de entrega (Orden de Lab)</label>
+                                        <input type="date" id="fechaEntregaOrden" class="form-control form-control-sm" style="max-width:200px">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -364,7 +369,6 @@
         <div class="modal-footer" style="justify-content:center;gap:12px">
             <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary"> Imprimir Factura</a>
             <button class="btn btn-primary" onclick="nuevaVenta()"> Nueva Venta</button>
-            <a th:href="@{/ventas}" class="btn btn-secondary">📋 Ver lista</a>
         </div>
     </div>
 </div>
@@ -598,7 +602,9 @@ async function registrarVenta() {
         rxAlturaOd:          recetaExterna ? vRx('rxAlturaOd')         : null,
         rxAlturaOi:          recetaExterna ? vRx('rxAlturaOi')         : null,
         rxSegmento:          recetaExterna ? vRx('rxSegmento')         : null,
-        rxLenteRecomendado:  recetaExterna ? vRx('rxLenteRecomendado') : null
+        rxLenteRecomendado:  recetaExterna ? vRx('rxLenteRecomendado') : null,
+        // TAREA 7
+        fechaEntregaOrden:   recetaExterna ? vRx('fechaEntregaOrden')  : null
     };
 
     const csrfToken  = document.querySelector('meta[name="_csrf"]').content;

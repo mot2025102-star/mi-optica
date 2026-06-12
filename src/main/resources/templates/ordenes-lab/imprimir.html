@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Orden ' + ${orden.numeroOrden}">Orden Lab</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            background: #fff;
+            color: #111;
+        }
+
+        /* Cada copia ocupa exactamente 1/3 de la hoja A4 vertical = ~99mm */
+        .copia {
+            width: 100%;
+            height: 99mm;
+            padding: 6mm 8mm;
+            border-bottom: 2px dashed #aaa;
+            page-break-inside: avoid;
+            overflow: hidden;
+        }
+        .copia:last-child { border-bottom: none; }
+
+        /* Al imprimir: 3 copias por página, sin márgenes */
+        @page { size: A4 portrait; margin: 0; }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none !important; }
+        }
+
+        /* ── Cabecera de cada copia ── */
+        .cab {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1.5px solid #333;
+            padding-bottom: 4px;
+            margin-bottom: 5px;
+        }
+        .cab-titulo { font-size: 13px; font-weight: 700; }
+        .cab-num    { font-size: 12px; font-weight: 700; color: #0077aa; }
+        .cab-dest   {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #333;
+        }
+        .dest-lab      { background: #e8f4ff; border-color: #0077aa; color: #0077aa; }
+        .dest-cliente  { background: #eafaf1; border-color: #1a7a3c; color: #1a7a3c; }
+        .dest-empresa  { background: #fff8e1; border-color: #b8860b; color: #b8860b; }
+
+        /* ── Info general ── */
+        .info-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .info-item { display: flex; gap: 3px; }
+        .lbl { color: #555; }
+        .val { font-weight: 600; }
+
+        /* ── Tabla de graduación ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 4px 0;
+            font-size: 10px;
+        }
+        th, td {
+            border: 1px solid #bbb;
+            padding: 2px 5px;
+            text-align: center;
+        }
+        th { background: #f0f0f0; font-weight: 700; font-size: 9px; }
+        .td-label { text-align: left; font-weight: 700; background: #f8f8f8; }
+
+        /* ── Medidas secundarias ── */
+        .medidas {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .medida-item { display: flex; gap: 3px; font-size: 10px; }
+
+        /* ── Productos ── */
+        .prods { margin-top: 4px; font-size: 10px; }
+        .prod-row {
+            display: flex;
+            gap: 8px;
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .prod-cant { font-weight: 700; min-width: 20px; }
+
+        /* ── Pie ── */
+        .pie {
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #555;
+            border-top: 1px solid #ddd;
+            padding-top: 3px;
+        }
+
+        /* ── Botón imprimir (no aparece al imprimir) ── */
+        .btn-imprimir {
+            display: block;
+            margin: 14px auto;
+            padding: 10px 32px;
+            background: #0077aa;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-imprimir:hover { background: #005f88; }
+    </style>
+</head>
+<body>
+
+<!-- Botón visible solo en pantalla -->
+<div class="no-print" style="text-align:center;padding:10px;background:#f5f5f5;border-bottom:1px solid #ddd">
+    <span style="font-weight:700;font-size:13px">Orden [[${orden.numeroOrden}]]</span>
+    &nbsp;&nbsp;
+    <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    &nbsp;&nbsp;
+    <a th:href="@{/ordenes-lab}" style="font-size:12px;color:#555">← Volver</a>
+</div>
+
+<!-- ════════════════════════════════════════════
+     COPIA 1 — LABORATORIO
+═════════════════════════════════════════════ -->
+<div class="copia">
+    <div class="cab">
+        <div>
+            <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
+            <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+        </div>
+        <div class="cab-dest dest-lab">📋 Copia Laboratorio</div>
+    </div>
+
+    <div class="info-row">
+        <div class="info-item"><span class="lbl">Cliente:</span>
+            <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
+        <div class="info-item"><span class="lbl">Emisión:</span>
+            <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
+        <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
+            <span class="lbl">Entrega est.:</span>
+            <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr><th></th><th>Esfera</th><th>Cilindro</th><th>Eje</th><th>Add</th><th>DIP</th><th>Altura</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="td-label">OD</td>
+                <td th:text="${orden.odEsfera}"></td><td th:text="${orden.odCilindro}"></td>
+                <td th:text="${orden.odEje}"></td>   <td th:text="${orden.odAdd}"></td>
+                <td th:text="${orden.odDip}"></td>   <td th:text="${orden.odAltura}"></td>
+            </tr>
+            <tr>
+                <td class="td-label">OI</td>
+                <td th:text="${orden.oiEsfera}"></td><td th:text="${orden.oiCilindro}"></td>
+                <td th:text="${orden.oiEje}"></td>   <td th:text="${orden.oiAdd}"></td>
+                <td th:text="${orden.oiDip}"></td>   <td th:text="${orden.oiAltura}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="medidas">
+        <div class="medida-item" th:if="${orden.pantoscopico != null}">
+            <span class="lbl">Pantoscópico:</span><span class="val" th:text="${orden.pantoscopico}"></span></div>
+        <div class="medida-item" th:if="${orden.vertex != null}">
+            <span class="lbl">Vertex:</span><span class="val" th:text="${orden.vertex}"></span></div>
+        <div class="medida-item" th:if="${orden.panoramico != null}">
+            <span class="lbl">Panorámico:</span><span class="val" th:text="${orden.panoramico}"></span></div>
+    </div>
+
+    <div class="prods" th:if="${!orden.productos.isEmpty()}">
+        <div style="font-weight:700;margin-bottom:2px">Productos:</div>
+        <div class="prod-row" th:each="p : ${orden.productos}">
+            <span class="prod-cant" th:text="${p.cantidad}+'x'"></span>
+            <span th:text="${p.descripcion}"></span>
+            <span th:if="${p.material != null}" style="color:#555" th:text="'· '+${p.material}"></span>
+            <span th:if="${p.tratamiento != null}" style="color:#555" th:text="'· '+${p.tratamiento}"></span>
+        </div>
+    </div>
+
+    <div class="pie">
+        <span th:text="'Vendedor: ' + ${orden.usuario.nombreCompleto}"></span>
+        <span th:if="${orden.observaciones != null}" th:text="'Obs: ' + ${orden.observaciones}"></span>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     COPIA 2 — CLIENTE
+═════════════════════════════════════════════ -->
+<div class="copia">
+    <div class="cab">
+        <div>
+            <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
+            <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+        </div>
+        <div class="cab-dest dest-cliente">👤 Copia Cliente</div>
+    </div>
+
+    <div class="info-row">
+        <div class="info-item"><span class="lbl">Cliente:</span>
+            <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
+        <div class="info-item"><span class="lbl">Emisión:</span>
+            <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
+        <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
+            <span class="lbl">Entrega est.:</span>
+            <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr><th></th><th>Esfera</th><th>Cilindro</th><th>Eje</th><th>Add</th><th>DIP</th><th>Altura</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="td-label">OD</td>
+                <td th:text="${orden.odEsfera}"></td><td th:text="${orden.odCilindro}"></td>
+                <td th:text="${orden.odEje}"></td>   <td th:text="${orden.odAdd}"></td>
+                <td th:text="${orden.odDip}"></td>   <td th:text="${orden.odAltura}"></td>
+            </tr>
+            <tr>
+                <td class="td-label">OI</td>
+                <td th:text="${orden.oiEsfera}"></td><td th:text="${orden.oiCilindro}"></td>
+                <td th:text="${orden.oiEje}"></td>   <td th:text="${orden.oiAdd}"></td>
+                <td th:text="${orden.oiDip}"></td>   <td th:text="${orden.oiAltura}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="medidas">
+        <div class="medida-item" th:if="${orden.pantoscopico != null}">
+            <span class="lbl">Pantoscópico:</span><span class="val" th:text="${orden.pantoscopico}"></span></div>
+        <div class="medida-item" th:if="${orden.vertex != null}">
+            <span class="lbl">Vertex:</span><span class="val" th:text="${orden.vertex}"></span></div>
+        <div class="medida-item" th:if="${orden.panoramico != null}">
+            <span class="lbl">Panorámico:</span><span class="val" th:text="${orden.panoramico}"></span></div>
+    </div>
+
+    <div class="prods" th:if="${!orden.productos.isEmpty()}">
+        <div style="font-weight:700;margin-bottom:2px">Productos:</div>
+        <div class="prod-row" th:each="p : ${orden.productos}">
+            <span class="prod-cant" th:text="${p.cantidad}+'x'"></span>
+            <span th:text="${p.descripcion}"></span>
+            <span th:if="${p.material != null}" style="color:#555" th:text="'· '+${p.material}"></span>
+            <span th:if="${p.tratamiento != null}" style="color:#555" th:text="'· '+${p.tratamiento}"></span>
+        </div>
+    </div>
+
+    <div class="pie">
+        <span th:text="'Vendedor: ' + ${orden.usuario.nombreCompleto}"></span>
+        <span>Conserve este comprobante para retirar su pedido.</span>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     COPIA 3 — EMPRESA
+═════════════════════════════════════════════ -->
+<div class="copia">
+    <div class="cab">
+        <div>
+            <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
+            <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+        </div>
+        <div class="cab-dest dest-empresa">🏢 Copia Empresa</div>
+    </div>
+
+    <div class="info-row">
+        <div class="info-item"><span class="lbl">Cliente:</span>
+            <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
+        <div class="info-item"><span class="lbl">Emisión:</span>
+            <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
+        <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
+            <span class="lbl">Entrega est.:</span>
+            <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+        </div>
+        <div class="info-item">
+            <span class="lbl">Estado:</span>
+            <span class="val" th:text="${orden.estado}"></span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr><th></th><th>Esfera</th><th>Cilindro</th><th>Eje</th><th>Add</th><th>DIP</th><th>Altura</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="td-label">OD</td>
+                <td th:text="${orden.odEsfera}"></td><td th:text="${orden.odCilindro}"></td>
+                <td th:text="${orden.odEje}"></td>   <td th:text="${orden.odAdd}"></td>
+                <td th:text="${orden.odDip}"></td>   <td th:text="${orden.odAltura}"></td>
+            </tr>
+            <tr>
+                <td class="td-label">OI</td>
+                <td th:text="${orden.oiEsfera}"></td><td th:text="${orden.oiCilindro}"></td>
+                <td th:text="${orden.oiEje}"></td>   <td th:text="${orden.oiAdd}"></td>
+                <td th:text="${orden.oiDip}"></td>   <td th:text="${orden.oiAltura}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="medidas">
+        <div class="medida-item" th:if="${orden.pantoscopico != null}">
+            <span class="lbl">Pantoscópico:</span><span class="val" th:text="${orden.pantoscopico}"></span></div>
+        <div class="medida-item" th:if="${orden.vertex != null}">
+            <span class="lbl">Vertex:</span><span class="val" th:text="${orden.vertex}"></span></div>
+        <div class="medida-item" th:if="${orden.panoramico != null}">
+            <span class="lbl">Panorámico:</span><span class="val" th:text="${orden.panoramico}"></span></div>
+    </div>
+
+    <div class="prods" th:if="${!orden.productos.isEmpty()}">
+        <div style="font-weight:700;margin-bottom:2px">Productos:</div>
+        <div class="prod-row" th:each="p : ${orden.productos}">
+            <span class="prod-cant" th:text="${p.cantidad}+'x'"></span>
+            <span th:text="${p.descripcion}"></span>
+            <span th:if="${p.material != null}" style="color:#555" th:text="'· '+${p.material}"></span>
+            <span th:if="${p.tratamiento != null}" style="color:#555" th:text="'· '+${p.tratamiento}"></span>
+        </div>
+    </div>
+
+    <div class="pie">
+        <span th:text="'Vendedor: ' + ${orden.usuario.nombreCompleto}"></span>
+        <span th:if="${orden.notaOrigen != null}" th:text="${orden.notaOrigen}"></span>
+        <span th:if="${orden.observaciones != null}" th:text="'Obs: ' + ${orden.observaciones}"></span>
+    </div>
+</div>
+
+</body>
+</html>

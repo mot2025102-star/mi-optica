@@ -326,6 +326,11 @@ public class VentaService {
             if (!obs.isEmpty()) {
                 orden.setObservaciones(obs.toString());
             }
+
+            // TAREA 7: Fecha estimada de entrega
+            if (req.getFechaEntregaOrden() != null && !req.getFechaEntregaOrden().isBlank()) {
+                orden.setFechaEntregaEstimada(LocalDate.parse(req.getFechaEntregaOrden()));
+            }
             // ───────────────────────────────────────────────────
 
             ordenRepo.save(orden);

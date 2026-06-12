@@ -51,9 +51,12 @@ public class VentaRequest {
     private String  lugarEntrega;
     private Integer idSucursalEntrega;
 
-    // TAREA 4: Datos de transferencia
+// TAREA 4: Datos de transferencia
     private String referenciaPago;   // número de referencia
     private String bancoPago;        // banco emisor
+
+    // TAREA 7: Fecha estimada de entrega de la orden de laboratorio
+    private String fechaEntregaOrden; // formato "yyyy-MM-dd"
     // ──────────────────────────────────────────────────────────────
 
     private Integer rxIdCliente; // cliente para la orden (puede ser null=CF)

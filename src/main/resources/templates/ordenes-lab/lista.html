@@ -129,6 +129,21 @@
                                             <circle cx="13.1" cy="10.9" r="0.9" fill="currentColor"/>
                                         </svg>
                                     </button>
+                                    </button>
+                                    <!-- TAREA 8: Botón imprimir PDF -->
+                                    <a class="icon-btn icon-btn--ghost has-tip"
+                                       th:href="@{'/ordenes-lab/imprimir/' + ${o.idOrden}}"
+                                       target="_blank"
+                                       data-tip="Imprimir / PDF"
+                                       aria-label="Imprimir PDF">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M6 9V3h12v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <rect x="3" y="9" width="18" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                                            <path d="M6 18v3h12v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="18" cy="13.5" r="1" fill="currentColor"/>
+                                        </svg>
+                                    </a>
+                                    <!-- Cambio de estado rápido -->
                                     <!-- Cambio de estado rápido -->
                                     <select class="form-select form-select-sm"
                                             style="width:130px"

@@ -159,6 +159,16 @@ public class OrdenLaboratorioController {
 
     private String nv(String s) { return s != null ? s : ""; }
 
+    // ── TAREA 8: PDF con 3 copias ─────────────────────────────────
+    @GetMapping("/imprimir/{id}")
+    @PreAuthorize("hasAnyRole('OPTOMETRISTA','VENDEDOR','ADMINISTRADOR')")
+    public String imprimir(@PathVariable Integer id, Model model) {
+        var orden = ordenService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+        model.addAttribute("orden", orden);
+        return "ordenes-lab/imprimir";
+    }
+
     // ── ELIMINAR (solo ADMINISTRADOR) ────────────────────────────
     @PostMapping("/eliminar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
