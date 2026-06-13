@@ -143,9 +143,12 @@
 ═════════════════════════════════════════════ -->
 <div class="copia">
     <div class="cab">
-        <div>
-            <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
-            <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+        <div style="display:flex; align-items:center; gap: 10px;">
+            <img th:src="@{/logo/miopticalogo.jpeg}" style="height: 35px; border-radius: 4px;" alt="Logo" />
+            <div>
+                <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
+                <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+            </div>
         </div>
         <div class="cab-dest dest-lab">📋 Copia Laboratorio</div>
     </div>
@@ -190,7 +193,20 @@
             <span class="lbl">Panorámico:</span><span class="val" th:text="${orden.panoramico}"></span></div>
     </div>
 
-    <div class="prods" th:if="${!orden.productos.isEmpty()}">
+    <div class="prods" th:if="${orden.venta != null && !orden.venta.detalles.isEmpty()}">
+        <div style="font-weight:700;margin-bottom:4px;border-bottom:1px solid #333;padding-bottom:2px;display:flex;">
+            <div style="width:50px">Código</div>
+            <div style="width:40px">Cant.</div>
+            <div style="flex:1">Descripción</div>
+        </div>
+        <div class="prod-row" style="display:flex;padding:2px 0;border-bottom:none" th:each="d : ${orden.venta.detalles}">
+            <div style="width:50px" th:text="${d.producto.idProducto}"></div>
+            <div style="width:40px" th:text="${#numbers.formatDecimal(d.cantidad, 1, 2)}"></div>
+            <div style="flex:1" th:text="${d.producto.tipoProducto + ' ' + d.producto.detalle}"></div>
+        </div>
+    </div>
+    
+    <div class="prods" th:if="${orden.venta == null && !orden.productos.isEmpty()}">
         <div style="font-weight:700;margin-bottom:2px">Productos:</div>
         <div class="prod-row" th:each="p : ${orden.productos}">
             <span class="prod-cant" th:text="${p.cantidad}+'x'"></span>
@@ -212,21 +228,31 @@
 ═════════════════════════════════════════════ -->
 <div class="copia">
     <div class="cab">
-        <div>
-            <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
-            <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+        <div style="display:flex; align-items:center; gap: 10px;">
+            <img th:src="@{/logo/miopticalogo.jpeg}" style="height: 35px; border-radius: 4px;" alt="Logo" />
+            <div>
+                <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
+                <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+            </div>
         </div>
         <div class="cab-dest dest-cliente">👤 Copia Cliente</div>
     </div>
 
     <div class="info-row">
-        <div class="info-item"><span class="lbl">Cliente:</span>
-            <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
-        <div class="info-item"><span class="lbl">Emisión:</span>
-            <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
-        <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
-            <span class="lbl">Entrega est.:</span>
-            <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+        <div style="flex:1; display:flex; gap:14px; flex-wrap:wrap;">
+            <div class="info-item"><span class="lbl">Cliente:</span>
+                <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
+            <div class="info-item"><span class="lbl">Emisión:</span>
+                <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
+            <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
+                <span class="lbl">Entrega est.:</span>
+                <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+            </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:2px; font-size:10px; text-align:right" th:if="${orden.venta != null}">
+            <div><span class="lbl">Total Q.:</span> <span class="val" th:text="${#numbers.formatDecimal(orden.venta.total, 1, 2)}"></span></div>
+            <div><span class="lbl">Abono Q.:</span> <span class="val" th:text="${#numbers.formatDecimal(orden.venta.total, 1, 2)}"></span></div>
+            <div><span class="lbl">Saldo Q.:</span> <span class="val">0.00</span></div>
         </div>
     </div>
 
@@ -259,7 +285,22 @@
             <span class="lbl">Panorámico:</span><span class="val" th:text="${orden.panoramico}"></span></div>
     </div>
 
-    <div class="prods" th:if="${!orden.productos.isEmpty()}">
+    <div class="prods" th:if="${orden.venta != null && !orden.venta.detalles.isEmpty()}">
+        <div style="font-weight:700;margin-bottom:4px;border-bottom:1px solid #333;padding-bottom:2px;display:flex;">
+            <div style="width:50px">Código</div>
+            <div style="width:40px">Cant.</div>
+            <div style="flex:1">Descripción</div>
+            <div style="width:60px;text-align:right">Total</div>
+        </div>
+        <div class="prod-row" style="display:flex;padding:2px 0;border-bottom:none" th:each="d : ${orden.venta.detalles}">
+            <div style="width:50px" th:text="${d.producto.idProducto}"></div>
+            <div style="width:40px" th:text="${#numbers.formatDecimal(d.cantidad, 1, 2)}"></div>
+            <div style="flex:1" th:text="${d.producto.tipoProducto + ' ' + d.producto.detalle}"></div>
+            <div style="width:60px;text-align:right" th:text="${#numbers.formatDecimal(d.subtotal, 1, 2)}"></div>
+        </div>
+    </div>
+
+    <div class="prods" th:if="${orden.venta == null && !orden.productos.isEmpty()}">
         <div style="font-weight:700;margin-bottom:2px">Productos:</div>
         <div class="prod-row" th:each="p : ${orden.productos}">
             <span class="prod-cant" th:text="${p.cantidad}+'x'"></span>
@@ -281,25 +322,35 @@
 ═════════════════════════════════════════════ -->
 <div class="copia">
     <div class="cab">
-        <div>
-            <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
-            <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+        <div style="display:flex; align-items:center; gap: 10px;">
+            <img th:src="@{/logo/miopticalogo.jpeg}" style="height: 35px; border-radius: 4px;" alt="Logo" />
+            <div>
+                <div class="cab-titulo" th:text="${orden.sucursal.nombre}">Mi Óptica</div>
+                <div class="cab-num" th:text="${orden.numeroOrden}">OL-000001</div>
+            </div>
         </div>
         <div class="cab-dest dest-empresa">🏢 Copia Empresa</div>
     </div>
 
     <div class="info-row">
-        <div class="info-item"><span class="lbl">Cliente:</span>
-            <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
-        <div class="info-item"><span class="lbl">Emisión:</span>
-            <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
-        <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
-            <span class="lbl">Entrega est.:</span>
-            <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+        <div style="flex:1; display:flex; gap:14px; flex-wrap:wrap;">
+            <div class="info-item"><span class="lbl">Cliente:</span>
+                <span class="val" th:text="${orden.cliente != null ? orden.cliente.nombre : 'Consumidor Final'}"></span></div>
+            <div class="info-item"><span class="lbl">Emisión:</span>
+                <span class="val" th:text="${#temporals.format(orden.fechaEmision,'dd/MM/yyyy')}"></span></div>
+            <div class="info-item" th:if="${orden.fechaEntregaEstimada != null}">
+                <span class="lbl">Entrega est.:</span>
+                <span class="val" th:text="${#temporals.format(orden.fechaEntregaEstimada,'dd/MM/yyyy')}"></span>
+            </div>
+            <div class="info-item">
+                <span class="lbl">Estado:</span>
+                <span class="val" th:text="${orden.estado}"></span>
+            </div>
         </div>
-        <div class="info-item">
-            <span class="lbl">Estado:</span>
-            <span class="val" th:text="${orden.estado}"></span>
+        <div style="display:flex; flex-direction:column; gap:2px; font-size:10px; text-align:right" th:if="${orden.venta != null}">
+            <div><span class="lbl">Total Q.:</span> <span class="val" th:text="${#numbers.formatDecimal(orden.venta.total, 1, 2)}"></span></div>
+            <div><span class="lbl">Abono Q.:</span> <span class="val" th:text="${#numbers.formatDecimal(orden.venta.total, 1, 2)}"></span></div>
+            <div><span class="lbl">Saldo Q.:</span> <span class="val">0.00</span></div>
         </div>
     </div>
 
@@ -332,7 +383,22 @@
             <span class="lbl">Panorámico:</span><span class="val" th:text="${orden.panoramico}"></span></div>
     </div>
 
-    <div class="prods" th:if="${!orden.productos.isEmpty()}">
+    <div class="prods" th:if="${orden.venta != null && !orden.venta.detalles.isEmpty()}">
+        <div style="font-weight:700;margin-bottom:4px;border-bottom:1px solid #333;padding-bottom:2px;display:flex;">
+            <div style="width:50px">Código</div>
+            <div style="width:40px">Cant.</div>
+            <div style="flex:1">Descripción</div>
+            <div style="width:60px;text-align:right">Total</div>
+        </div>
+        <div class="prod-row" style="display:flex;padding:2px 0;border-bottom:none" th:each="d : ${orden.venta.detalles}">
+            <div style="width:50px" th:text="${d.producto.idProducto}"></div>
+            <div style="width:40px" th:text="${#numbers.formatDecimal(d.cantidad, 1, 2)}"></div>
+            <div style="flex:1" th:text="${d.producto.tipoProducto + ' ' + d.producto.detalle}"></div>
+            <div style="width:60px;text-align:right" th:text="${#numbers.formatDecimal(d.subtotal, 1, 2)}"></div>
+        </div>
+    </div>
+
+    <div class="prods" th:if="${orden.venta == null && !orden.productos.isEmpty()}">
         <div style="font-weight:700;margin-bottom:2px">Productos:</div>
         <div class="prod-row" th:each="p : ${orden.productos}">
             <span class="prod-cant" th:text="${p.cantidad}+'x'"></span>

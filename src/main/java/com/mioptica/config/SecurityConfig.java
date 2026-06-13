@@ -65,9 +65,10 @@ public class SecurityConfig {
             )
             .headers(headers -> headers
                 .cacheControl(cache -> {})
+                .frameOptions(frame -> frame.sameOrigin())
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/img/**", "/logo/**", "/favicon.ico").permitAll()
                 .requestMatchers("/login", "/login-error").permitAll()
                 .requestMatchers("/ordenes-lab/**").hasAnyRole("OPTOMETRISTA", "VENDEDOR", "ADMINISTRADOR")
                 .anyRequest().authenticated()

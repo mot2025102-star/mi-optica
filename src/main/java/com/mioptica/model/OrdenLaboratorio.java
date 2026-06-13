@@ -75,11 +75,15 @@ public class OrdenLaboratorio {
 
     // ── Origen de la orden ─────────────────────────────────────────
     @Column(name = "origen", length = 30)
-    private String origen = "MANUAL";
-    // Valores: FICHA_INTERNA | RECETA_EXTERNA | MANUAL
+    private String origen = "VENTA";
+    // Valores: VENTA | FICHA_INTERNA | RECETA_EXTERNA | MANUAL
 
     @Column(name = "id_ficha")
     private Integer idFicha;  // FK a fichas_clinicas (null si no viene de ficha)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_venta")
+    private Venta venta; // Relación con la Venta original
 
     @Column(name = "nota_origen", columnDefinition = "TEXT")
     private String notaOrigen;  // "Graduación dada por el cliente" si es externa

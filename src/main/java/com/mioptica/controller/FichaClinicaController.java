@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -305,6 +306,35 @@ public class FichaClinicaController {
             ra.addFlashAttribute("mensajeError", e.getMessage());
         }
         return "redirect:/fichas";
+    }
+
+    // ─── API: última ficha clínica de un cliente (Rx Final) ──────
+    @GetMapping("/api/ultima-rx")
+    @ResponseBody
+    public ResponseEntity<java.util.Map<String, String>> ultimaRx(
+            @RequestParam Integer idCliente) {
+
+        List<FichaClinica> fichas =
+            fichaService.listarPorCliente(idCliente);
+
+        if (fichas.isEmpty()) {
+            return ResponseEntity.ok(java.util.Collections.emptyMap());
+        }
+
+        FichaClinica f = fichas.get(0); // la más reciente
+
+        java.util.Map<String, String> rx = new java.util.LinkedHashMap<>();
+        rx.put("rxOdEsfera",   f.getRxOdEsfera()   != null ? f.getRxOdEsfera()   : "");
+        rx.put("rxOdCilindro", f.getRxOdCilindro() != null ? f.getRxOdCilindro() : "");
+        rx.put("rxOdEje",      f.getRxOdEje()      != null ? f.getRxOdEje()      : "");
+        rx.put("rxOdAdicion",  f.getRxOdAdicion()  != null ? f.getRxOdAdicion()  : "");
+        rx.put("rxOiEsfera",   f.getRxOiEsfera()   != null ? f.getRxOiEsfera()   : "");
+        rx.put("rxOiCilindro", f.getRxOiCilindro() != null ? f.getRxOiCilindro() : "");
+        rx.put("rxOiEje",      f.getRxOiEje()      != null ? f.getRxOiEje()      : "");
+        rx.put("rxOiAdicion",  f.getRxOiAdicion()  != null ? f.getRxOiAdicion()  : "");
+        rx.put("fechaFicha",   f.getFecha()        != null ? f.getFecha().toString() : "");
+
+        return ResponseEntity.ok(rx);
     }
 
     // ─── Helpers privados ─────────────────────────────────────────

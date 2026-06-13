@@ -57,7 +57,30 @@ public class VentaRequest {
 
     // TAREA 7: Fecha estimada de entrega de la orden de laboratorio
     private String fechaEntregaOrden; // formato "yyyy-MM-dd"
-    // ──────────────────────────────────────────────────────────────
+
+    // ── Ficha Clínica Interna (cargada automáticamente desde DB) ──
+    private boolean fichaInterna = false;
+
+    // Graduación Rx Final OD
+    private String fiOdEsfera;
+    private String fiOdCilindro;
+    private String fiOdEje;
+    private String fiOdAdd;
+
+    // Graduación Rx Final OI
+    private String fiOiEsfera;
+    private String fiOiCilindro;
+    private String fiOiEje;
+    private String fiOiAdd;
+
+    // Medidas del paciente (ficha interna)
+    private String fiDpOd;
+    private String fiDpOi;
+    private String fiAlturaOd;
+    private String fiAlturaOi;
+    private String fiSegmento;
+    private String fiLenteRecomendado;
+    private String fiFechaEntregaOrden;
 
     private Integer rxIdCliente; // cliente para la orden (puede ser null=CF)
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,6 +27,10 @@
             --success:     #059669;
             --warning:     #D97706;
             --navy:        #0D1B2A;
+            --teal:        #00b5b8;
+            --yellow:      #f5d800;
+            --dark:        #0a0a0a;
+            --intro-bg:    var(--bg);
             --ease-spring: cubic-bezier(.16,1,.3,1);
             --font:        'Urbanist', system-ui, sans-serif;
         }
@@ -39,6 +45,63 @@
                 radial-gradient(circle, rgba(0,180,216,.05) 1px, transparent 1px);
             background-size: auto, auto, 28px 28px;
         }
+
+        /* ══════════════════════════════
+           FASE 1 — REVEAL
+        ══════════════════════════════ */
+        .reveal-scene { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+        .reveal-black {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            clip-path: inset(0% 0% 0% 0%);
+            animation: revealWipe 1.8s 0.3s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+        }
+        @keyframes revealWipe {
+            0%   { clip-path: inset(0% 0%   0% 0%); }
+            100% { clip-path: inset(0% 100% 0% 0%); }
+        }
+        .reveal-img { width: 480px; height: auto; object-fit: contain; }
+        .reveal-beam {
+            position: absolute; top: 0; left: -18%; width: 18%; height: 100%;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.04) 80%, transparent 100%);
+            opacity: 0; animation: beamMove 1.8s 0.3s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+        }
+        @keyframes beamMove {
+            0%   { left: -18%; opacity: 0; }
+            4%   { opacity: 1; }
+            96%  { opacity: 1; }
+            100% { left: 118%; opacity: 0; }
+        }
+
+        /* ══════════════════════════════
+           FASE 2 — LOGO ANIMADO
+        ══════════════════════════════ */
+        .logo-wrap {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            opacity: 0; animation: logoFadeIn 0.6s 1.8s ease forwards;
+        }
+        @keyframes logoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .logo-row { display: flex; align-items: center; line-height: 1; gap: 0; }
+        .text-mi { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 96px; color: var(--teal); letter-spacing: -1px; margin-left: 15px; }
+        .text-ptica { font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 96px; color: var(--yellow); letter-spacing: 0px; margin-left: -16px; }
+        .text-tica { font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 96px; color: var(--teal); letter-spacing: 0px; margin-left: 0.5px; }
+        .tagline { font-family: 'Nunito Sans', sans-serif; font-weight: 600; font-size: 22px; color: var(--teal); letter-spacing: 1.5px; text-align: right; align-self: flex-end; padding-right: 10px; margin-top: -20px; }
+
+        .eye-container { width: 124px; height: 100px; position: relative; display: inline-flex; align-items: center; justify-content: center; margin: 0 -1px; }
+        .eye-svg { width: 100%; height: 100%; overflow: visible; }
+        .eye-ring { fill: none; stroke: var(--yellow); stroke-width: 7; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(245,216,0,0.55)); animation: ringGlow 4s 2.5s ease-in-out infinite; }
+        @keyframes ringGlow { 0%,38%,58%,100% { filter: drop-shadow(0 0 6px rgba(245,216,0,0.55)); } 45%,52% { filter: drop-shadow(0 0 0px rgba(245,216,0,0)); } }
+        .eye-fill { fill: #030f10; }
+        .pupil-curve { fill: none; stroke: var(--teal); stroke-width: 6.5; stroke-linecap: round; }
+        .accent-mark, .accent-mark4 { fill: none; stroke-linecap: round; }
+        .accent-mark { stroke: var(--teal); stroke-width: 11; }
+        .accent-mark4 { stroke: var(--intro-bg); stroke-width: 15; }
+        .accent-mark2, .accent-mark5, .accent-mark6 { fill: none; stroke: var(--yellow); stroke-width: 9; stroke-linecap: round; }
+        .accent-mark3 { fill: none; stroke: var(--intro-bg); stroke-width: 12; stroke-linecap: round; }
+        .t-rect { fill: var(--intro-bg); }
+        .lid-top { fill: var(--yellow); animation: blinkTop 4s 2.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+        .lid-bot { fill: var(--yellow); animation: blinkBot 4s 2.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center top; }
+        @keyframes blinkTop { 0%,38%,58%,100% { transform: scaleY(0); } 45%,52% { transform: scaleY(1); } }
+        @keyframes blinkBot { 0%,38%,58%,100% { transform: scaleY(0); } 45%,52% { transform: scaleY(1); } }
 
         /* ══ LAYOUT ══ */
         .login-page {
@@ -374,61 +437,52 @@
 <div class="login-page">
     <div class="login-card">
 
-        <!-- ── MARCA + OJO ── -->
-        <div class="login-brand">
-
-            <div class="eye-wrap" id="eyeWrap" style="width:90px;height:54px;margin:0 auto 16px">
-                <svg class="eye-svg" id="eyeSvg" viewBox="0 0 80 48"
-                    xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 10px rgba(0,180,216,.3))">
-                    <defs>
-                        <radialGradient id="irisGrad" cx="42%" cy="38%" r="55%">
-                            <stop offset="0%"   stop-color="#48CAE4"/>
-                            <stop offset="50%"  stop-color="#0096C7"/>
-                            <stop offset="100%" stop-color="#023E8A"/>
-                        </radialGradient>
-                        <clipPath id="eyeClip">
-                            <path d="M2 24 C 16 4, 64 4, 78 24 C 64 44, 16 44, 2 24 Z"/>
-                        </clipPath>
-                    </defs>
-
-                    <!-- Todo el contenido del ojo en un grupo que se anima para parpadear -->
-                    <g id="eyeGraphics" style="transform-origin:40px 24px;transform-box:fill-box">
-
-                        <!-- Esclerótica -->
-                        <path fill="#fff" stroke="var(--accent)" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round"
-                            d="M2 24 C 16 4, 64 4, 78 24 C 64 44, 16 44, 2 24 Z"/>
-
-                        <!-- Iris relleno -->
-                        <circle id="eyeIrisFill" fill="url(#irisGrad)"
-                                cx="40" cy="24" r="12" clip-path="url(#eyeClip)"/>
-
-                        <!-- Anillo del iris -->
-                        <circle id="eyeIrisRing" fill="none"
-                                stroke="rgba(0,120,180,.4)" stroke-width="1.2"
-                                cx="40" cy="24" r="12" clip-path="url(#eyeClip)"/>
-
-                        <!-- Pupila -->
-                        <circle id="eyePupil" fill="#0D1B2A"
-                                cx="40" cy="24" r="5.5" clip-path="url(#eyeClip)"/>
-
-                        <!-- Reflejo principal -->
-                        <ellipse id="eyeGlint" fill="rgba(255,255,255,.8)"
-                                cx="43" cy="20.5" rx="2.4" ry="1.5"
-                                transform="rotate(-20 43 20.5)"
-                                clip-path="url(#eyeClip)"/>
-
-                        <!-- Reflejo secundario -->
-                        <circle fill="rgba(255,255,255,.4)"
-                                cx="37.5" cy="22.5" r="1"
-                                clip-path="url(#eyeClip)"/>
-                    </g>
-                </svg>
+            <!-- ══ FASE 1: REVEAL ══ -->
+            <div class="reveal-scene" style="bottom: auto; height: 150px; border-radius: 24px 24px 0 0;">
+              <div class="reveal-beam"></div>
             </div>
 
-            <div class="brand-name">Mi Óptica</div>
-            <div class="brand-sub">mi mejor visión</div>
-        </div>
+            <div class="logo-wrap" style="transform: scale(0.65); transform-origin: center; margin-bottom: -30px;">
+              <div class="logo-row">
+
+                <span class="text-mi">Mi</span>
+                <div class="divider-rect"></div>
+
+                <div class="eye-container">
+                  <svg class="eye-svg" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+
+                    <ellipse cx="62" cy="54" rx="40" ry="34" fill="transparent"/>
+
+                    <ellipse class="eye-ring" cx="62" cy="54" rx="40" ry="34"/>
+
+                    <path class="pupil-curve" d="M53 55 Q62 48 71 55"/>
+
+                    <clipPath id="topHalf">
+                      <rect x="18" y="18" width="90" height="36"/>
+                    </clipPath>
+                    <ellipse class="lid-top" cx="62" cy="54" rx="40" ry="34" clip-path="url(#topHalf)"/>
+
+                    <clipPath id="botHalf">
+                      <rect x="18" y="54" width="90" height="36"/>
+                    </clipPath>
+                    <ellipse class="lid-bot" cx="62" cy="54" rx="40" ry="34" clip-path="url(#botHalf)"/>
+
+                    <path class="accent-mark4" d="M60 16 Q61 14 70 8"/>
+                    <path class="accent-mark" d="M60 16 Q61 14 70 8"/>
+                    <path class="accent-mark3" d="M90 59 Q110 52 130 59"/>
+                    <path class="accent-mark2" d="M90 59 Q110 52 130 59"/>
+                    <rect class="t-rect" x="163" y="32" width="9" height="14" rx="3"/>
+                    <path class="accent-mark5" d="M24 40 Q0 40 15 40"/>
+                    <path class="accent-mark6" d="M150 40 Q170 40 156 40"/>
+
+                  </svg>
+                </div>
+
+                <span class="text-ptica">p</span><span class="text-tica">tica</span>
+              </div>
+
+              <div class="tagline">mi mejor visión</div>
+            </div>
 
         <!-- ── HEADING ── -->
         <div class="login-heading">
@@ -499,104 +553,47 @@
 </div>
 
 <script>
-/* ══════════════════════════════════════════════
-   OJO QUE SIGUE EL CURSOR — versión mejorada
-   ══════════════════════════════════════════════ */
-(function () {
-    const pupil    = document.getElementById('eyePupil');
-    const irisFill = document.getElementById('eyeIrisFill');
-    const irisRing = document.getElementById('eyeIrisRing');
-    const glint    = document.getElementById('eyeGlint');
-    const eyeWrap  = document.getElementById('eyeWrap');
+  // ── Paréntesis sigue el cursor ──────────────────────────────────
+  const curve        = document.querySelector('.pupil-curve');
+  const eyeContainer = document.querySelector('.eye-container');
 
-    const BASE_X = 40, BASE_Y = 24, MAX_MOVE = 6;
-    let rafId = null, targetX = BASE_X, targetY = BASE_Y;
-    let currentX = BASE_X, currentY = BASE_Y;
+  const MAX_X = 11;  // px máximo horizontal
+  const MAX_Y =  8;  // px máximo vertical
 
-    // ── Seguimiento del cursor ────────────────────────────────────
-    document.addEventListener('mousemove', function (e) {
-        if (window._eyeLookingAway && window._eyeLookingAway()) return;
-        const rect  = eyeWrap.getBoundingClientRect();
-        const cx    = rect.left + rect.width  / 2;
-        const cy    = rect.top  + rect.height / 2;
-        const dx    = e.clientX - cx;
-        const dy    = e.clientY - cy;
-        const dist  = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx);
-        const maxD  = Math.hypot(window.innerWidth, window.innerHeight) * 0.5;
-        const move  = MAX_MOVE * Math.pow(Math.min(dist / maxD, 1), 0.55);
+  const smooth = v => v / Math.sqrt(1 + v * v);
 
-        targetX = BASE_X + Math.cos(angle) * move;
-        targetY = BASE_Y + Math.sin(angle) * move;
-        if (!rafId) rafId = requestAnimationFrame(animateEye);
-    }, { passive: true });
+  let curX = 0, curY = 0;
+  let tgtX = 0, tgtY = 0;
 
-    function animateEye() {
-        rafId = null;
-        currentX += (targetX - currentX) * 0.12;
-        currentY += (targetY - currentY) * 0.12;
-        const px = currentX, py = currentY;
+  document.addEventListener('mousemove', (e) => {
+    if (!eyeContainer) return;
+    const rect = eyeContainer.getBoundingClientRect();
+    const cx   = rect.left + rect.width  / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dx = (e.clientX - cx) / (window.innerWidth  / 2);
+    const dy = (e.clientY - cy) / (window.innerHeight / 2);
 
-        pupil.setAttribute('cx', px);
-        pupil.setAttribute('cy', py);
-        irisFill.setAttribute('cx', BASE_X + (px - BASE_X) * 0.45);
-        irisFill.setAttribute('cy', BASE_Y + (py - BASE_Y) * 0.45);
-        irisRing.setAttribute('cx', BASE_X + (px - BASE_X) * 0.45);
-        irisRing.setAttribute('cy', BASE_Y + (py - BASE_Y) * 0.45);
-        glint.setAttribute('cx', px + 3);
-        glint.setAttribute('cy', py - 3.5);
+    tgtX = smooth(dx) * MAX_X;
+    tgtY = smooth(dy) * MAX_Y;
+  });
 
-        if (Math.hypot(targetX - currentX, targetY - currentY) > 0.01)
-            rafId = requestAnimationFrame(animateEye);
-    }
+  document.addEventListener('mouseleave', () => {
+    tgtX = 0;
+    tgtY = 0;
+  });
 
-    // ── Parpadeo ─────────────────────────────────────────────────
-    let blinkTimer  = null;   // timeout del próximo parpadeo
-    let isBlinking  = false;  // ← flag para evitar parpadeos simultáneos
+  function lerp(a, b, t) { return a + (b - a) * t; }
 
-    function blink(onDone) {
-        if (isBlinking) return;          // ya está parpadeando, ignorar
-        isBlinking = true;
+  function tick() {
+    if (!curve) return;
+    curX = lerp(curX, tgtX, 0.09);
+    curY = lerp(curY, tgtY, 0.09);
+    curve.setAttribute('transform',
+      `translate(${curX.toFixed(3)}, ${curY.toFixed(3)})`);
+    requestAnimationFrame(tick);
+  }
 
-        const g      = document.getElementById('eyeGraphics');
-        const FRAMES = 12;
-        let f = 0;
-
-        const iv = setInterval(() => {
-            f++;
-            const scale = f <= FRAMES / 2
-                ? 1 - (f / (FRAMES / 2))
-                : (f - FRAMES / 2) / (FRAMES / 2);
-
-            g.style.transform = `scaleY(${Math.max(0, scale)})`;
-
-            if (f >= FRAMES) {
-                clearInterval(iv);
-                g.style.transform = 'scaleY(1)';
-                isBlinking = false;
-                if (onDone) onDone();  // callback al terminar
-            }
-        }, 14);
-    }
-
-    function scheduleBlink() {
-        clearTimeout(blinkTimer);   // cancelar cualquier timer previo
-        blinkTimer = setTimeout(() => {
-            blink(scheduleBlink);   // al terminar, programar el siguiente
-        }, 2800 + Math.random() * 4200);
-    }
-
-    // Guiño al entrar al ojo — cancela el timer automático y hace uno inmediato
-    eyeWrap.addEventListener('mouseenter', () => {
-        clearTimeout(blinkTimer);
-        setTimeout(() => {
-            blink(scheduleBlink);  // al terminar el guiño, retoma el ciclo normal
-        }, 200);
-    });
-
-    // Arrancar el ciclo
-    scheduleBlink();
-})();
+  setTimeout(tick, 2200);
 
 /* ══════════════════════════════════════════════
    TOGGLE CONTRASEÑA
@@ -605,67 +602,16 @@
     const passInput = document.getElementById('password');
     const iconoOjo  = document.getElementById('iconoOjo');
     const btn       = document.getElementById('togglePass');
-    const pupil     = document.getElementById('eyePupil');
-    const irisFill  = document.getElementById('eyeIrisFill');
-    const irisRing  = document.getElementById('eyeIrisRing');
-    const glint     = document.getElementById('eyeGlint');
 
     const SVG_OPEN   = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
     const SVG_CLOSED = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
-
-    // Posición "mirando a otro lado"
-    const LOOK_AWAY_X = 45;
-    const LOOK_AWAY_Y = 18;
-    const BASE_X = 40, BASE_Y = 24;
-
-    let lookingAway = false;
-
-    // Función para mover el ojo suavemente a una posición
-    function moveEyeTo(tx, ty, duration = 280) {
-        const start = performance.now();
-        const startX = parseFloat(pupil.getAttribute('cx') || BASE_X);
-        const startY = parseFloat(pupil.getAttribute('cy') || BASE_Y);
-
-        function step(now) {
-            const t = Math.min((now - start) / duration, 1);
-            // Easing out cubic
-            const e = 1 - Math.pow(1 - t, 3);
-            const x = startX + (tx - startX) * e;
-            const y = startY + (ty - startY) * e;
-
-            pupil.setAttribute('cx', x);
-            pupil.setAttribute('cy', y);
-            irisFill.setAttribute('cx', BASE_X + (x - BASE_X) * 0.45);
-            irisFill.setAttribute('cy', BASE_Y + (y - BASE_Y) * 0.45);
-            irisRing.setAttribute('cx', BASE_X + (x - BASE_X) * 0.45);
-            irisRing.setAttribute('cy', BASE_Y + (y - BASE_Y) * 0.45);
-            glint.setAttribute('cx', x + 3);
-            glint.setAttribute('cy', y - 3.5);
-
-            if (t < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-    }
 
     btn.addEventListener('click', function () {
         const show = passInput.type === 'password';
         passInput.type     = show ? 'text'     : 'password';
         iconoOjo.innerHTML = show ? SVG_CLOSED : SVG_OPEN;
         btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
-
-        if (show) {
-            // Mostrar contraseña → ojo voltea avergonzado
-            lookingAway = true;
-            moveEyeTo(LOOK_AWAY_X, LOOK_AWAY_Y, 300);
-        } else {
-            // Ocultar → vuelve al centro
-            lookingAway = false;
-            moveEyeTo(BASE_X, BASE_Y, 250);
-        }
     });
-
-    // Exponer el flag para que el seguimiento del cursor lo respete
-    window._eyeLookingAway = () => lookingAway;
 })();
 </script>
 

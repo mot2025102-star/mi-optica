@@ -148,6 +148,79 @@
 
                     <!-- Izquierda: Receta externa -->
                     <div>
+                        <!-- ── Ficha Clínica Interna (aparece automáticamente) ── -->
+                        <div class="card mb-3" id="cardFichaInterna"
+                             style="display:none;border:2px solid var(--turquesa,#27C2C9)">
+                            <div class="card-header">
+                                <div class="card-title">🏥 Graduación del Cliente (Ficha Clínica Interna)</div>
+                                <span class="badge badge--info" id="badgeFechaFicha">Cargado automáticamente</span>
+                            </div>
+                            <div class="card-body" style="padding:16px 20px;overflow-x:auto">
+                                <table class="table table-sm" style="min-width:500px">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:50px">Ojo</th>
+                                            <th>Esfera</th>
+                                            <th>Cilindro</th>
+                                            <th>Eje</th>
+                                            <th>Add</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-600" style="color:var(--turquesa,#27C2C9)">OD</td>
+                                            <td><input id="fiOdEsfera"   class="form-control form-control-sm" placeholder="—" readonly></td>
+                                            <td><input id="fiOdCilindro" class="form-control form-control-sm" placeholder="—" readonly></td>
+                                            <td><input id="fiOdEje"      class="form-control form-control-sm" placeholder="—" readonly></td>
+                                            <td><input id="fiOdAdd"      class="form-control form-control-sm" placeholder="—" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-600" style="color:var(--turquesa,#27C2C9)">OI</td>
+                                            <td><input id="fiOiEsfera"   class="form-control form-control-sm" placeholder="—" readonly></td>
+                                            <td><input id="fiOiCilindro" class="form-control form-control-sm" placeholder="—" readonly></td>
+                                            <td><input id="fiOiEje"      class="form-control form-control-sm" placeholder="—" readonly></td>
+                                            <td><input id="fiOiAdd"      class="form-control form-control-sm" placeholder="—" readonly></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Medidas del Paciente — ingresadas por el vendedor -->
+                                <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px">
+                                    <div style="font-size:11px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📏 Medidas del Paciente</div>
+                                    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">DP OD</label>
+                                            <input id="fiDpOd" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">DP OI</label>
+                                            <input id="fiDpOi" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Altura OD</label>
+                                            <input id="fiAlturaOd" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Altura OI</label>
+                                            <input id="fiAlturaOi" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Segmento</label>
+                                            <input id="fiSegmento" class="form-control form-control-sm" style="width:100px" placeholder="ej: bifocal">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0">
+                                        <label class="form-label">Lente Recomendado</label>
+                                        <input id="fiLenteRecomendado" class="form-control form-control-sm" placeholder="ej: Antirreflex CR-39, Transitions 1.67...">
+                                    </div>
+                                    <div class="form-group" style="margin-top:12px;margin-bottom:0">
+                                        <label class="form-label">📅 Fecha estimada de entrega (Orden de Lab)</label>
+                                        <input type="date" id="fiFechaEntregaOrden" class="form-control form-control-sm" style="max-width:200px">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Toggle receta externa -->
                         <div class="card mb-3" id="cardRecetaToggle">
                             <div class="card-body" style="padding:14px 20px;display:flex;align-items:center;gap:16px">
@@ -517,13 +590,63 @@ function buscarCliente(q) {
     }, 300);
 }
 
-function selCliente(id, nombre, nit) {
+async function selCliente(id, nombre, nit) {
+    // ── Lógica existente (sin cambios) ──────────────────────────
     document.getElementById('idCliente').value    = id;
     document.getElementById('busqCliente').value  = nombre;
     document.getElementById('clienteInfo').innerHTML =
         `<span class="fw-600 text-turquesa">${nombre}</span>
          <span class="text-gris text-sm"> NIT: ${nit || 'CF'}</span>`;
     document.getElementById('autoCliente').style.display = 'none';
+
+    // ── NUEVO: cargar Rx Final de la última ficha clínica ───────
+    try {
+        const resp = await fetch('/fichas/api/ultima-rx?idCliente=' + id);
+        const rx   = await resp.json();
+
+        const tieneRx = rx.rxOdEsfera   || rx.rxOiEsfera   ||
+                        rx.rxOdCilindro || rx.rxOiCilindro;
+
+        if (tieneRx) {
+            // Mostrar la Ficha Clínica Interna
+            document.getElementById('cardFichaInterna').style.display = 'block';
+
+            // Ocultar la Receta Externa para evitar confusiones
+            document.getElementById('chkRecetaExterna').checked = false;
+            toggleRecetaExterna(false);
+
+            // Poblar los 8 campos de Rx Final Interno (OD y OI)
+            document.getElementById('fiOdEsfera').value   = rx.rxOdEsfera   || '';
+            document.getElementById('fiOdCilindro').value = rx.rxOdCilindro || '';
+            document.getElementById('fiOdEje').value      = rx.rxOdEje      || '';
+            document.getElementById('fiOdAdd').value      = rx.rxOdAdicion  || '';
+
+            document.getElementById('fiOiEsfera').value   = rx.rxOiEsfera   || '';
+            document.getElementById('fiOiCilindro').value = rx.rxOiCilindro || '';
+            document.getElementById('fiOiEje').value      = rx.rxOiEje      || '';
+            document.getElementById('fiOiAdd').value      = rx.rxOiAdicion  || '';
+
+            // Mostrar badge informativo junto al nombre del cliente
+            document.getElementById('clienteInfo').innerHTML +=
+                `&nbsp;<span class="badge badge--info" style="margin-left:6px;font-size:11px">
+                    📋 Rx cargado (ficha: ${rx.fechaFicha})
+                 </span>`;
+        } else {
+            // Si no tiene ficha, esconder la tarjeta por si había otro cliente antes
+            document.getElementById('cardFichaInterna').style.display = 'none';
+            document.getElementById('fiOdEsfera').value = '';
+            document.getElementById('fiOdCilindro').value = '';
+            document.getElementById('fiOdEje').value = '';
+            document.getElementById('fiOdAdd').value = '';
+            document.getElementById('fiOiEsfera').value = '';
+            document.getElementById('fiOiCilindro').value = '';
+            document.getElementById('fiOiEje').value = '';
+            document.getElementById('fiOiAdd').value = '';
+        }
+    } catch (e) {
+        // Falla silenciosa: no interrumpir el flujo de venta
+        console.warn('No se pudo cargar Rx del cliente:', e);
+    }
 }
 
 document.addEventListener('click', e => {
@@ -604,7 +727,25 @@ async function registrarVenta() {
         rxSegmento:          recetaExterna ? vRx('rxSegmento')         : null,
         rxLenteRecomendado:  recetaExterna ? vRx('rxLenteRecomendado') : null,
         // TAREA 7
-        fechaEntregaOrden:   recetaExterna ? vRx('fechaEntregaOrden')  : null
+        fechaEntregaOrden:   recetaExterna ? vRx('fechaEntregaOrden')  : null,
+        
+        // ── Ficha Clínica Interna ──
+        fichaInterna:        document.getElementById('cardFichaInterna').style.display === 'block',
+        fiOdEsfera:          vRx('fiOdEsfera'),
+        fiOdCilindro:        vRx('fiOdCilindro'),
+        fiOdEje:             vRx('fiOdEje'),
+        fiOdAdd:             vRx('fiOdAdd'),
+        fiOiEsfera:          vRx('fiOiEsfera'),
+        fiOiCilindro:        vRx('fiOiCilindro'),
+        fiOiEje:             vRx('fiOiEje'),
+        fiOiAdd:             vRx('fiOiAdd'),
+        fiDpOd:              vRx('fiDpOd'),
+        fiDpOi:              vRx('fiDpOi'),
+        fiAlturaOd:          vRx('fiAlturaOd'),
+        fiAlturaOi:          vRx('fiAlturaOi'),
+        fiSegmento:          vRx('fiSegmento'),
+        fiLenteRecomendado:  vRx('fiLenteRecomendado'),
+        fiFechaEntregaOrden: vRx('fiFechaEntregaOrden')
     };
 
     const csrfToken  = document.querySelector('meta[name="_csrf"]').content;

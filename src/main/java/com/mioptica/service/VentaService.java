@@ -197,10 +197,8 @@ public class VentaService {
         recibo.setVenta(venta);
         reciboRepo.save(recibo);
 
-        // ── 7. Si es receta externa → generar Orden de Laboratorio ───
-        if (req.isRecetaExterna()) {
-            generarOrdenRecetaExterna(req, venta, sucursal, usuario);
-        }
+        // ── 7. Generar Orden de Laboratorio si la venta incluye Lentes ───
+        generarOrdenLaboratorio(req, venta, sucursal, usuario);
 
         return venta;
     }
@@ -275,10 +273,27 @@ public class VentaService {
                 + String.format("%06d", corr.getValorActual());
     }
     
-// ── Helper: orden desde receta externa ───────────────────────
-    private void generarOrdenRecetaExterna(VentaRequest req, Venta venta,
+    // ── Helper: orden desde venta ────────────────────────
+    private void generarOrdenLaboratorio(VentaRequest req, Venta venta,
                                         Sucursal sucursal, Usuario usuario) {
         try {
+            // Verificar si hay al menos un producto tipo "LENTE" en el detalle
+            boolean tieneLente = false;
+            for (VentaRequest.ItemVenta item : req.getItems()) {
+                if (item.getIdProducto() != null) {
+                    Producto p = productoRepo.findById(item.getIdProducto()).orElse(null);
+                    if (p != null && p.esLente()) {
+                        tieneLente = true;
+                        break;
+                    }
+                }
+            }
+
+            // Si no hay lente, no se crea orden
+            if (!tieneLente) {
+                return;
+            }
+
             int next = ordenRepo.findMaxId().orElse(0) + 1;
 
             OrdenLaboratorio orden = new OrdenLaboratorio();
@@ -288,55 +303,72 @@ public class VentaService {
             orden.setCliente(venta.getCliente());
             orden.setFechaEmision(LocalDate.now());
             orden.setEstado("Pendiente");
+            
+            // Relación con VENTA
+            orden.setOrigen("VENTA");
+            orden.setVenta(venta);
+            
+            if (req.isRecetaExterna()) {
+                orden.setNotaOrigen("⚠️ Graduación dada por el cliente");
+            } else if (req.isFichaInterna()) {
+                orden.setNotaOrigen("✅ Graduación cargada de Ficha Interna");
+            } else {
+                orden.setNotaOrigen("Orden generada a partir de Venta");
+            }
 
-            // Origen
-            orden.setOrigen("RECETA_EXTERNA");
-            orden.setIdFicha(null);
-            orden.setNotaOrigen("⚠️ Graduación dada por el cliente — Factura: "
-                    + venta.getNumeroFactura());
-
+            // Dependiendo de si activó receta externa o ficha interna, extraer datos:
+            boolean externa = req.isRecetaExterna();
+            
             // Graduación
-            orden.setOdEsfera(req.getRxOdEsfera());
-            orden.setOdCilindro(req.getRxOdCilindro());
-            orden.setOdEje(req.getRxOdEje());
-            orden.setOdAdd(req.getRxOdAdd());
+            orden.setOdEsfera(externa ? req.getRxOdEsfera() : req.getFiOdEsfera());
+            orden.setOdCilindro(externa ? req.getRxOdCilindro() : req.getFiOdCilindro());
+            orden.setOdEje(externa ? req.getRxOdEje() : req.getFiOdEje());
+            orden.setOdAdd(externa ? req.getRxOdAdd() : req.getFiOdAdd());
 
-            orden.setOiEsfera(req.getRxOiEsfera());
-            orden.setOiCilindro(req.getRxOiCilindro());
-            orden.setOiEje(req.getRxOiEje());
-            orden.setOiAdd(req.getRxOiAdd());
+            orden.setOiEsfera(externa ? req.getRxOiEsfera() : req.getFiOiEsfera());
+            orden.setOiCilindro(externa ? req.getRxOiCilindro() : req.getFiOiCilindro());
+            orden.setOiEje(externa ? req.getRxOiEje() : req.getFiOiEje());
+            orden.setOiAdd(externa ? req.getRxOiAdd() : req.getFiOiAdd());
 
-            orden.setPantoscopico(req.getRxPantoscopico());
-            orden.setVertex(req.getRxVertex());
-            orden.setPanoramico(req.getRxPanoramico());
-
-            // ── TAREA 1: Campos nuevos ─────────────────────────
-            orden.setOdDip(req.getRxDpOd());
-            orden.setOiDip(req.getRxDpOi());
-            orden.setOdAltura(req.getRxAlturaOd());
-            orden.setOiAltura(req.getRxAlturaOi());
-            // segmento y lente recomendado van en observaciones
+            // Medidas del paciente (DIP, Alturas, etc.)
+            orden.setOdDip(externa ? req.getRxDpOd() : req.getFiDpOd());
+            orden.setOiDip(externa ? req.getRxDpOi() : req.getFiDpOi());
+            orden.setOdAltura(externa ? req.getRxAlturaOd() : req.getFiAlturaOd());
+            orden.setOiAltura(externa ? req.getRxAlturaOi() : req.getFiAlturaOi());
+            
+            // Extraer pantoscópico, vertex, panorámico si es externa (la ficha interna en UI no los tiene, pero por si acaso)
+            if (externa) {
+                orden.setPantoscopico(req.getRxPantoscopico());
+                orden.setVertex(req.getRxVertex());
+                orden.setPanoramico(req.getRxPanoramico());
+            }
+            
             StringBuilder obs = new StringBuilder();
-            if (req.getRxLenteRecomendado() != null && !req.getRxLenteRecomendado().isBlank()) {
-                obs.append("Lente recomendado: ").append(req.getRxLenteRecomendado()).append("\n");
+            String lenteRec = externa ? req.getRxLenteRecomendado() : req.getFiLenteRecomendado();
+            if (lenteRec != null && !lenteRec.isBlank()) {
+                obs.append("Lente recomendado: ").append(lenteRec).append("\n");
             }
-            if (req.getRxSegmento() != null && !req.getRxSegmento().isBlank()) {
-                obs.append("Segmento: ").append(req.getRxSegmento());
+            
+            String segmento = externa ? req.getRxSegmento() : req.getFiSegmento();
+            if (segmento != null && !segmento.isBlank()) {
+                obs.append("Segmento: ").append(segmento);
             }
+            
             if (!obs.isEmpty()) {
                 orden.setObservaciones(obs.toString());
             }
 
-            // TAREA 7: Fecha estimada de entrega
-            if (req.getFechaEntregaOrden() != null && !req.getFechaEntregaOrden().isBlank()) {
-                orden.setFechaEntregaEstimada(LocalDate.parse(req.getFechaEntregaOrden()));
+            // Fecha estimada de entrega (la UI envía la fecha de la orden en rxFecha... o fiFecha...)
+            String fEntr = externa ? req.getFechaEntregaOrden() : req.getFiFechaEntregaOrden();
+            if (fEntr != null && !fEntr.isBlank()) {
+                orden.setFechaEntregaEstimada(LocalDate.parse(fEntr));
             }
-            // ───────────────────────────────────────────────────
 
             ordenRepo.save(orden);
 
         } catch (Exception e) {
-            System.err.println("⚠️ No se pudo generar orden receta externa: " + e.getMessage());
+            System.err.println("⚠️ No se pudo generar orden de laboratorio desde venta: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
