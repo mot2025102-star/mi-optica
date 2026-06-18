@@ -2,9 +2,11 @@ package com.mioptica.controller;
  
 import com.mioptica.dto.VentaDetalleDTO;
 import com.mioptica.model.FichaClinica;
+import com.mioptica.model.Inventario;
 import com.mioptica.repository.CategoriaRepository;
 import com.mioptica.repository.SucursalRepository;
 import com.mioptica.repository.UsuarioRepository;
+import com.mioptica.repository.VentaRepository;
 import com.mioptica.service.CorteCajaService;
 import com.mioptica.service.ExportService;
 import com.mioptica.service.ReporteService;
@@ -21,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.mioptica.model.FichaClinica;
 import com.mioptica.repository.FichaClinicaRepository;
+import com.mioptica.repository.InventarioRepository;
+
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +42,8 @@ public class ReporteController {
     private final CategoriaRepository categoriaRepo;
     private final CorteCajaService    corteCajaService;
     private final FichaClinicaRepository fichaClinicaRepo;
+    private final VentaRepository ventaRepo;
+    private final InventarioRepository inventarioRepo;
  
     // ══════════════════════════════════════════════════════════════
     // ─── REPORTES DE VENTAS ───────────────────────────────────────
@@ -351,6 +358,58 @@ public ResponseEntity<byte[]> exportarSaldosPendientes(
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=saldos_pendientes.xlsx")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(archivo);
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
+// ─── EXPORTAR VENTAS POR CLIENTE ──────────────────────────────
+@GetMapping("/reportes/fichas/exportar/ventascliente")
+@ResponseBody
+public ResponseEntity<byte[]> exportarVentasPorCliente(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fi,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ff,
+        @RequestParam(defaultValue = "0") Integer idSucursal,
+        @AuthenticationPrincipal UserDetails ud) {
+    try {
+        var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
+        boolean esAdmin = usuario.esAdmin();
+        if (!esAdmin && usuario.getSucursal() != null)
+            idSucursal = usuario.getSucursal().getIdSucursal();
+
+        List<Object[]> rows = ventaRepo.detalleVentasPorCliente(fi, ff, idSucursal);
+        byte[] archivo = exportService.exportarVentasPorCliente(rows, fi, ff);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=ventas_por_cliente_" + fi + "_" + ff + ".xlsx")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(archivo);
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
+// ─── EXPORTAR PRODUCTOS ARMAZONES Y LENTES ────────────────────
+@GetMapping("/reportes/fichas/exportar/productos")
+@ResponseBody
+public ResponseEntity<byte[]> exportarProductos(
+        @RequestParam(defaultValue = "0") Integer idSucursal,
+        @AuthenticationPrincipal UserDetails ud) {
+    try {
+        var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
+        boolean esAdmin = usuario.esAdmin();
+        if (!esAdmin && usuario.getSucursal() != null)
+            idSucursal = usuario.getSucursal().getIdSucursal();
+
+        List<Inventario> inventarios = inventarioRepo.findArazonesYLentesBySucursal(idSucursal);
+        byte[] archivo = exportService.exportarProductosArmazonesLentes(inventarios);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=productos_armazones_lentes.xlsx")
                 .contentType(MediaType.parseMediaType(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(archivo);

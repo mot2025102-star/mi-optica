@@ -34,4 +34,16 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
     // Cantidad de facturas hoy
     @Query("SELECT COUNT(v) FROM Venta v WHERE v.fecha = :hoy AND v.estado != 'Anulada' AND v.sucursal.idSucursal = :idSuc")
     long countHoy(@Param("hoy") LocalDate hoy, @Param("idSuc") Integer idSuc);
+    // Detalle de ventas por cliente (para reporte Excel)
+@Query("SELECT v.cliente.nombre, v.fecha, v.numeroFactura, " +
+       "d.producto.idProducto, d.producto.detalle, " +
+       "d.precioUnitario, d.cantidad, d.subtotal " +
+       "FROM DetalleVenta d JOIN d.venta v " +
+       "WHERE v.fecha BETWEEN :fi AND :ff " +
+       "AND v.estado != 'Anulada' " +
+       "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
+       "ORDER BY v.cliente.nombre ASC, v.fecha ASC, v.idVenta ASC")
+List<Object[]> detalleVentasPorCliente(@Param("fi") LocalDate fi,
+                                        @Param("ff") LocalDate ff,
+                                        @Param("idSuc") Integer idSuc);
 }

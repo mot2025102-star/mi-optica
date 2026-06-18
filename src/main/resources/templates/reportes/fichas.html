@@ -25,18 +25,18 @@
         <!-- Filtro de fechas -->
         <div class="card mb-3">
             <div class="card-body" style="padding:14px 20px">
-                <form th:action="@{/reportes/fichas}" method="get"
-                      style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                <form id="formFechas" th:action="@{/reportes/fichas}" method="get"
+                    style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
 
                     <div style="display:flex;gap:8px;align-items:center">
                         <div>
                             <label class="form-label">Desde</label>
-                            <input type="date" name="fi" class="form-control" th:value="${fi}">
+                            <input type="date" name="fi" id="fi" class="form-control" th:value="${fi}">
                         </div>
                         <span class="text-gris" style="margin-top:20px">al</span>
                         <div>
                             <label class="form-label">Hasta</label>
-                            <input type="date" name="ff" class="form-control" th:value="${ff}">
+                            <input type="date" name="ff" id="ff" class="form-control" th:value="${ff}">
                         </div>
                     </div>
 
@@ -52,16 +52,22 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary"
-                            style="display:inline-flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                             stroke-linecap="round" stroke-linejoin="round"
-                             style="width:14px;height:14px">
-                            <circle cx="11" cy="11" r="8"/>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        Filtrar
-                    </button>
+                    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+                        <button type="submit" class="btn btn-primary"
+                                style="display:inline-flex;align-items:center;gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            Filtrar
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setHoy()">Hoy</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setEstaSemana()">Esta semana</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setEsteMes()">Este mes</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setEsteAnio()">Este año</button>
+                    </div>
+                    <input th:if="${!esAdmin}" type="hidden" name="idSucursal" th:value="${idSucursal}">
                 </form>
             </div>
         </div>
@@ -100,11 +106,64 @@
                     <span style="font-weight:600;font-size:14px">Saldos Pendientes</span>
                     <span style="font-size:11px;color:var(--gris-texto)">Fichas con saldo > 0</span>
                 </a>
-
+                <!-- Ventas por Cliente -->
+                <a th:href="@{/reportes/fichas/exportar/ventascliente(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
+                class="btn btn-secondary"
+                style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 32px;min-width:180px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span style="font-weight:600;font-size:14px">Ventas por Cliente</span>
+                    <span style="font-size:11px;color:var(--gris-texto)">Excel agrupado por cliente</span>
+                </a>
+                <!-- Productos Armazones y Lentes -->
+                <a th:href="@{/reportes/fichas/exportar/productos(idSucursal=${idSucursal})}"
+                class="btn btn-secondary"
+                style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 32px;min-width:180px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span style="font-weight:600;font-size:14px">Productos</span>
+                    <span style="font-size:11px;color:var(--gris-texto)">Armazones y Lentes</span>
+                </a>
             </div>
         </div>
 
     </div>
 </div>
+<script>
+function submitFechas(fi, ff) {
+    document.getElementById('fi').value = fi;
+    document.getElementById('ff').value = ff;
+    document.getElementById('formFechas').submit();
+}
+function setHoy() {
+    const hoy = new Date().toISOString().split('T')[0];
+    submitFechas(hoy, hoy);
+}
+function setEstaSemana() {
+    const d = new Date();
+    const lunes = new Date(d);
+    lunes.setDate(d.getDate() - d.getDay() + 1);
+    submitFechas(lunes.toISOString().split('T')[0], d.toISOString().split('T')[0]);
+}
+function setEsteMes() {
+    const d = new Date();
+    const fi = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
+    const ff = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().split('T')[0];
+    submitFechas(fi, ff);
+}
+function setEsteAnio() {
+    const d = new Date();
+    submitFechas(d.getFullYear() + '-01-01', d.getFullYear() + '-12-31');
+}
+</script>
 </body>
 </html>
