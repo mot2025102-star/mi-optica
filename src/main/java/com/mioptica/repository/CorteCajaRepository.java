@@ -27,4 +27,11 @@ public interface CorteCajaRepository extends JpaRepository<CorteCaja, Integer> {
     List<CorteCaja> findBySucursal(@Param("idSuc") Integer idSucursal);
 
     List<CorteCaja> findAllByOrderByFechaDesc();
+
+    @Query("SELECT c FROM CorteCaja c WHERE c.sucursal.idSucursal = :idSucursal AND c.cerrado = false")
+    Optional<CorteCaja> findAbiertoBySucursal(@Param("idSucursal") Integer idSucursal);
+
+    @Query("SELECT c FROM CorteCaja c WHERE c.sucursal.idSucursal = :idSucursal AND c.cerrado = true ORDER BY c.fechaCierre DESC LIMIT 1")
+    Optional<CorteCaja> findUltimoCerradoBySucursal(@Param("idSucursal") Integer idSucursal);
+    boolean existsBySucursalIdSucursalAndFecha(Integer idSucursal, LocalDate fecha);
 }

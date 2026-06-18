@@ -159,36 +159,25 @@ public class ReporteController {
         }
     }
  
-    // ══════════════════════════════════════════════════════════════
+
     // ─── CORTE DE CAJA — GET ──────────────────────────────────────
-    // ══════════════════════════════════════════════════════════════
     @GetMapping("/corte-caja")
     public String corteCaja(
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @RequestParam(defaultValue = "0") Integer idSucursal,
             @AuthenticationPrincipal UserDetails ud,
             Model model) {
- 
-        if (fecha == null) fecha = LocalDate.now();
- 
+
         var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
         boolean esAdmin = usuario.esAdmin();
- 
+
         if (!esAdmin && usuario.getSucursal() != null)
             idSucursal = usuario.getSucursal().getIdSucursal();
         if (idSucursal == 0 && usuario.getSucursal() != null)
             idSucursal = usuario.getSucursal().getIdSucursal();
- 
-        // ── CLAVE: garantizar que siempre existe un registro en BD
-        // para que idCorte nunca sea null en el formulario HTML
-        corteCajaService.obtenerOCrearCorte(fecha, idSucursal, ud.getUsername());
- 
-        // Obtener los datos del corte (ya con idCorte garantizado)
-        Map<String, Object> corte = reporteService.corteDeCaja(fecha, idSucursal);
- 
+
+        Map<String, Object> corte = reporteService.corteDeCaja(idSucursal);
+
         model.addAttribute("corte",      corte);
-        model.addAttribute("fecha",      fecha);
         model.addAttribute("idSucursal", idSucursal);
         model.addAttribute("esAdmin",    esAdmin);
         model.addAttribute("sucursales", sucursalRepo.findByActivoTrue());
@@ -196,15 +185,29 @@ public class ReporteController {
         model.addAttribute("activePage", "corte-caja");
         return "reportes/corte";
     }
+
+    // ─── CORTE DE CAJA — POST: nuevo corte ───────────────────────
+    @PostMapping("/corte-caja/nuevo")
+    public String nuevoCorte(
+            @RequestParam Integer idSucursal,
+            @AuthenticationPrincipal UserDetails ud,
+            RedirectAttributes ra) {
+        try {
+            corteCajaService.nuevoCorte(idSucursal, ud.getUsername());
+            ra.addFlashAttribute("mensajeOk", "Nuevo corte creado.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("mensajeError", e.getMessage());
+        }
+        return "redirect:/corte-caja?idSucursal=" + idSucursal;
+    }
  
     // ══════════════════════════════════════════════════════════════
     // ─── CORTE DE CAJA — POST: saldo inicial ──────────────────────
     // ══════════════════════════════════════════════════════════════
-    @PostMapping("/corte-caja/saldo-inicial")
+   @PostMapping("/corte-caja/saldo-inicial")
     public String actualizarSaldoInicial(
             @RequestParam Integer    idCorte,
             @RequestParam BigDecimal saldoInicial,
-            @RequestParam String     fecha,
             @RequestParam Integer    idSucursal,
             RedirectAttributes ra) {
         try {
@@ -213,7 +216,7 @@ public class ReporteController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensajeError", e.getMessage());
         }
-        return "redirect:/corte-caja?fecha=" + fecha + "&idSucursal=" + idSucursal;
+        return "redirect:/corte-caja?idSucursal=" + idSucursal;
     }
  
     // ══════════════════════════════════════════════════════════════
@@ -221,19 +224,17 @@ public class ReporteController {
     // ══════════════════════════════════════════════════════════════
     @PostMapping("/corte-caja/cerrar")
     public String cerrarCorte(
-            @RequestParam Integer    idCorte,
-            @RequestParam BigDecimal saldoFisico,
+            @RequestParam Integer idCorte,
             @RequestParam(required = false) String observacion,
-            @RequestParam String     fecha,
-            @RequestParam Integer    idSucursal,
+            @RequestParam Integer idSucursal,
             RedirectAttributes ra) {
         try {
-            corteCajaService.cerrarCorte(idCorte, saldoFisico, observacion);
+            corteCajaService.cerrarCorte(idCorte, null, observacion);
             ra.addFlashAttribute("mensajeOk", "Corte cerrado correctamente.");
         } catch (Exception e) {
             ra.addFlashAttribute("mensajeError", e.getMessage());
         }
-        return "redirect:/corte-caja?fecha=" + fecha + "&idSucursal=" + idSucursal;
+        return "redirect:/corte-caja?idSucursal=" + idSucursal;
     }
  
     // ══════════════════════════════════════════════════════════════
@@ -243,19 +244,18 @@ public class ReporteController {
     public String agregarGasto(
             @RequestParam String     concepto,
             @RequestParam BigDecimal monto,
-            @RequestParam String     fecha,
             @RequestParam Integer    idSucursal,
             @AuthenticationPrincipal UserDetails ud,
             RedirectAttributes ra) {
         try {
             corteCajaService.registrarGasto(
-                    LocalDate.parse(fecha), idSucursal,
+                    LocalDate.now(), idSucursal,
                     ud.getUsername(), concepto, monto);
             ra.addFlashAttribute("mensajeOk", "Gasto registrado.");
         } catch (Exception e) {
             ra.addFlashAttribute("mensajeError", e.getMessage());
         }
-        return "redirect:/corte-caja?fecha=" + fecha + "&idSucursal=" + idSucursal;
+        return "redirect:/corte-caja?idSucursal=" + idSucursal;
     }
  
     // ══════════════════════════════════════════════════════════════
@@ -264,7 +264,6 @@ public class ReporteController {
     @PostMapping("/corte-caja/gasto/eliminar")
     public String eliminarGasto(
             @RequestParam Integer idGasto,
-            @RequestParam String  fecha,
             @RequestParam Integer idSucursal,
             @AuthenticationPrincipal UserDetails ud,
             RedirectAttributes ra) {
@@ -274,7 +273,7 @@ public class ReporteController {
         } catch (Exception e) {
             ra.addFlashAttribute("mensajeError", e.getMessage());
         }
-        return "redirect:/corte-caja?fecha=" + fecha + "&idSucursal=" + idSucursal;
+        return "redirect:/corte-caja?idSucursal=" + idSucursal;
     }
     // ══════════════════════════════════════════════════════════════
 // ─── REPORTES DE FICHAS ───────────────────────────────────────

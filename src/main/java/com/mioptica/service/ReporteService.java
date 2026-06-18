@@ -123,92 +123,74 @@ public class ReporteService {
 
     // ─── Corte de Caja ────────────────────────────────────────────
     // ── ACTUALIZADO: ahora incluye saldo inicial, gastos y diferencia
-    public Map<String, Object> corteDeCaja(LocalDate fecha, Integer idSucursal) {
+    public Map<String, Object> corteDeCaja(Integer idSucursal) {
 
-        // Ventas del día
-        List<Venta> ventas = ventaRepo.findByPeriodoYSucursal(fecha, fecha, idSucursal);
+    // Buscar corte abierto o el último cerrado
+    Optional<CorteCaja> corteGuardado = corteCajaRepo.findAbiertoBySucursal(idSucursal);
+    if (corteGuardado.isEmpty())
+        corteGuardado = corteCajaRepo.findUltimoCerradoBySucursal(idSucursal);
+
+    LocalDate fecha = corteGuardado.map(CorteCaja::getFecha).orElse(LocalDate.now());
+
+    // Ventas del día
+    List<Venta> ventas = ventaRepo.findByPeriodoYSucursal(fecha, LocalDate.now(), idSucursal);
         ventas = ventas.stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
+
 
         BigDecimal totalVentas = ventas.stream()
                 .map(Venta::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // TAREA 6: Ventas de la semana (lunes al domingo de la semana que contiene 'fecha')
-        LocalDate lunesSemana  = fecha.with(java.time.DayOfWeek.MONDAY);
-        LocalDate domingoSemana = fecha.with(java.time.DayOfWeek.SUNDAY);
-        List<Venta> ventasSemana = ventaRepo
-                .findByPeriodoYSucursal(lunesSemana, domingoSemana, idSucursal)
-                .stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
-        BigDecimal totalSemana = ventasSemana.stream()
-                .map(Venta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // TAREA 6: Ventas del mes (día 1 al último día del mes de 'fecha')
-        LocalDate primerDiaMes = fecha.withDayOfMonth(1);
-        LocalDate ultimoDiaMes = fecha.withDayOfMonth(fecha.lengthOfMonth());
-        List<Venta> ventasMes = ventaRepo
-                .findByPeriodoYSucursal(primerDiaMes, ultimoDiaMes, idSucursal)
-                .stream().filter(v -> !"Anulada".equals(v.getEstado())).toList();
-        BigDecimal totalMes = ventasMes.stream()
-                .map(Venta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
-
         BigDecimal totalDescuentos = ventas.stream()
                 .map(Venta::getDescuento)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long ventasAnuladas = ventaRepo.findByPeriodoYSucursal(fecha, fecha, idSucursal)
-                .stream().filter(v -> "Anulada".equals(v.getEstado())).count();
+        long ventasAnuladas = ventaRepo.findByPeriodoYSucursal(fecha, LocalDate.now(), idSucursal)
+        .stream().filter(v -> "Anulada".equals(v.getEstado())).count();
+
 
         // Recibos del día
         List<ReciboCaja> recibos = reciboRepo.findAll().stream()
-                .filter(r -> fecha.equals(r.getFecha())
-                          && r.getSucursal().getIdSucursal().equals(idSucursal))
-                .toList();
+        .filter(r -> !r.getFecha().isBefore(fecha) && !r.getFecha().isAfter(LocalDate.now())
+                  && r.getSucursal().getIdSucursal().equals(idSucursal))
+        .toList();
 
         BigDecimal totalRecibos = recibos.stream()
                 .map(ReciboCaja::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+                // Totales por forma de pago desde BD
         Map<String, BigDecimal> porFormaPago = new LinkedHashMap<>();
-        recibos.forEach(r -> {
-            String forma = r.getFormaPago() != null ? r.getFormaPago() : "Contado";
-            porFormaPago.merge(forma, r.getMonto(), BigDecimal::add);
-        });
+        List<Object[]> totalesPago = reciboRepo.totalPorFormaPago(fecha, LocalDate.now(), idSucursal);
+        for (Object[] row : totalesPago) {
+            String forma = row[0] != null ? row[0].toString() : "Contado";
+            BigDecimal monto = toBD(row[1]);
+            porFormaPago.put(forma, monto);
+        }
 
         // ── NUEVO: Gastos del día ──────────────────────────────────
-        List<GastoCaja> gastos = gastoCajaRepo
-                .findByFechaYSucursal(fecha, idSucursal);
-        BigDecimal totalGastos = gastoCajaRepo
-                .totalGastosDia(fecha, idSucursal);
+        List<GastoCaja> gastos = gastoCajaRepo.findByFechaYSucursal(fecha, idSucursal);
+        BigDecimal totalGastos = gastoCajaRepo.totalGastosDia(fecha, idSucursal);
         if (totalGastos == null) totalGastos = BigDecimal.ZERO;
 
         // ── NUEVO: Corte guardado (saldo inicial, diferencia, etc.) ─
-        Optional<CorteCaja> corteGuardado = corteCajaRepo
-                .findByIdSucursalAndFecha(idSucursal, fecha);
+
 
         BigDecimal saldoInicial  = corteGuardado.map(CorteCaja::getSaldoInicial)
                                                  .orElse(BigDecimal.ZERO);
         BigDecimal saldoFisico   = corteGuardado.map(CorteCaja::getSaldoFisico)
                                                  .orElse(null);
-        BigDecimal saldoEsperado = saldoInicial.add(totalRecibos).subtract(totalGastos);
-        BigDecimal diferencia    = saldoFisico != null
-                                 ? saldoFisico.subtract(saldoEsperado)
-                                 : BigDecimal.ZERO;
+        BigDecimal saldoEsperado = corteGuardado.map(CorteCaja::getSaldoEsperado).orElse(
+                saldoInicial.add(totalRecibos).subtract(totalGastos));
+        BigDecimal diferencia = totalVentas.subtract(totalGastos);
         boolean    cerrado       = corteGuardado.map(CorteCaja::getCerrado).orElse(false);
         Integer    idCorte       = corteGuardado.map(CorteCaja::getIdCorte).orElse(null);
+        LocalDate fechaCierre = corteGuardado.map(CorteCaja::getFechaCierre).orElse(null);
 
         Map<String, Object> corte = new LinkedHashMap<>();
         corte.put("fecha",           fecha);
         corte.put("ventas",          ventas);
         corte.put("totalVentas",     totalVentas);
-        // TAREA 6
-        corte.put("ventasSemana",    ventasSemana);
-        corte.put("totalSemana",     totalSemana);
-        corte.put("ventasMes",       ventasMes);
-        corte.put("totalMes",        totalMes);
-        corte.put("lunesSemana",     lunesSemana);
-        corte.put("domingoSemana",   domingoSemana);
-        corte.put("primerDiaMes",    primerDiaMes);
-        corte.put("ultimoDiaMes",    ultimoDiaMes);
         corte.put("totalDescuentos", totalDescuentos);
         corte.put("ventasAnuladas",  ventasAnuladas);
         corte.put("cantVentas",      (long) ventas.size());
@@ -225,6 +207,7 @@ public class ReporteService {
         corte.put("diferencia",      diferencia);
         corte.put("cerrado",         cerrado);
         corte.put("idCorte",         idCorte);
+        corte.put("fechaCierre", fechaCierre);
         return corte;
     }
 }
