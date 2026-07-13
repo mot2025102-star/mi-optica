@@ -54,6 +54,25 @@ public class FichaClinica {
     @Column(name = "av_od_cc", length = 20) private String avOdCc;
     @Column(name = "av_oi_cc", length = 20) private String avOiCc;
 
+    // AV con agujero estenopeico (permite diferenciar defecto refractivo de otra causa)
+    @Column(name = "av_od_agujero", length = 20) private String avOdAgujero;
+    @Column(name = "av_oi_agujero", length = 20) private String avOiAgujero;
+
+    // AV de cerca
+    @Column(name = "av_od_cerca", length = 20) private String avOdCerca;
+    @Column(name = "av_oi_cerca", length = 20) private String avOiCerca;
+
+    // ─── RX OBJETIVO (retinoscopía / autorrefracción) ──────────────
+    @Column(name = "obj_od_esfera",   length = 10) private String objOdEsfera;
+    @Column(name = "obj_od_cilindro", length = 10) private String objOdCilindro;
+    @Column(name = "obj_od_eje",      length = 10) private String objOdEje;
+    @Column(name = "obj_od_adicion",  length = 10) private String objOdAdicion;
+
+    @Column(name = "obj_oi_esfera",   length = 10) private String objOiEsfera;
+    @Column(name = "obj_oi_cilindro", length = 10) private String objOiCilindro;
+    @Column(name = "obj_oi_eje",      length = 10) private String objOiEje;
+    @Column(name = "obj_oi_adicion",  length = 10) private String objOiAdicion;
+
     // ─── RX SUBJETIVO ─────────────────────────────────────────────
     @Column(name = "sub_od_esfera",   length = 10) private String subOdEsfera;
     @Column(name = "sub_od_cilindro", length = 10) private String subOdCilindro;
@@ -81,6 +100,11 @@ public class FichaClinica {
     @Column(name = "rx_dip",    precision = 5, scale = 2) private BigDecimal rxDip;
     @Column(name = "rx_ndp_od", precision = 5, scale = 2) private BigDecimal rxNdpOd;
     @Column(name = "rx_ndp_oi", precision = 5, scale = 2) private BigDecimal rxNdpOi;
+
+    // Medidas de ajuste del armazón (se envían a la Orden de Laboratorio)
+    @Column(name = "vertex",       length = 10) private String vertex;        // mm
+    @Column(name = "pantoscopico", length = 10) private String pantoscopico;  // °
+    @Column(name = "panoramico",   length = 10) private String panoramico;    // °
 
     // ─── SUGERENCIA DE MATERIALES ─────────────────────────────────
     @Column(name = "sug_tipo_lente",     length = 50)  private String sugTipoLente;

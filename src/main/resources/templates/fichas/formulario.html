@@ -39,7 +39,8 @@
                     <div class="form-row form-row-3">
                         <div class="form-group">
                             <label class="form-label">Cliente *</label>
-                            <select name="cliente.idCliente" class="form-select" required>
+                            <select name="cliente.idCliente" id="selCliente" class="form-select" required
+                                    onchange="verificarHistorialCliente(this.value)">
                                 <option value="">— Selecciona cliente —</option>
                                 <option th:each="c : ${clientes}"
                                         th:value="${c.idCliente}"
@@ -71,6 +72,8 @@
                             </select>
                         </div>
                     </div>
+
+                    <div id="historialClienteBox" class="alert" style="display:none;margin-bottom:16px"></div>
 
                     <div class="form-row form-row-2">
                         <div class="form-group">
@@ -400,6 +403,28 @@
                                    placeholder="20/20" th:value="${ficha.avOiCc}">
                         </div>
                     </div>
+                    <div class="form-row form-row-4" style="margin-top:12px">
+                        <div class="form-group">
+                            <label class="form-label">AV OD c/agujero</label>
+                            <input type="text" name="avOdAgujero" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOdAgujero}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AV OI c/agujero</label>
+                            <input type="text" name="avOiAgujero" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOiAgujero}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AV OD cerca</label>
+                            <input type="text" name="avOdCerca" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOdCerca}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AV OI cerca</label>
+                            <input type="text" name="avOiCerca" class="form-control"
+                                   placeholder="20/20" th:value="${ficha.avOiCerca}">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -458,6 +483,71 @@
                             <input type="number" name="hc_pio_oi" class="form-control"
                                    min="0" max="60" step="0.5" placeholder="Ej: 14">
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── RX OBJETIVO ──────────────────────────────────── -->
+            <div class="card mb-3">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--gris-borde);background:rgba(39,194,201,0.06)">
+                    <div style="font-size:13px;font-weight:700;color:var(--turquesa)"> RX Objetivo</div>
+                    <div style="font-size:11px;color:var(--gris-texto);margin-top:2px">Retinoscopía / autorrefracción, antes de refinar con el paciente</div>
+                </div>
+                <div class="card-body">
+                    <div style="overflow-x:auto">
+                        <table style="width:100%;border-collapse:collapse;font-size:13px">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.03)">
+                                    <th style="padding:10px 14px;text-align:left;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Ojo</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Esfera</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Cilindro</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Eje</th>
+                                    <th style="padding:10px 14px;text-align:center;color:var(--gris-texto);font-size:11px;text-transform:uppercase">Adición</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- OD -->
+                                <tr style="border-bottom:1px solid var(--gris-borde)">
+                                    <td style="padding:10px 14px;font-weight:700;color:var(--turquesa)">OD (Derecho)</td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOdEsfera" class="form-control" list="dl-esfera"
+                                               placeholder="Ej: -1.50" style="text-align:center" th:value="${ficha.objOdEsfera}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOdCilindro" class="form-control" list="dl-cilindro"
+                                               placeholder="Ej: -0.75" style="text-align:center" th:value="${ficha.objOdCilindro}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOdEje" class="form-control" list="dl-eje"
+                                               placeholder="Ej: 90" style="text-align:center" th:value="${ficha.objOdEje}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOdAdicion" class="form-control" list="dl-adicion"
+                                               placeholder="Ej: +1.00" style="text-align:center" th:value="${ficha.objOdAdicion}">
+                                    </td>
+                                </tr>
+                                <!-- OI -->
+                                <tr>
+                                    <td style="padding:10px 14px;font-weight:700;color:var(--amarillo)">OI (Izquierdo)</td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOiEsfera" class="form-control" list="dl-esfera"
+                                               placeholder="Ej: -1.50" style="text-align:center" th:value="${ficha.objOiEsfera}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOiCilindro" class="form-control" list="dl-cilindro"
+                                               placeholder="Ej: -0.75" style="text-align:center" th:value="${ficha.objOiCilindro}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOiEje" class="form-control" list="dl-eje"
+                                               placeholder="Ej: 90" style="text-align:center" th:value="${ficha.objOiEje}">
+                                    </td>
+                                    <td style="padding:6px 14px">
+                                        <input type="text" name="objOiAdicion" class="form-control" list="dl-adicion"
+                                               placeholder="Ej: +1.00" style="text-align:center" th:value="${ficha.objOiAdicion}">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -596,6 +686,27 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Medidas de ajuste del armazón (van a la Orden de Laboratorio) -->
+                    <div style="margin-top:16px">
+                        <div class="form-row form-row-3">
+                            <div class="form-group">
+                                <label class="form-label">Distancia Vértex (mm)</label>
+                                <input type="text" name="vertex" class="form-control"
+                                       placeholder="Ej: 12" th:value="${ficha.vertex}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ángulo Pantoscópico (°)</label>
+                                <input type="text" name="pantoscopico" class="form-control"
+                                       placeholder="Ej: 8" th:value="${ficha.pantoscopico}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ángulo Panorámico (°)</label>
+                                <input type="text" name="panoramico" class="form-control"
+                                       placeholder="Ej: 5" th:value="${ficha.panoramico}">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -658,6 +769,21 @@
                                 <span th:text="${#strings.substringAfter(t,':')}"></span>
                             </label>
                         </th:block>
+                    </div>
+
+                    <div class="form-row form-row-2" style="margin-bottom:16px">
+                        <div class="form-group">
+                            <label class="form-label">Armazón</label>
+                            <input type="text" name="armazon" class="form-control"
+                                   placeholder="Ej: Ray-Ban RB2140 negro / cliente trae su propio armazón"
+                                   th:value="${ficha.armazon}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Detalle de lentes a fabricar</label>
+                            <input type="text" name="detalleLentes" class="form-control"
+                                   placeholder="Ej: Progresivo policarbonato AR gris"
+                                   th:value="${ficha.detalleLentes}">
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -742,6 +868,41 @@ llenarDatalist(document.getElementById('dl-rx-cilindro'), cilindroOpts);
 llenarDatalist(document.getElementById('dl-rx-eje'),      ejeOpts);
 llenarDatalist(document.getElementById('dl-rx-adicion'),  adicionOpts);
 
+// ── Historial del paciente al seleccionar cliente ─────────────
+// Si ya tiene fichas anteriores, muestra su última Rx como referencia.
+// Si es la primera vez que se le atiende, avisa que es un paciente nuevo.
+async function verificarHistorialCliente(idCliente) {
+    const box = document.getElementById('historialClienteBox');
+    if (!idCliente) {
+        box.style.display = 'none';
+        return;
+    }
+    try {
+        const resp = await fetch('/fichas/api/ultima-rx?idCliente=' + idCliente);
+        const rx   = await resp.json();
+
+        const tieneRx = rx.rxOdEsfera || rx.rxOiEsfera || rx.rxOdCilindro || rx.rxOiCilindro;
+
+        if (tieneRx) {
+            box.className   = 'alert alert--info';
+            box.innerHTML   = '📋 <strong>Paciente con historial</strong> — última Rx registrada el ' +
+                (rx.fechaFicha || '—') +
+                ': OD ' + (rx.rxOdEsfera || '—') + ' / ' + (rx.rxOdCilindro || '—') + ' × ' + (rx.rxOdEje || '—') +
+                '&nbsp;&nbsp;·&nbsp;&nbsp;OI ' + (rx.rxOiEsfera || '—') + ' / ' + (rx.rxOiCilindro || '—') + ' × ' + (rx.rxOiEje || '—');
+        } else {
+            box.className = 'alert alert--warning';
+            box.innerHTML = '🆕 <strong>Paciente nuevo</strong> — no hay fichas clínicas anteriores registradas para este cliente.';
+        }
+        box.style.display = 'block';
+    } catch (e) {
+        // Falla silenciosa: no interrumpir el registro de la ficha
+        console.warn('No se pudo verificar historial del cliente:', e);
+        box.style.display = 'none';
+    }
+}
+
+// Si se está editando una ficha ya existente, no se dispara la verificación
+// automáticamente (el select no cambia al cargar la página).
 </script>
 
 </body>
