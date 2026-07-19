@@ -99,12 +99,12 @@
                 <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Cliente</div>
                 <div class="form-row form-row-2">
                     <div class="form-group" style="position:relative">
-                        <label class="form-label">Buscar cliente (opcional)</label>
+                        <label class="form-label">Buscar cliente</label>
                         <div style="position:relative">
                             <input type="text" id="busqCliente" class="form-control"
                                    placeholder="Nombre, DPI o teléfono..." autocomplete="off"
                                    oninput="buscarCliente(this.value)">
-                            <div id="autoCliente" style="position:absolute;top:100%;left:0;right:0;background:var(--gris-oscuro);border:1px solid var(--turquesa);border-top:none;border-radius:0 0 8px 8px;z-index:200;max-height:200px;overflow-y:auto;display:none"></div>
+                            <div id="autoCliente" style="position:absolute;top:100%;left:0;right:0;background:#FFFFFF;border:1px solid #DDDDDD;border-top:none;border-radius:0 0 8px 8px;z-index:9999;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:none"></div>
                         </div>
                         <input type="hidden" id="idCliente">
                     </div>
@@ -152,7 +152,7 @@
                         <div class="card mb-3" id="cardFichaInterna"
                              style="display:none;border:2px solid var(--turquesa,#27C2C9)">
                             <div class="card-header">
-                                <div class="card-title">🏥 Graduación del Cliente (Ficha Clínica Interna)</div>
+                                <div class="card-title">Graduación del Cliente (Ficha Clínica Interna)</div>
                                 <span class="badge badge--info" id="badgeFechaFicha">Cargado automáticamente</span>
                             </div>
                             <div class="card-body" style="padding:16px 20px;overflow-x:auto">
@@ -214,7 +214,7 @@
                                         <input id="fiLenteRecomendado" class="form-control form-control-sm" placeholder="ej: Antirreflex CR-39, Transitions 1.67...">
                                     </div>
                                     <div class="form-group" style="margin-top:12px;margin-bottom:0">
-                                        <label class="form-label">📅 Fecha estimada de entrega (Orden de Lab)</label>
+                                        <label class="form-label">Fecha estimada de entrega (Orden de Lab)</label>
                                         <input type="date" id="fiFechaEntregaOrden" class="form-control form-control-sm" style="max-width:200px">
                                     </div>
                                 </div>
@@ -228,7 +228,7 @@
                                     <input type="checkbox" id="chkRecetaExterna"
                                            onchange="toggleRecetaExterna(this.checked)"
                                            style="width:18px;height:18px;accent-color:var(--dorado,#C9A84C)">
-                                    📋 Venta con Receta Externa
+                                    Venta con Receta Externa
                                 </label>
                                 <span class="text-gris text-sm">
                                     Activa si el cliente trae su propia graduación
@@ -240,8 +240,8 @@
                         <div class="card mb-3" id="cardRecetaExterna"
                              style="display:none;border:2px solid var(--dorado,#C9A84C)">
                             <div class="card-header">
-                                <div class="card-title">📋 Graduación del Cliente (Receta Externa)</div>
-                                <span class="badge badge--warning">⚠️ Dada por el cliente</span>
+                                <div class="card-title">Graduación del Cliente (Receta Externa)</div>
+                                <span class="badge badge--warning">Dada por el cliente</span>
                             </div>
                             <div class="card-body" style="padding:16px 20px;overflow-x:auto">
                                 <table class="table table-sm" style="min-width:500px">
@@ -317,7 +317,7 @@
                                     </div>
                                     <!-- TAREA 7: Fecha estimada de entrega de la orden -->
                                     <div class="form-group" style="margin-top:12px;margin-bottom:0">
-                                        <label class="form-label">📅 Fecha estimada de entrega (Orden de Lab)</label>
+                                        <label class="form-label">Fecha estimada de entrega (Orden de Lab)</label>
                                         <input type="date" id="fechaEntregaOrden" class="form-control form-control-sm" style="max-width:200px">
                                     </div>
                                 </div>
@@ -327,33 +327,33 @@
 
                     <!-- Derecha: Forma de pago + Resumen -->
                     <div>
-                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Forma de Pago</div>
-                        <div class="form-row form-row-2">
-                            <div class="form-group">
-                                <label class="form-label">Forma de pago *</label>
-                                <select id="formaPago" class="form-select"
-                                        onchange="toggleTransferencia(this.value)">
-                                    <option>Contado</option>
-                                    <option>Tarjeta</option>
-                                    <option>Transferencia</option>
-                                    <option>Cheque</option>
-                                </select>
+                        <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px"> Pagos y Descuentos</div>
+                        <div class="form-group" style="margin-bottom:16px;">
+                            <label class="form-label">Descuento global (%)</label>
+                            <input type="number" id="descGlobal" class="form-control"
+                                min="0" max="100" step="0.1" value="0" oninput="calcTotal()">
+                        </div>
+
+                        <div style="border:1px solid rgba(39,194,201,0.3);border-radius:10px;padding:14px 16px;background:rgba(39,194,201,0.05);margin-bottom:16px">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                                <div style="font-size:11px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px">
+                                    Métodos de Pago
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarFilaPago()">+ Agregar Pago</button>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Descuento global (%)</label>
-                                <input type="number" id="descGlobal" class="form-control"
-                                    min="0" max="100" step="0.1" value="0" oninput="calcTotal()">
+                            <div id="contenedorPagos">
+                                <!-- Filas de pago dinámicas -->
                             </div>
                         </div>
                         <!-- TAREA 2: Fecha de entrega -->
                         <!-- TAREA 2 + 3: Fecha de entrega, lugar y sucursal -->
                         <div class="form-row form-row-2" style="margin-bottom:12px">
                             <div class="form-group">
-                                <label class="form-label">📅 Fecha de entrega</label>
+                                <label class="form-label">Fecha de entrega</label>
                                 <input type="date" id="fechaEntrega" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">🏪 Sucursal de entrega</label>
+                                <label class="form-label">Sucursal de entrega</label>
                                 <select id="idSucursalEntrega" class="form-select">
                                     <option value="">— Sin asignar —</option>
                                     <option th:each="s : ${sucursales}"
@@ -363,32 +363,12 @@
                             </div>
                         </div>
                         <div class="form-group" style="margin-bottom:12px">
-                            <label class="form-label">📍 Lugar / dirección de entrega</label>
+                            <label class="form-label">Lugar / dirección de entrega</label>
                             <input type="text" id="lugarEntrega" class="form-control"
                                    placeholder="ej: Casa del cliente, Sucursal zona 10...">
                         </div>
 
-                        <!-- TAREA 4: Datos de transferencia (oculto por defecto) -->
-                        <div id="cardTransferencia" style="display:none;margin-bottom:12px;
-                             padding:14px 16px;border:1px solid rgba(39,194,201,0.3);
-                             border-radius:10px;background:rgba(39,194,201,0.05)">
-                            <div style="font-size:11px;font-weight:700;color:var(--turquesa);
-                                        text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">
-                                🏦 Datos de la Transferencia
-                            </div>
-                            <div class="form-row form-row-2">
-                                <div class="form-group">
-                                    <label class="form-label">Banco</label>
-                                    <input type="text" id="bancoPago" class="form-control"
-                                           placeholder="ej: Banrural, BAC, G&T...">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">No. de referencia</label>
-                                    <input type="text" id="referenciaPago" class="form-control"
-                                           placeholder="ej: 0012345678">
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Modales de pago se ubicarán al final -->
 
                         <div class="form-group" style="margin-bottom:20px">
                             <label class="form-label">Observaciones</label>
@@ -411,6 +391,14 @@
                             <div style="display:flex;justify-content:space-between;align-items:center">
                                 <span style="font-size:15px;font-weight:700">TOTAL:</span>
                                 <span style="font-size:24px;font-weight:700;color:var(--turquesa)" id="resTotal">Q 0.00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:center">
+                                <span class="text-gris" style="font-weight:600">Total Pagado:</span>
+                                <span class="fw-600" id="resPagado" style="font-size:16px">Q 0.00</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:8px;border-top:1px dashed var(--gris-borde)">
+                                <span class="fw-600" id="lblSaldo" style="font-size:14px">Saldo Pendiente:</span>
+                                <span class="fw-600" id="resSaldo" style="font-size:18px;color:var(--rojo, #ef4444)">Q 0.00</span>
                             </div>
                         </div>
 
@@ -442,6 +430,81 @@
         <div class="modal-footer" style="justify-content:center;gap:12px">
             <a id="exitoPdfLink" href="#" target="_blank" class="btn btn-secondary"> Imprimir Factura</a>
             <button class="btn btn-primary" onclick="nuevaVenta()"> Nueva Venta</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modales de Pagos -->
+<div class="modal-overlay" id="modalTarjeta" style="display:none">
+    <div class="modal" style="max-width:400px;background:var(--card-bg);border:1px solid var(--gris-borde)">
+        <div class="modal-header">
+            <div class="modal-title">💳 Datos de Tarjeta</div>
+        </div>
+        <div class="modal-body" style="padding:20px">
+            <input type="hidden" id="modalTarjetaFilaIdx">
+            <div class="form-group">
+                <label class="form-label">Tipo de Tarjeta</label>
+                <select id="modalTarjetaTipo" class="form-select">
+                    <option>Crédito</option>
+                    <option>Débito</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Marca</label>
+                <select id="modalTarjetaMarca" class="form-select">
+                    <option>Visa</option>
+                    <option>Mastercard</option>
+                    <option>Amex</option>
+                    <option>Otra</option>
+                </select>
+            </div>
+            <div class="form-row form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Últimos 4 dígitos</label>
+                    <input type="text" id="modalTarjetaDigitos" class="form-control" maxlength="4" placeholder="ej: 1234">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">No. Autorización</label>
+                    <input type="text" id="modalTarjetaAuth" class="form-control" placeholder="ej: 98765">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="padding:16px 20px;border-top:1px solid var(--gris-borde);display:flex;justify-content:flex-end;gap:8px">
+            <button class="btn btn-secondary" onclick="cerrarModalPago('modalTarjeta')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarModalTarjeta()">Guardar Datos</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalCheque" style="display:none">
+    <div class="modal" style="max-width:400px;background:var(--card-bg);border:1px solid var(--gris-borde)">
+        <div class="modal-header">
+            <div class="modal-title">🏦 Datos del Cheque / Transf.</div>
+        </div>
+        <div class="modal-body" style="padding:20px">
+            <input type="hidden" id="modalChequeFilaIdx">
+            <div class="form-group">
+                <label class="form-label">Banco</label>
+                <input type="text" id="modalChequeBanco" class="form-control" placeholder="ej: Banrural, BAC...">
+            </div>
+            <div class="form-row form-row-2">
+                <div class="form-group">
+                    <label class="form-label">No. Cheque / Ref.</label>
+                    <input type="text" id="modalChequeNum" class="form-control" placeholder="ej: 001234">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" id="modalChequeFecha" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Titular</label>
+                <input type="text" id="modalChequeTitular" class="form-control" placeholder="Nombre en el cheque">
+            </div>
+        </div>
+        <div class="modal-footer" style="padding:16px 20px;border-top:1px solid var(--gris-borde);display:flex;justify-content:flex-end;gap:8px">
+            <button class="btn btn-secondary" onclick="cerrarModalPago('modalCheque')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarModalCheque()">Guardar Datos</button>
         </div>
     </div>
 </div>
@@ -531,8 +594,8 @@ function agregarFila() {
                     'border-left:2px solid var(--turquesa);margin-bottom:4px';
                 document.getElementById('fila_' + idx).after(info);
             }
-            info.innerHTML = `🏭 <span style="color:var(--turquesa);font-weight:600">${proveedor}</span>` +
-                `&nbsp;&nbsp;·&nbsp;&nbsp;💰 Precio lista: <span style="font-weight:600">Q ${precio.toFixed(2)}</span>`;
+            info.innerHTML = `<span style="color:var(--turquesa);font-weight:600">${proveedor}</span>` +
+                `&nbsp;&nbsp;·&nbsp;&nbsp; Precio lista: <span style="font-weight:600">Q ${precio.toFixed(2)}</span>`;
             calcFila(idx);
         }
     });
@@ -568,7 +631,173 @@ function calcTotal() {
     document.getElementById('resSubtotal').textContent  = 'Q ' + sub.toFixed(2);
     document.getElementById('resDescuento').textContent = '- Q ' + desc.toFixed(2) + ' (' + pct + '%)';
     document.getElementById('resTotal').textContent     = 'Q ' + total.toFixed(2);
+    
+    // Calcular Saldo y Total Pagado
+    let pagado = 0;
+    if (typeof arrayPagos !== 'undefined') {
+        pagado = arrayPagos.reduce((acc, p) => acc + (parseFloat(p.monto) || 0), 0);
+    }
+    document.getElementById('resPagado').textContent = 'Q ' + pagado.toFixed(2);
+    
+    let saldo = total - pagado;
+    let lblSaldo = document.getElementById('lblSaldo');
+    let resSaldo = document.getElementById('resSaldo');
+    
+    if (saldo > 0) {
+        lblSaldo.textContent = 'Saldo Pendiente:';
+        resSaldo.textContent = 'Q ' + saldo.toFixed(2);
+        resSaldo.style.color = 'var(--rojo, #ef4444)';
+    } else {
+        lblSaldo.textContent = 'Vuelto / Cambio:';
+        resSaldo.textContent = 'Q ' + Math.abs(saldo).toFixed(2);
+        resSaldo.style.color = 'var(--verde, #10b981)';
+    }
 }
+
+// ── Lógica de Múltiples Pagos ─────────────────────────────────────
+let arrayPagos = [];
+let pagoIdxCounter = 0;
+
+function agregarFilaPago() {
+    let idx = pagoIdxCounter++;
+    arrayPagos.push({
+        idx: idx,
+        metodoPago: 'Contado',
+        monto: 0,
+        tipoTarjeta: '', marcaTarjeta: 'Visa', ultimosDigitos: '', autorizacion: '',
+        banco: '', noCheque: '', titular: '', fechaCheque: '', referencia: ''
+    });
+    renderPagos();
+}
+
+function renderPagos() {
+    const contenedor = document.getElementById('contenedorPagos');
+    if (!contenedor) return;
+    contenedor.innerHTML = arrayPagos.map(p => `
+        <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed rgba(0,0,0,0.05)">
+            <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center">
+                <select class="form-select" style="flex:2" onchange="cambiarMetodoPago(${p.idx}, this.value)">
+                    <option value="Contado" ${p.metodoPago === 'Contado' ? 'selected' : ''}>Efectivo / Contado</option>
+                    <option value="Tarjeta" ${p.metodoPago === 'Tarjeta' ? 'selected' : ''}>Tarjeta</option>
+                    <option value="Transferencia" ${p.metodoPago === 'Transferencia' ? 'selected' : ''}>Transferencia</option>
+                    <option value="Cheque" ${p.metodoPago === 'Cheque' ? 'selected' : ''}>Cheque</option>
+                </select>
+                <div style="position:relative;flex:2">
+                    <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gris-texto);font-size:14px">Q</span>
+                    <input type="number" class="form-control" style="padding-left:26px" value="${p.monto}" min="0" step="0.01" oninput="actualizarMontoPago(${p.idx}, this.value)">
+                </div>
+                ${(p.metodoPago !== 'Contado') ? `
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalPago(${p.idx}, '${p.metodoPago}')" style="padding:6px 10px" title="Datos extra">
+                        📝
+                    </button>
+                ` : ''}
+                <button type="button" class="btn btn-secondary btn-sm" style="color:var(--naranja);padding:6px 10px" onclick="eliminarFilaPago(${p.idx})">
+                    🗑️
+                </button>
+            </div>
+            ${generarResumenDatosPago(p)}
+        </div>
+    `).join('');
+    calcTotal();
+}
+
+function generarResumenDatosPago(p) {
+    let extra = '';
+    if (p.metodoPago === 'Tarjeta' && (p.ultimosDigitos || p.autorizacion)) {
+        extra = 'Tarjeta ' + p.marcaTarjeta + ' *' + p.ultimosDigitos + ' (Auth: ' + p.autorizacion + ')';
+    } else if (p.metodoPago === 'Cheque' && (p.noCheque || p.banco)) {
+        extra = 'Cheque ' + p.banco + ' #' + p.noCheque;
+    } else if (p.metodoPago === 'Transferencia' && (p.referencia || p.banco)) {
+        extra = 'Transf. ' + p.banco + ' Ref: ' + p.referencia;
+    }
+    
+    if (!extra) return '';
+    return `<div style="font-size:11.5px;color:var(--turquesa);margin-top:-4px;padding-left:5px">↳ ${extra}</div>`;
+}
+
+function cambiarMetodoPago(idx, metodo) {
+    let p = arrayPagos.find(x => x.idx === idx);
+    if(p) {
+        p.metodoPago = metodo;
+        renderPagos();
+        if (metodo !== 'Contado') {
+            abrirModalPago(idx, metodo);
+        }
+    }
+}
+
+function actualizarMontoPago(idx, val) {
+    let p = arrayPagos.find(x => x.idx === idx);
+    if(p) {
+        p.monto = parseFloat(val) || 0;
+        calcTotal(); 
+    }
+}
+
+function eliminarFilaPago(idx) {
+    arrayPagos = arrayPagos.filter(x => x.idx !== idx);
+    renderPagos();
+}
+
+function abrirModalPago(idx, metodo) {
+    let p = arrayPagos.find(x => x.idx === idx);
+    if(!p) return;
+    
+    if (metodo === 'Tarjeta') {
+        document.getElementById('modalTarjetaFilaIdx').value = idx;
+        document.getElementById('modalTarjetaTipo').value = p.tipoTarjeta || 'Crédito';
+        document.getElementById('modalTarjetaMarca').value = p.marcaTarjeta || 'Visa';
+        document.getElementById('modalTarjetaDigitos').value = p.ultimosDigitos || '';
+        document.getElementById('modalTarjetaAuth').value = p.autorizacion || '';
+        document.getElementById('modalTarjeta').style.display = 'flex';
+    } else {
+        document.getElementById('modalChequeFilaIdx').value = idx;
+        document.getElementById('modalChequeBanco').value = p.banco || '';
+        document.getElementById('modalChequeNum').value = p.noCheque || p.referencia || '';
+        document.getElementById('modalChequeFecha').value = p.fechaCheque || '';
+        document.getElementById('modalChequeTitular').value = p.titular || '';
+        document.getElementById('modalCheque').style.display = 'flex';
+    }
+}
+
+function cerrarModalPago(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function guardarModalTarjeta() {
+    let idx = parseInt(document.getElementById('modalTarjetaFilaIdx').value);
+    let p = arrayPagos.find(x => x.idx === idx);
+    if(p) {
+        p.tipoTarjeta = document.getElementById('modalTarjetaTipo').value;
+        p.marcaTarjeta = document.getElementById('modalTarjetaMarca').value;
+        p.ultimosDigitos = document.getElementById('modalTarjetaDigitos').value;
+        p.autorizacion = document.getElementById('modalTarjetaAuth').value;
+    }
+    cerrarModalPago('modalTarjeta');
+    renderPagos();
+}
+
+function guardarModalCheque() {
+    let idx = parseInt(document.getElementById('modalChequeFilaIdx').value);
+    let p = arrayPagos.find(x => x.idx === idx);
+    if(p) {
+        p.banco = document.getElementById('modalChequeBanco').value;
+        let num = document.getElementById('modalChequeNum').value;
+        if (p.metodoPago === 'Transferencia') {
+            p.referencia = num;
+        } else {
+            p.noCheque = num;
+        }
+        p.fechaCheque = document.getElementById('modalChequeFecha').value;
+        p.titular = document.getElementById('modalChequeTitular').value;
+    }
+    cerrarModalPago('modalCheque');
+    renderPagos();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    agregarFilaPago();
+});
 
 // ── Búsqueda de cliente ───────────────────────────────────────────
 let toCli;
@@ -581,10 +810,12 @@ function buscarCliente(q) {
         const data = await r.json();
         if (!data.length) { box.style.display = 'none'; return; }
         box.innerHTML = data.map(c => `
-            <div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--gris-borde)"
-                 onmousedown="selCliente(${c.id},'${c.nombre.replace(/'/g,"\\'")}','${c.nit ?? ''}')">
-                <div class="fw-600">${c.nombre}</div>
-                <div class="text-gris text-sm">DPI: ${c.dpi || '—'} | NIT: ${c.nit || 'CF'}</div>
+            <div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid rgba(0,0,0,0.08);color:#333333"
+                 onmousedown="selCliente(${c.id},'${c.nombre.replace(/'/g,"\\'")}','${c.nit ?? ''}')"
+                 onmouseover="this.style.backgroundColor='#F3F4F6'"
+                 onmouseout="this.style.backgroundColor='transparent'">
+                <div class="fw-600" style="color:#111111">${c.nombre}</div>
+                <div style="font-size:12px;color:#666666;margin-top:2px">DPI: ${c.dpi || '—'} | NIT: ${c.nit || 'CF'}</div>
             </div>`).join('');
         box.style.display = 'block';
     }, 300);
@@ -629,7 +860,7 @@ async function selCliente(id, nombre, nit) {
             // Mostrar badge informativo junto al nombre del cliente
             document.getElementById('clienteInfo').innerHTML +=
                 `&nbsp;<span class="badge badge--info" style="margin-left:6px;font-size:11px">
-                    📋 Rx cargado (ficha: ${rx.fechaFicha})
+                    Rx cargado (ficha: ${rx.fechaFicha})
                  </span>`;
         } else {
             // Si no tiene ficha, esconder la tarjeta por si había otro cliente antes
@@ -661,12 +892,17 @@ function toggleRecetaExterna(activa) {
 
 // ── Registrar venta ───────────────────────────────────────────────
 async function registrarVenta() {
+    // BUG FIX 2: Prevenir doble envío deshabilitando el botón
+    const btnRegistrar = document.querySelector('button[onclick="registrarVenta()"]');
+    if (btnRegistrar) btnRegistrar.disabled = true;
+
     const items = [];
-    const filas = document.querySelectorAll('#listaProds > div');
+    // CORRECCIÓN RAÍZ: Solo seleccionar divs con id="fila_N", NO los divs info_N de TomSelect
+    const filas = document.querySelectorAll('#listaProds > div[id^="fila_"]');
 
     for (const fila of filas) {
         const idx   = fila.id.split('_')[1];
-        const sel   = document.getElementById('sel_' + idx);   // ← Tom Select usa el <select> original
+        const sel   = document.getElementById('sel_' + idx);
         if (!sel || !sel.value) continue;
 
         const cant   = parseFloat(document.getElementById('cant_'  + idx)?.value || 0);
@@ -678,6 +914,7 @@ async function registrarVenta() {
 
         if (cant <= 0) continue;
         if (cant > stock) {
+            if (btnRegistrar) btnRegistrar.disabled = false;
             mostrarError('Stock insuficiente para "' + (opt?.text?.split('(')[0]?.trim() || '') + '". Stock disponible: ' + stock);
             return;
         }
@@ -691,16 +928,18 @@ async function registrarVenta() {
         });
     }
 
-    if (!items.length) { mostrarError('Agrega al menos un producto.'); return; }
+    if (!items.length) { 
+        if (btnRegistrar) btnRegistrar.disabled = false;
+        mostrarError('Agrega al menos un producto.'); 
+        return; 
+    }
 
     const recetaExterna = document.getElementById('chkRecetaExterna')?.checked || false;
     const vRx = id => document.getElementById(id)?.value?.trim() || null;
 
     const payload = {
         idCliente:       parseInt(document.getElementById('idCliente').value) || null,
-        formaPago:       document.getElementById('formaPago').value,
-        referenciaPago:  document.getElementById('referenciaPago')?.value || null,
-        bancoPago:       document.getElementById('bancoPago')?.value || null,
+        pagos:           arrayPagos,
         descuentoGlobal: parseFloat(document.getElementById('descGlobal').value || 0),
         observacion:     document.getElementById('observacion').value,
         fechaEntrega:       document.getElementById('fechaEntrega').value || null,
@@ -766,9 +1005,11 @@ async function registrarVenta() {
             document.getElementById('modalExito').classList.add('show');
             document.getElementById('alertaError').style.display = 'none';
         } else {
+            if (btnRegistrar) btnRegistrar.disabled = false;
             mostrarError(data.error);
         }
     } catch (e) {
+        if (btnRegistrar) btnRegistrar.disabled = false;
         mostrarError('Error de conexión: ' + e.message);
     }
 }

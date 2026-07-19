@@ -50,6 +50,12 @@ public class Venta {
     @Column(name = "estado", length = 20)
     private String estado = "Pagada";
 
+    @Column(name = "estado_pago", length = 20)
+    private String estadoPago = "COMPLETO";
+
+    @Column(name = "saldo_pendiente", precision = 10, scale = 2)
+    private BigDecimal saldoPendiente = BigDecimal.ZERO;
+
     @Column(name = "observacion", columnDefinition = "TEXT")
     private String observacion;
 
@@ -68,4 +74,8 @@ public class Venta {
     // Relación con el detalle (cascada: al guardar la venta, guarda el detalle)
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles = new ArrayList<>();
+
+    // Relación con los pagos
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PagoVenta> pagos = new ArrayList<>();
 }

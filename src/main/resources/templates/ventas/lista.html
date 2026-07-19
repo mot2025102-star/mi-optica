@@ -66,9 +66,11 @@
                     <div style="min-width:140px">
                         <label class="form-label">Estado</label>
                         <select name="est" class="form-select">
-                            <option value=""        th:selected="${est==''}">Todas</option>
-                            <option value="Pagada"  th:selected="${est=='Pagada'}"> Pagadas</option>
-                            <option value="Anulada" th:selected="${est=='Anulada'}"> Anuladas</option>
+                            <option value=""          th:selected="${est==''}">Todas</option>
+                            <option value="Pagada"    th:selected="${est=='Pagada'}">Pagadas</option>
+                            <option value="Anticipo"  th:selected="${est=='Anticipo'}">Anticipo</option>
+                            <option value="Pendiente" th:selected="${est=='Pendiente'}">Pendientes</option>
+                            <option value="Anulada"   th:selected="${est=='Anulada'}">Anuladas</option>
                         </select>
                     </div>
                     <div style="display:flex;gap:8px;align-items:flex-end">
@@ -129,7 +131,11 @@
                                 </span>
                             </td>
                             <td>
-                                <span th:class="${v.estado == 'Pagada'} ? 'badge badge--success' : 'badge badge--danger'"
+                                <span th:class="${
+                                        v.estado == 'Pagada'    ? 'badge badge--success' :
+                                        v.estado == 'Anticipo'  ? 'badge badge--danger'  :
+                                        v.estado == 'Pendiente' ? 'badge badge--warning' :
+                                                                  'badge badge--secondary'}"
                                       th:text="${v.estado}">
                                 </span>
                             </td>

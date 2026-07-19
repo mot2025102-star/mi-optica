@@ -12,7 +12,7 @@ import lombok.Data;
 public class VentaRequest {
 
     private Integer   idCliente;       // null = Consumidor Final
-    private String    formaPago;       // Contado | Tarjeta | Transferencia | Cheque
+    private List<PagoRequest> pagos;
     private BigDecimal descuentoGlobal;
     private String    observacion;
     private List<ItemVenta> items;
@@ -51,9 +51,7 @@ public class VentaRequest {
     private String  lugarEntrega;
     private Integer idSucursalEntrega;
 
-// TAREA 4: Datos de transferencia
-    private String referenciaPago;   // número de referencia
-    private String bancoPago;        // banco emisor
+    // Pagos múltiples procesados en List<PagoRequest> pagos
 
     // TAREA 7: Fecha estimada de entrega de la orden de laboratorio
     private String fechaEntregaOrden; // formato "yyyy-MM-dd"
@@ -83,6 +81,21 @@ public class VentaRequest {
     private String fiFechaEntregaOrden;
 
     private Integer rxIdCliente; // cliente para la orden (puede ser null=CF)
+
+    @Data
+    public static class PagoRequest {
+        private String metodoPago;
+        private BigDecimal monto;
+        private String tipoTarjeta;
+        private String marcaTarjeta;
+        private String ultimosDigitos;
+        private String autorizacion;
+        private String banco;
+        private String noCheque;
+        private String titular;
+        private String fechaCheque;
+        private String referencia;
+    }
 
     @Data
     public static class ItemVenta {

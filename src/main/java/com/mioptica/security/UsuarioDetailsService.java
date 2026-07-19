@@ -27,13 +27,13 @@ public class UsuarioDetailsService implements UserDetailsService {
 
         // ─── BLOQUE DE DIAGNÓSTICO (Esto saldrá en tu terminal) ──────────────
         System.out.println("\n==========================================");
-        System.out.println("   🔍 DIAGNÓSTICO DE LOGIN EN CURSO");
+        System.out.println("      DIAGNÓSTICO DE LOGIN EN CURSO");
         System.out.println("==========================================");
-        System.out.println("👤 Usuario detectado: " + usuario.getUsername());
-        System.out.println("🛡️ Rol en BD: " + usuario.getRol().getNombre());
-        System.out.println("🔑 Autoridad enviada a Spring: " + autoridad);
-        System.out.println("📝 Hash en BD: " + usuario.getPasswordHash());
-        System.out.println("📏 Longitud del Hash: " + (usuario.getPasswordHash() != null ? usuario.getPasswordHash().length() : 0));
+        System.out.println("Usuario detectado: " + usuario.getUsername());
+        System.out.println("Rol en BD: " + usuario.getRol().getNombre());
+        System.out.println("Autoridad enviada a Spring: " + autoridad);
+        System.out.println("Hash en BD: " + usuario.getPasswordHash());
+        System.out.println("Longitud del Hash: " + (usuario.getPasswordHash() != null ? usuario.getPasswordHash().length() : 0));
         System.out.println("==========================================\n");
         // ─────────────────────────────────────────────────────────────────────
 

@@ -101,7 +101,65 @@ public class VentaService {
         venta.setSubtotal(subtotal);
         venta.setDescuento(descGlobal);
         venta.setTotal(total);
-        venta.setEstado("Pagada");
+        // ── Procesar Pagos y Saldo ───────────────────────────
+        BigDecimal totalPagado = BigDecimal.ZERO;
+        if (req.getPagos() != null && !req.getPagos().isEmpty()) {
+            // BUG FIX 1: Si el usuario dejó el monto en 0 pero hay un solo método de pago, asumimos que paga el total completo.
+            BigDecimal sumaPagosEnviada = req.getPagos().stream()
+                    .map(p -> p.getMonto() != null ? p.getMonto() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (sumaPagosEnviada.compareTo(BigDecimal.ZERO) <= 0 && req.getPagos().size() == 1) {
+                req.getPagos().get(0).setMonto(total);
+            }
+
+            for (VentaRequest.PagoRequest pReq : req.getPagos()) {
+                if (pReq.getMonto() != null && pReq.getMonto().compareTo(BigDecimal.ZERO) > 0) {
+                    totalPagado = totalPagado.add(pReq.getMonto());
+                    PagoVenta pago = new PagoVenta();
+                    pago.setVenta(venta);
+                    pago.setMetodoPago(pReq.getMetodoPago() != null ? pReq.getMetodoPago() : "Contado");
+                    pago.setMonto(pReq.getMonto());
+                    pago.setTipoTarjeta(pReq.getTipoTarjeta());
+                    pago.setMarcaTarjeta(pReq.getMarcaTarjeta());
+                    pago.setUltimosDigitos(pReq.getUltimosDigitos());
+                    pago.setAutorizacion(pReq.getAutorizacion());
+                    pago.setBanco(pReq.getBanco());
+                    pago.setNoCheque(pReq.getNoCheque());
+                    pago.setTitular(pReq.getTitular());
+                    pago.setFechaCheque(pReq.getFechaCheque());
+                    if ("Transferencia".equalsIgnoreCase(pago.getMetodoPago()) && pReq.getReferencia() != null) {
+                        pago.setAutorizacion(pReq.getReferencia());
+                    }
+                    venta.getPagos().add(pago);
+                }
+            }
+        }
+        
+        BigDecimal saldoPendiente = total.subtract(totalPagado);
+        if (saldoPendiente.compareTo(BigDecimal.ZERO) <= 0) {
+            // Pagó todo (o más del total con vuelto)
+            venta.setSaldoPendiente(BigDecimal.ZERO);
+            venta.setEstadoPago("COMPLETO");
+            venta.setEstado("Pagada");
+        } else {
+            // Hay saldo pendiente → distinguir ANTICIPO vs PENDIENTE según fecha de entrega
+            venta.setSaldoPendiente(saldoPendiente);
+            // Parsear la fecha de entrega del request (aún no está asignada a la entidad)
+            LocalDate fechaEnt = null;
+            if (req.getFechaEntrega() != null && !req.getFechaEntrega().isBlank()) {
+                try { fechaEnt = LocalDate.parse(req.getFechaEntrega()); } catch (Exception ignored) {}
+            }
+            // ANTICIPO: el cliente paga ANTES de recibir (fecha entrega es futura)
+            // PENDIENTE: ya se entregó o no hay fecha, el cliente aún debe dinero
+            if (fechaEnt != null && fechaEnt.isAfter(LocalDate.now())) {
+                venta.setEstadoPago("ANTICIPO");
+                venta.setEstado("Anticipo");
+            } else {
+                venta.setEstadoPago("PENDIENTE");
+                venta.setEstado("Pendiente");
+            }
+        }
+        
         venta.setObservacion(req.getObservacion());
 
         // TAREA 2: Fecha de entrega
@@ -179,23 +237,38 @@ public class VentaService {
         venta = ventaRepo.save(venta);
 
         // ── 6. Recibo de caja automático ──────────────────────────
-        String numRecibo = generarCorrelativo(idSucursal, "Recibo", "RC");
-        ReciboCaja recibo = new ReciboCaja();
-        recibo.setSucursal(sucursal);
-        recibo.setUsuario(usuario);
-        recibo.setCliente(venta.getCliente());
-        recibo.setNumeroRecibo(numRecibo);
-        recibo.setFecha(LocalDate.now());
-        recibo.setMonto(total);
-        recibo.setFormaPago(req.getFormaPago() != null ? req.getFormaPago() : "Contado");
-        // TAREA 4: datos de transferencia
-        if ("Transferencia".equalsIgnoreCase(req.getFormaPago())) {
-            recibo.setReferencia(req.getReferenciaPago());
-            recibo.setBanco(req.getBancoPago());
+        if (req.getPagos() != null && !req.getPagos().isEmpty()) {
+            for (VentaRequest.PagoRequest p : req.getPagos()) {
+                if (p.getMonto() != null && p.getMonto().compareTo(BigDecimal.ZERO) > 0) {
+                    String numRecibo = generarCorrelativo(idSucursal, "Recibo", "RC");
+                    ReciboCaja recibo = new ReciboCaja();
+                    recibo.setSucursal(sucursal);
+                    recibo.setUsuario(usuario);
+                    recibo.setCliente(venta.getCliente());
+                    recibo.setNumeroRecibo(numRecibo);
+                    recibo.setFecha(LocalDate.now());
+                    
+                    // Si el pago excede el total (vuelto), el recibo se hace por el monto pagado para cuadrar caja
+                    recibo.setMonto(p.getMonto());
+                    
+                    recibo.setFormaPago(p.getMetodoPago() != null ? p.getMetodoPago() : "Contado");
+                    
+                    if ("Transferencia".equalsIgnoreCase(p.getMetodoPago())) {
+                        recibo.setReferencia(p.getReferencia() != null ? p.getReferencia() : p.getAutorizacion());
+                        recibo.setBanco(p.getBanco());
+                    } else if ("Cheque".equalsIgnoreCase(p.getMetodoPago())) {
+                        recibo.setReferencia(p.getNoCheque());
+                        recibo.setBanco(p.getBanco());
+                    } else if ("Tarjeta".equalsIgnoreCase(p.getMetodoPago())) {
+                        recibo.setReferencia(p.getAutorizacion());
+                    }
+                    
+                    recibo.setConcepto("Pago factura " + numFactura);
+                    recibo.setVenta(venta);
+                    reciboRepo.save(recibo);
+                }
+            }
         }
-        recibo.setConcepto("Pago factura " + numFactura);
-        recibo.setVenta(venta);
-        reciboRepo.save(recibo);
 
         // ── 7. Generar Orden de Laboratorio si la venta incluye Lentes ───
         generarOrdenLaboratorio(req, venta, sucursal, usuario);
