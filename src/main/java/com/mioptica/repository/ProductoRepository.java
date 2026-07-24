@@ -14,6 +14,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
 
     Optional<Producto> findByCodigo(String codigo);
 
+    @Query("SELECT COALESCE(MAX(p.idProducto), 0) FROM Producto p")
+    Integer findMaxId();
+
     List<Producto> findByActivoTrueOrderByDetalleAsc();
 
     @Query("SELECT p FROM Producto p WHERE p.activo = true AND " +

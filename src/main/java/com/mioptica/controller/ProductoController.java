@@ -96,6 +96,7 @@ public class ProductoController {
         model.addAttribute("proveedores",  proveedorService.listarActivos());
         model.addAttribute("editando",     false);
         model.addAttribute("activePage",   "productos");
+        model.addAttribute("proximoId",    productoService.findMaxId() + 1);
         return "productos/formulario";
     }
  
@@ -219,6 +220,51 @@ public class ProductoController {
         try {
             Marca m = productoService.guardarMarca(nombre);
             return ResponseEntity.ok(Map.of("ok", true, "id", m.getIdMarca(), "nombre", m.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/tratamiento")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> guardarTratamiento(@RequestParam String nombre) {
+        try {
+            Tratamiento_lente t = productoService.guardarTratamiento(nombre);
+            return ResponseEntity.ok(Map.of("ok", true, "id", t.getIdTratamiento(), "nombre", t.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/api/tratamiento/lista")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> listarTratamientosApi() {
+        List<Map<String, Object>> lista = productoService.listarTratamientos().stream()
+                .map(t -> Map.<String, Object>of("id", t.getIdTratamiento(), "nombre", t.getNombre()))
+                .toList();
+        return ResponseEntity.ok(lista);
+    }
+
+    @PutMapping("/api/tratamiento/{id}")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> actualizarTratamiento(@PathVariable Integer id, @RequestParam String nombre) {
+        try {
+            Tratamiento_lente t = productoService.actualizarTratamiento(id, nombre);
+            return ResponseEntity.ok(Map.of("ok", true, "id", t.getIdTratamiento(), "nombre", t.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/api/tratamiento/{id}")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> eliminarTratamiento(@PathVariable Integer id) {
+        try {
+            productoService.eliminarTratamiento(id);
+            return ResponseEntity.ok(Map.of("ok", true));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
         }

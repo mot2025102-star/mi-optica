@@ -53,8 +53,9 @@
             <input type="hidden" name="idProducto"   th:value="${producto.idProducto}"/>
             <input type="hidden" id="hTipo"      name="tipoProducto"
                    th:value="${producto.tipoProducto != null and producto.tipoProducto != 'GENERAL'} ? ${producto.tipoProducto} : ''"/>
-            <input type="hidden" id="hCodigo"    name="codigo"                th:value="${producto.codigo}"/>
-            <input type="hidden" id="hDetalle"   name="detalle"               th:value="${producto.detalle}"/>
+            <input type="hidden" id="hCodigo"        name="codigo"                th:value="${producto.codigo}"/>
+            <input type="hidden" id="hCodigoFabrica" name="codigoFabrica"         th:value="${producto.codigoFabrica}"/>
+            <input type="hidden" id="hDetalle"       name="detalle"               th:value="${producto.detalle}"/>
             <input type="hidden" id="hDesc"      name="descripcion"           th:value="${producto.descripcion}"/>
             <input type="hidden" id="hUnidad"    name="unidadMedida"          th:value="${producto.unidadMedida != null ? producto.unidadMedida : 'Unidad'}"/>
             <input type="hidden" id="hColor"     name="color"                 th:value="${producto.color}"/>
@@ -76,7 +77,6 @@
             <input type="hidden" id="hMedPuenteA" name="medPuente"       th:value="${producto.medPuente}"/>
             <input type="hidden" id="hMedVarA"    name="medVarrilla"     th:value="${producto.medVarrilla}"/>
             <input type="hidden" id="hClasifL"      name="clasificacionLente"  th:value="${producto.clasificacionLente}"/>
-            <input type="hidden" id="hSubFamiliaL"  name="subFamiliaLente"     th:value="${producto.subFamiliaLente}"/>
             <input type="hidden" id="hRangoL"       name="rangoLente"          th:value="${producto.rangoLente}"/>
             <input type="hidden" id="hProveedorL"   name="proveedorLente"      th:value="${producto.proveedorLente}"/>
             <input type="hidden" id="hCodInternoL"  name="codigoInternoLente"  th:value="${producto.codigoInternoLente}"/>
@@ -125,8 +125,12 @@
                 </div>
                 <div class="card-body" style="padding:20px">
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Código *</label><input type="text" id="vCodigoA" class="form-control" placeholder="Ej: BZ128/BLK" th:value="${producto.codigo}"></div>
+                        <div class="form-group"><label class="form-label">Código Interno (SKU) <span class="form-hint">Autogenerado</span></label><input type="text" id="vCodigoA" class="form-control" th:value="${producto.codigo}" readonly style="background-color: var(--card-bg); font-family: monospace; font-weight: 600; color: var(--turquesa);"></div>
+                        <div class="form-group"><label class="form-label">Código de Fábrica / Modelo</label><input type="text" id="vCodigoFabricaA" class="form-control" placeholder="Ej: BZ128/BLK" th:value="${producto.codigoFabrica}"></div>
+                    </div>
+                    <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Nombre / Detalle *</label><input type="text" id="vDetalleA" class="form-control" placeholder="Ej: Armazón Baron BZ128 Negro" th:value="${producto.detalle}"></div>
+                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button></div></div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button></div></div>
@@ -227,10 +231,10 @@
                     <button type="button" class="btn btn-secondary btn-sm" onclick="cambiarTipo()" th:if="${!editando}">← Cambiar tipo</button>
                 </div>
                 <div class="card-body" style="padding:20px">
-                    <div class="lente-seccion-titulo">🔖 Identificación</div>
+                    <div class="lente-seccion-titulo">Identificación</div>
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Código * <span class="form-hint">Ej: 00001</span></label><input type="text" id="vCodigoL" class="form-control" placeholder="Ej: 00001" th:value="${producto.codigo}"></div>
-                        <div class="form-group"><label class="form-label">Código Interno <span class="form-hint">Ej: LNT-0.25-0.50 PC/TR/AR</span></label><input type="text" id="vCodInternoL" class="form-control" placeholder="Ej: LNT-0.25-0.50 PC/TR/AR" th:value="${producto.codigoInternoLente}"></div>
+                        <div class="form-group"><label class="form-label">Código Interno (SKU) <span class="form-hint">Autogenerado</span></label><input type="text" id="vCodigoL" class="form-control" th:value="${producto.codigo}" readonly style="background-color: var(--card-bg); font-family: monospace; font-weight: 600; color: var(--turquesa);"></div>
+                        <div class="form-group"><label class="form-label">Código Manual (Descriptivo) <span class="form-hint">Opcional</span></label><input type="text" id="vCodInternoL" class="form-control" placeholder="Ej: LNT-0.25-0.50 PC/TR/AR" th:value="${producto.codigoInternoLente}"></div>
                     </div>
                     <div class="form-group"><label class="form-label">Descripción del Producto * <span class="form-hint">Ej: LENTE -0.25 -0.50 POLICARBONATO TRANSPARENTE ANTIREFLEJO</span></label><input type="text" id="vDetalleL" class="form-control" placeholder="Ej: LENTE -0.25 -0.50 POLICARBONATO TRANSPARENTE ANTIREFLEJO" th:value="${producto.detalle}"></div>
  
@@ -267,28 +271,18 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Sub-Familia (Tratamiento adicional)</label>
-                            <select id="vSubFamiliaL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option value="UV"                           th:selected="${producto.subFamiliaLente == 'UV'}">Filtro UV</option>
-                                <option value="ANTIREFLEJO"                  th:selected="${producto.subFamiliaLente == 'ANTIREFLEJO'}">Antireflejo</option>
-                                <option value="FILTRO_LUZ_AZUL"              th:selected="${producto.subFamiliaLente == 'FILTRO_LUZ_AZUL'}">Filtro de Luz Azul</option>
-                                <option value="FOTOCROMÁTICO"                th:selected="${producto.subFamiliaLente == 'FOTOCROMÁTICO'}">Fotocromatico</option>
-                                <option value="AR_FILTRO_AZUL"               th:selected="${producto.subFamiliaLente == 'AR_FILTRO_AZUL'}">Antireflejo + Filtro de Luz Azul</option>
-                                <option value="AR_FOTOCROMÁTICO"             th:selected="${producto.subFamiliaLente == 'AR_FOTOCROMÁTICO'}">Antireflejo + Fotocromatico</option>
-                                <option value="AR_FILTRO_AZUL_FOTOCROMÁTICO" th:selected="${producto.subFamiliaLente == 'AR_FILTRO_AZUL_FOTOCROMÁTICO'}">Antireflejo + Filtro Azul + Fotocromatico</option>
-                            </select>
+                            <div style="display:flex;gap:8px">
+                                <select id="vSubFamiliaL" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="t : ${tratamientos}" th:value="${t.idTratamiento}" th:text="${t.nombre}" th:selected="${producto.tratamientoLente != null and producto.tratamientoLente.idTratamiento == t.idTratamiento}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarTratamiento('vSubFamiliaL')">＋</button>
+                            </div>
                         </div>
                     </div>
- 
+
                     <div class="lente-seccion-titulo" style="margin-top:20px"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg> Especificaciones</div>
-                    <div class="form-row form-row-3">
-                        <div class="form-group">
-                            <label class="form-label">Tratamiento (DB)</label>
-                            <select id="vTratamientoL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option th:each="t : ${tratamientos}" th:value="${t.idTratamiento}" th:text="${t.nombre}" th:selected="${producto.tratamientoLente != null and producto.tratamientoLente.idTratamiento == t.idTratamiento}"></option>
-                            </select>
-                        </div>
+                    <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Rangos</label>
                             <select id="vRangoL" class="form-select">
@@ -407,8 +401,12 @@
                 </div>
                 <div class="card-body" style="padding:20px">
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Código *</label><input type="text" id="vCodigoO" class="form-control" placeholder="Ej: LMP-001" th:value="${producto.codigo}"></div>
+                        <div class="form-group"><label class="form-label">Código Interno (SKU) <span class="form-hint">Autogenerado</span></label><input type="text" id="vCodigoO" class="form-control" th:value="${producto.codigo}" readonly style="background-color: var(--card-bg); font-family: monospace; font-weight: 600; color: var(--turquesa);"></div>
+                        <div class="form-group"><label class="form-label">Código de Fábrica / Modelo</label><input type="text" id="vCodigoFabricaO" class="form-control" placeholder="Ej: LMP-001" th:value="${producto.codigoFabrica}"></div>
+                    </div>
+                    <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Nombre / Detalle *</label><input type="text" id="vDetalleO" class="form-control" placeholder="Ej: Líquido limpiador" th:value="${producto.detalle}"></div>
+                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button></div></div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button></div></div>
@@ -499,11 +497,12 @@
 const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
 const TITULOS = { ARMAZON:'Armazón', LENTE:'Lente', LIMPIEZA:'Producto de Limpieza', ACCESORIO:'Accesorio' };
 const CAMPOS = {
-    ARMAZON:  { proveedor:'vProveedorA', codigo:'vCodigoA',detalle:'vDetalleA',desc:'vDescA',color:'vColorA',unidad:'vUnidadA',marca:'vMarcaA',categoria:null,modelo:'vModeloA',tipoL:null,matL:null,tratL:null,materialA:'vMaterialA',familiaA:'vFamiliaA',formaA:'vFormaA',segmentoA:'vSegmentoA',gamaA:'vGamaA',medHoriz:'vMedHorizA',medVert:'vMedVertA',medDiag:'vMedDiagA',medPuente:'vMedPuenteA',medVar:'vMedVarrillaA' },
-    LENTE:    { proveedor:'vProveedorL', codigo:'vCodigoL',detalle:'vDetalleL',desc:'vDescL',color:'vColorL',unidad:null,marca:'vMarcaL',categoria:null,modelo:null,tipoL:'vTipoL',matL:'vMaterialL',tratL:'vTratamientoL',clasif:'vClasifL',subFamilia:'vSubFamiliaL',rango:'vRangoL',proveedorLente:'vProveedorL',codInterno:'vCodInternoL',costo:'vCostoL',utilidad:'vUtilidadL',iva:'vIvaL',precioVenta:'vPrecioVentaL' },
-    LIMPIEZA: { proveedor:'vProveedorO', codigo:'vCodigoO',detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null },
-    ACCESORIO:{ proveedor:'vProveedorO', codigo:'vCodigoO',detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null }
+    ARMAZON:  { proveedor:'vProveedorA', codigo:'vCodigoA', codigoFabrica:'vCodigoFabricaA', detalle:'vDetalleA',desc:'vDescA',color:'vColorA',unidad:'vUnidadA',marca:'vMarcaA',categoria:null,modelo:'vModeloA',tipoL:null,matL:null,tratL:null,materialA:'vMaterialA',familiaA:'vFamiliaA',formaA:'vFormaA',segmentoA:'vSegmentoA',gamaA:'vGamaA',medHoriz:'vMedHorizA',medVert:'vMedVertA',medDiag:'vMedDiagA',medPuente:'vMedPuenteA',medVar:'vMedVarrillaA' },
+    LENTE:    { proveedor:'vProveedorL', codigo:'vCodigoL', codigoFabrica:null,              detalle:'vDetalleL',desc:'vDescL',color:'vColorL',unidad:null,marca:'vMarcaL',categoria:null,modelo:null,tipoL:'vTipoL',matL:'vMaterialL',tratL:'vSubFamiliaL',clasif:'vClasifL',subFamilia:null,rango:'vRangoL',proveedorLente:'vProveedorL',codInterno:'vCodInternoL',costo:'vCostoL',utilidad:'vUtilidadL',iva:'vIvaL',precioVenta:'vPrecioVentaL' },
+    LIMPIEZA: { proveedor:'vProveedorO', codigo:'vCodigoO', codigoFabrica:'vCodigoFabricaO', detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null },
+    ACCESORIO:{ proveedor:'vProveedorO', codigo:'vCodigoO', codigoFabrica:'vCodigoFabricaO', detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null }
 };
+const proximoId = /*[[${proximoId != null ? proximoId : 0}]]*/ 0;
  
 document.addEventListener('DOMContentLoaded', () => {
     if (tipoInicial && tipoInicial !== '' && tipoInicial !== 'GENERAL') seleccionarTipo(tipoInicial);
@@ -534,6 +533,20 @@ function seleccionarTipo(tipo) {
     const card = document.getElementById('card-' + tipo);
     if (card) card.classList.add('activo');
     document.getElementById('hTipo').value = tipo;
+    
+    // Autocompletar el preview del código interno si estamos creando un producto nuevo
+    if (proximoId > 0 && !document.getElementById('hCodigo').value) {
+        let pref = 'PROD';
+        if (tipo === 'ARMAZON') pref = 'ARO';
+        else if (tipo === 'LENTE') pref = 'LNT';
+        else if (tipo === 'LIMPIEZA') pref = 'LMP';
+        else if (tipo === 'ACCESORIO') pref = 'ACC';
+        const codPreview = pref + '-' + String(proximoId).padStart(5, '0');
+        if (document.getElementById('vCodigoA')) document.getElementById('vCodigoA').value = codPreview;
+        if (document.getElementById('vCodigoL')) document.getElementById('vCodigoL').value = codPreview;
+        if (document.getElementById('vCodigoO')) document.getElementById('vCodigoO').value = codPreview;
+    }
+
     if (tipo === 'ARMAZON')    document.getElementById('panelArmazon').style.display = 'block';
     else if (tipo === 'LENTE') { document.getElementById('panelLente').style.display = 'block'; }
     else { document.getElementById('tituloOtro').textContent = TITULOS[tipo] + ' — Datos'; document.getElementById('panelOtro').style.display = 'block'; }
@@ -608,11 +621,12 @@ function sincronizarYValidar() {
     const c = CAMPOS[tipo];
     const codigo  = document.getElementById(c.codigo)?.value?.trim();
     const detalle = document.getElementById(c.detalle)?.value?.trim();
-    if (!codigo)  { alerta.textContent = '⚠ El código es obligatorio.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
+    if (!codigo)  { alerta.textContent = '⚠ Ocurrió un error al generar el código.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
     if (!detalle) { alerta.textContent = '⚠ El nombre / detalle es obligatorio.'; alerta.style.display='block'; document.getElementById(c.detalle).focus(); return false; }
  
-    document.getElementById('hCodigo').value    = codigo;
-    document.getElementById('hDetalle').value   = detalle;
+    document.getElementById('hCodigo').value        = codigo;
+    document.getElementById('hCodigoFabrica').value = c.codigoFabrica ? (document.getElementById(c.codigoFabrica)?.value?.trim() || '') : '';
+    document.getElementById('hDetalle').value       = detalle;
     document.getElementById('hDesc').value      = document.getElementById(c.desc)?.value    || '';
     document.getElementById('hColor').value     = c.color    ? (document.getElementById(c.color)?.value    || '') : '';
     document.getElementById('hUnidad').value    = c.unidad   ? (document.getElementById(c.unidad)?.value   || 'Unidad') : 'Unidad';
@@ -691,6 +705,15 @@ async function agregarCategoria(selectId) {
     if (!nombre?.trim()) return;
     const csrf = document.querySelector('[name="_csrf"]').value;
     const r = await fetch('/productos/api/categoria', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
+    const data = await r.json();
+    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
+    else alert('Error: ' + data.error);
+}
+async function agregarTratamiento(selectId) {
+    const nombre = prompt('Nombre del nuevo tratamiento:');
+    if (!nombre?.trim()) return;
+    const csrf = document.querySelector('[name="_csrf"]').value;
+    const r = await fetch('/productos/api/tratamiento', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
     const data = await r.json();
     if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
     else alert('Error: ' + data.error);

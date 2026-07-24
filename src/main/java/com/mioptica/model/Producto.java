@@ -17,9 +17,11 @@ public class Producto {
     @Column(name = "id_producto")
     private Integer idProducto;
  
-    @NotBlank(message = "El código es obligatorio")
     @Column(name = "codigo", nullable = false, unique = true, length = 50)
     private String codigo;
+
+    @Column(name = "codigo_fabrica", length = 80)
+    private String codigoFabrica;
  
     @NotBlank(message = "El nombre del producto es obligatorio")
     @Column(name = "detalle", nullable = false, length = 200)
@@ -117,13 +119,7 @@ public class Producto {
     @Column(name = "clasificacion_lente", length = 30)
     private String clasificacionLente;
  
-    /**
-     * Sub-familia / tratamiento adicional:
-     * UV | ANTIREFLEJO | FILTRO_LUZ_AZUL | FOTOCROMÁTICO |
-     * AR_FILTRO_AZUL | AR_FOTOCROMÁTICO | AR_FILTRO_AZUL_FOTOCROMÁTICO
-     */
-    @Column(name = "sub_familia_lente", length = 40)
-    private String subFamiliaLente;
+
  
     /**
      * Rango de graduación: BAJA | MEDIA | ALTA

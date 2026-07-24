@@ -7,4 +7,5 @@ import java.util.List;
  
 public interface Tratamiento_lenteRepository extends JpaRepository<Tratamiento_lente, Integer> {
     List<Tratamiento_lente> findAllByOrderByNombreAsc();
+    List<Tratamiento_lente> findAllByOrderByIdTratamientoAsc();
 }

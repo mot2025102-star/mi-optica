@@ -40,11 +40,12 @@ public class ProductoService {
     public List<Sucursal>          listarSucursales()     { return sucursalRepo.findByActivoTrue(); }
     public List<Tipo_lente>        listarTiposLente()     { return tipoLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Material_lente>    listarMateriales()     { return materialLenteRepo.findAllByOrderByNombreAsc(); }
-    public List<Tratamiento_lente> listarTratamientos()   { return tratamientoLenteRepo.findAllByOrderByNombreAsc(); }
+    public List<Tratamiento_lente> listarTratamientos()   { return tratamientoLenteRepo.findAllByOrderByIdTratamientoAsc(); }
     public List<Precio_lente>      listarPreciosLente()   { return precioLenteRepo.findAllByOrderByTipoNombreAscMaterialNombreAsc(); }
  
     // ─── Obtener uno ──────────────────────────────────────────────
     public Optional<Producto> findById(Integer id) { return productoRepo.findById(id); }
+    public Integer findMaxId() { return productoRepo.findMaxId(); }
  
     // ─── Consultar precio automático por combinación ──────────────
     public Optional<Precio_lente> consultarPrecio(Integer idTipo, Integer idMaterial, Integer idTratamiento) {
@@ -88,15 +89,33 @@ public class ProductoService {
             producto.setTratamientoLente(null);
         }
  
-        // ── Validar código duplicado ──────────────────────────────
-        Optional<Producto> existente = productoRepo.findByCodigo(producto.getCodigo());
-        if (existente.isPresent()
-                && !existente.get().getIdProducto().equals(producto.getIdProducto())) {
-            throw new Exception("Ya existe un producto con el código: " + producto.getCodigo());
+        // ── Generación de código interno (SKU) ────────────────────────
+        boolean esNuevo = (producto.getIdProducto() == null);
+        if (esNuevo) {
+            // Asignar código temporal para evadir UNIQUE constraint hasta obtener el ID real
+            producto.setCodigo(java.util.UUID.randomUUID().toString());
+        } else {
+            // Si se está editando, validar que nadie haya duplicado el código manualmente
+            Optional<Producto> existente = productoRepo.findByCodigo(producto.getCodigo());
+            if (existente.isPresent() && !existente.get().getIdProducto().equals(producto.getIdProducto())) {
+                throw new Exception("Ya existe un producto con el código interno: " + producto.getCodigo());
+            }
         }
  
-        boolean esNuevo = (producto.getIdProducto() == null);
         Producto guardado = productoRepo.save(producto);
+
+        // Si es nuevo, generamos el código definitivo usando el ID auto-asignado por la BD
+        if (esNuevo) {
+            String prefijo = switch (guardado.getTipoProducto() != null ? guardado.getTipoProducto() : "GENERAL") {
+                case "ARMAZON"  -> "ARO";
+                case "LENTE"    -> "LNT";
+                case "LIMPIEZA" -> "LMP";
+                case "ACCESORIO"-> "ACC";
+                default         -> "PROD";
+            };
+            guardado.setCodigo(prefijo + "-" + String.format("%05d", guardado.getIdProducto()));
+            guardado = productoRepo.save(guardado);
+        }
  
         // ── Obtener usuario actual para kardex ────────────────────
         Usuario usuarioActual = null;
@@ -247,6 +266,47 @@ public class ProductoService {
         Tratamiento_lente t = new Tratamiento_lente();
         t.setNombre(nombre.trim());
         return tratamientoLenteRepo.save(t);
+    }
+
+    @Transactional
+    public Tratamiento_lente actualizarTratamiento(Integer id, String nombre) throws Exception {
+        Tratamiento_lente t = tratamientoLenteRepo.findById(id)
+                .orElseThrow(() -> new Exception("Tratamiento no encontrado"));
+        t.setNombre(nombre.trim());
+        return tratamientoLenteRepo.save(t);
+    }
+
+    @Transactional
+    public void eliminarTratamiento(Integer id) throws Exception {
+        try {
+            tratamientoLenteRepo.deleteById(id);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new Exception("No se puede eliminar el tratamiento porque ya está asignado a uno o más productos.");
+        } catch (Exception e) {
+            throw new Exception("Error al eliminar el tratamiento: " + e.getMessage());
+        }
+    }
+
+    // ─── Sembrado Inicial de Tratamientos ─────────────────────────
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @Transactional
+    public void inicializarTratamientos() {
+        if (tratamientoLenteRepo.count() == 0) {
+            List<String> iniciales = List.of(
+                "Filtro UV",
+                "Antireflejo",
+                "Filtro de Luz Azul",
+                "Fotocromático",
+                "Filtro de Luz Azul + Antireflejo",
+                "Filtro de Luz Azul + Fotocromático",
+                "Filtro de Luz Azul + Antireflejo + Fotocromático"
+            );
+            for (String nombre : iniciales) {
+                Tratamiento_lente t = new Tratamiento_lente();
+                t.setNombre(nombre);
+                tratamientoLenteRepo.save(t);
+            }
+        }
     }
  
     // ─── Guardar / actualizar precio de lente ─────────────────────
