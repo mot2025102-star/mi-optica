@@ -34,6 +34,9 @@ public class FichaClinica {
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
+    @Column(name = "fecha_siguiente_consulta")
+    private LocalDate fechaSiguienteConsulta;
+
     @Column(name = "motivo_consulta", columnDefinition = "TEXT")
     private String motivoConsulta;
 
@@ -159,5 +162,24 @@ public class FichaClinica {
         if (dias <= 3)   return "amarillo";
         if (dias <= 7)   return "azul";
         return "verde";
+    }
+
+    /** Fecha en la que el paciente cumple 1 año desde esta consulta. */
+    public LocalDate getFechaAniversario() {
+        if (fecha == null) return null;
+        return fecha.plusYears(1);
+    }
+
+    /** Días que faltan para que el paciente cumpla el año desde esta consulta (negativo = ya lo cumplió). */
+    public long getDiasParaAniversario() {
+        LocalDate aniversario = getFechaAniversario();
+        if (aniversario == null) return 9999;
+        return ChronoUnit.DAYS.between(LocalDate.now(), aniversario);
+    }
+
+    /** true si al paciente le faltan 30 días o menos para cumplir el año de su última consulta (o ya lo cumplió). */
+    public boolean isProximaACumplirAnio() {
+        long dias = getDiasParaAniversario();
+        return dias <= 30;
     }
 }

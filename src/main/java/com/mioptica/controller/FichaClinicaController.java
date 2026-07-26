@@ -74,6 +74,7 @@ public class FichaClinicaController {
 
         FichaClinica ficha = new FichaClinica();
         ficha.setFecha(LocalDate.now());
+        ficha.setFechaSiguienteConsulta(LocalDate.now().plusYears(1));
         ficha.setOptometrista(usuario);
 
         if (idCliente != null) {
@@ -279,7 +280,16 @@ public class FichaClinicaController {
             json.append("\"ojo_dominante\":\"").append(esc(params.get("hc_ojo_dominante"))).append("\",");
             json.append("\"motilidad\":\"").append(esc(params.get("hc_motilidad"))).append("\",");
             json.append("\"pio_od\":\"").append(esc(params.get("hc_pio_od"))).append("\",");
-            json.append("\"pio_oi\":\"").append(esc(params.get("hc_pio_oi"))).append("\"");
+            json.append("\"pio_oi\":\"").append(esc(params.get("hc_pio_oi"))).append("\",");
+
+            // Pruebas preliminares adicionales (punto 10)
+            json.append("\"coverte_test\":\"").append(esc(params.get("hc_coverte_test"))).append("\",");
+            json.append("\"test_ishinara\":\"").append(esc(params.get("hc_test_ishinara"))).append("\",");
+            json.append("\"estereopsis\":\"").append(esc(params.get("hc_estereopsis"))).append("\",");
+            json.append("\"campo_visual\":\"").append(esc(params.get("hc_campo_visual"))).append("\",");
+            json.append("\"motricidad_ocular\":\"").append(esc(params.get("hc_motricidad_ocular"))).append("\",");
+            json.append("\"prueba_ambulatoria_tolera\":").append(params.containsKey("hc_prueba_ambulatoria_tolera") ? "true" : "false").append(",");
+            json.append("\"pruebas_preliminares_observaciones\":\"").append(esc(params.get("hc_pruebas_preliminares_observaciones"))).append("\"");
 
             json.append("}");
             ficha.setHistoriaClinica(json.toString());
@@ -314,16 +324,23 @@ public class FichaClinicaController {
     public ResponseEntity<java.util.Map<String, String>> ultimaRx(
             @RequestParam Integer idCliente) {
 
+        java.util.Map<String, String> rx = new java.util.LinkedHashMap<>();
+
+        // ── Edad del cliente (viene de Clientes, no se duplica el dato) ──
+        clienteRepo.findById(idCliente).ifPresent(c -> {
+            Integer edad = c.getEdad() != null ? c.getEdad() : c.getEdadCalculada();
+            rx.put("edad", edad != null ? edad.toString() : "");
+        });
+
         List<FichaClinica> fichas =
             fichaService.listarPorCliente(idCliente);
 
         if (fichas.isEmpty()) {
-            return ResponseEntity.ok(java.util.Collections.emptyMap());
+            return ResponseEntity.ok(rx);
         }
 
         FichaClinica f = fichas.get(0); // la más reciente
 
-        java.util.Map<String, String> rx = new java.util.LinkedHashMap<>();
         rx.put("rxOdEsfera",   f.getRxOdEsfera()   != null ? f.getRxOdEsfera()   : "");
         rx.put("rxOdCilindro", f.getRxOdCilindro() != null ? f.getRxOdCilindro() : "");
         rx.put("rxOdEje",      f.getRxOdEje()      != null ? f.getRxOdEje()      : "");

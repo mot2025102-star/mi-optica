@@ -59,11 +59,13 @@ public class DashboardController {
                     .sorted(java.util.Comparator.comparing(
                             com.mioptica.model.FichaClinica::getFechaEntrega))
                     .limit(5).toList();
+            var proximosAniversarios = proximosAniversarioCliente(todasFichas);
 
             model.addAttribute("totalFichas",     todasFichas.size());
             model.addAttribute("pendientes",       pendientes);
             model.addAttribute("conSaldo",         conSaldo);
             model.addAttribute("proximasEntregas", proximasEntregas);
+            model.addAttribute("proximosAniversarios", proximosAniversarios);
             return "dashboard/optometrista";
         }
 
@@ -119,11 +121,15 @@ public class DashboardController {
                 .filter(i -> i.getExistencia().compareTo(BigDecimal.valueOf(2)) <= 0)
                 .limit(10).toList();
 
+        var todasFichasAdmin = fichaRepo.findAll();
+        var proximosAniversariosAdmin = proximosAniversarioCliente(todasFichasAdmin);
+
         model.addAttribute("totalClientes",  clienteRepo.count());
         model.addAttribute("totalProductos", productoRepo.count());
         model.addAttribute("ventasHoy",      ventaService.totalHoy(idSuc));
         model.addAttribute("pedidosHoy",     ventaService.countHoy(idSuc));
         model.addAttribute("stockBajo",      stockBajo);
+        model.addAttribute("proximosAniversarios", proximosAniversariosAdmin);
         return "dashboard/admin";
     }
 
@@ -135,5 +141,27 @@ public class DashboardController {
         return base.stream()
                 .filter(i -> i.getExistencia().compareTo(BigDecimal.valueOf(2)) <= 0)
                 .limit(10).toList();
+    }
+
+    /**
+     * Punto 9: de la última ficha de cada cliente, retorna las que están a
+     * 30 días o menos de cumplir 1 año desde esa consulta (o ya lo cumplieron
+     * y aún no han vuelto). Solo se considera la ficha más reciente por
+     * cliente para no alertar de un aniversario ya cubierto por una consulta
+     * posterior.
+     */
+    private List<com.mioptica.model.FichaClinica> proximosAniversarioCliente(
+            List<com.mioptica.model.FichaClinica> fichas) {
+        return fichas.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        f -> f.getCliente().getIdCliente(),
+                        f -> f,
+                        (f1, f2) -> f1.getFecha().isAfter(f2.getFecha()) ? f1 : f2))
+                .values().stream()
+                .filter(com.mioptica.model.FichaClinica::isProximaACumplirAnio)
+                .sorted(java.util.Comparator.comparingLong(
+                        com.mioptica.model.FichaClinica::getDiasParaAniversario))
+                .limit(10)
+                .toList();
     }
 }

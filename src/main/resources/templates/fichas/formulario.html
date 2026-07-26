@@ -75,17 +75,30 @@
 
                     <div id="historialClienteBox" class="alert" style="display:none;margin-bottom:16px"></div>
 
-                    <div class="form-row form-row-2">
+                    <div class="form-row form-row-3">
                         <div class="form-group">
                             <label class="form-label">Fecha consulta *</label>
                             <input type="date" name="fecha" class="form-control" required
                                    th:value="${ficha.fecha}">
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Fecha siguiente consulta</label>
+                            <input type="date" name="fechaSiguienteConsulta" class="form-control"
+                                   th:value="${ficha.fechaSiguienteConsulta}">
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Motivo de consulta</label>
                             <input type="text" name="motivoConsulta" class="form-control"
                                    placeholder="Ej: Revisión rutinaria, dolor de cabeza..."
                                    th:value="${ficha.motivoConsulta}">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2" style="margin-top:12px">
+                        <div class="form-group">
+                            <label class="form-label">Edad del paciente</label>
+                            <input type="text" id="edadPaciente" class="form-control" readonly
+                                   style="background:rgba(255,255,255,0.03);cursor:not-allowed"
+                                   placeholder="Selecciona un cliente para ver su edad">
                         </div>
                     </div>
                 </div>
@@ -472,7 +485,7 @@
                     <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">
                         Presión Intraocular (mmHg)
                     </div>
-                    <div class="form-row form-row-2">
+                    <div class="form-row form-row-2" style="margin-bottom:20px">
                         <div class="form-group">
                             <label class="form-label">PIO OD</label>
                             <input type="number" name="hc_pio_od" class="form-control"
@@ -483,6 +496,54 @@
                             <input type="number" name="hc_pio_oi" class="form-control"
                                    min="0" max="60" step="0.5" placeholder="Ej: 14">
                         </div>
+                    </div>
+
+                    <!-- Otras pruebas preliminares -->
+                    <div style="font-size:12px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">
+                        Otras Pruebas
+                    </div>
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Coverte Test</label>
+                            <input type="text" name="hc_coverte_test" class="form-control"
+                                   placeholder="Resultado del coverte test">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Test de ishinara</label>
+                            <input type="text" name="hc_test_ishinara" class="form-control"
+                                   placeholder="Resultado del test de Ishihara">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estereopsis</label>
+                            <input type="text" name="hc_estereopsis" class="form-control"
+                                   placeholder="Resultado de estereopsis">
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2" style="margin-top:12px">
+                        <div class="form-group">
+                            <label class="form-label">Campo visual</label>
+                            <input type="text" name="hc_campo_visual" class="form-control"
+                                   placeholder="Resultado del campo visual">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Motricidad ocular</label>
+                            <input type="text" name="hc_motricidad_ocular" class="form-control"
+                                   placeholder="Resultado de motricidad ocular">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top:16px;display:flex;align-items:center;gap:8px">
+                        <label class="form-label" style="margin-bottom:0">Prueba ambulatoria</label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gris-texto);cursor:pointer">
+                            <input type="checkbox" name="hc_prueba_ambulatoria_tolera" value="true">
+                            TOLERA
+                        </label>
+                    </div>
+
+                    <div class="form-group" style="margin-top:16px">
+                        <label class="form-label">Observaciones</label>
+                        <textarea name="hc_pruebas_preliminares_observaciones" class="form-control" rows="3"
+                                  placeholder="Observaciones de las pruebas preliminares"></textarea>
                     </div>
                 </div>
             </div>
@@ -873,13 +934,21 @@ llenarDatalist(document.getElementById('dl-rx-adicion'),  adicionOpts);
 // Si es la primera vez que se le atiende, avisa que es un paciente nuevo.
 async function verificarHistorialCliente(idCliente) {
     const box = document.getElementById('historialClienteBox');
+    const edadInput = document.getElementById('edadPaciente');
+
     if (!idCliente) {
         box.style.display = 'none';
+        if (edadInput) edadInput.value = '';
         return;
     }
     try {
         const resp = await fetch('/fichas/api/ultima-rx?idCliente=' + idCliente);
         const rx   = await resp.json();
+
+        // Edad del cliente (dato que vive en Clientes, aquí solo se muestra)
+        if (edadInput) {
+            edadInput.value = rx.edad ? rx.edad + ' años' : 'Sin edad registrada en el cliente';
+        }
 
         const tieneRx = rx.rxOdEsfera || rx.rxOiEsfera || rx.rxOdCilindro || rx.rxOiCilindro;
 
@@ -901,8 +970,14 @@ async function verificarHistorialCliente(idCliente) {
     }
 }
 
-// Si se está editando una ficha ya existente, no se dispara la verificación
-// automáticamente (el select no cambia al cargar la página).
+// Si se está editando una ficha ya existente, precargar la edad del cliente
+// ya seleccionado (el select no dispara 'onchange' al cargar la página).
+document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('selCliente');
+    if (sel && sel.value) {
+        verificarHistorialCliente(sel.value);
+    }
+});
 </script>
 
 </body>

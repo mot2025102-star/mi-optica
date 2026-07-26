@@ -130,6 +130,57 @@
             </div>
         </div>
 
+        <!-- ── Consultas próximas a cumplir el año ──────────────────── -->
+        <div class="card" th:if="${!proximosAniversarios.isEmpty()}">
+            <div class="card-header">
+                <div class="card-title">Consultas Próximas a Cumplir el Año</div>
+                <a th:href="@{/fichas}" class="btn-inventario-premium btn-sm">Ver fichas →</a>
+            </div>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <th>Última consulta</th>
+                            <th>Aniversario</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="f : ${proximosAniversarios}">
+                        <td class="fw-600" th:text="${f.cliente.nombre}"></td>
+                        <td class="text-sm text-gris" th:text="${f.cliente.telefono ?: '—'}"></td>
+                        <td class="text-sm" th:text="${#temporals.format(f.fecha,'dd/MM/yyyy')}"></td>
+                        <td>
+                            <span th:with="dias=${f.diasParaAniversario}"
+                                  th:style="${dias < 0}  ? 'color:var(--rojo);font-weight:600' :
+                                             (${dias <= 7} ? 'color:var(--naranja);font-weight:600' : 'color:var(--amarillo)')"
+                                  th:text="${#temporals.format(f.fechaAniversario,'dd/MM/yyyy')}">
+                            </span>
+                            <div class="text-sm"
+                                 th:with="dias=${f.diasParaAniversario}"
+                                 th:text="${dias < 0}  ? 'Cumplido hace ' + ${-dias} + ' día(s)' :
+                                           (${dias == 0} ? 'Hoy' : 'En ' + ${dias} + ' día(s)')"
+                                 th:style="${dias < 0} ? 'color:var(--rojo)' : 'color:var(--gris-texto)'">
+                            </div>
+                        </td>
+                        <td>
+                            <a th:href="@{/fichas/nueva(idCliente=${f.cliente.idCliente})}"
+                               class="icon-btn icon-btn--brand has-tip"
+                               data-tip="Registrar Nueva Consulta"
+                               aria-label="Registrar Nueva Consulta">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- ── Accesos rápidos ────────────────────────────────────── -->
         <div class="stats-grid">
 
