@@ -2,7 +2,7 @@
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
- 
+
 <head th:replace="~{fragments/layout :: head('Producto')}"></head>
 
 <!-- Tom Select — buscador de proveedores -->
@@ -21,7 +21,7 @@
 
 <body>
 <div th:replace="~{fragments/layout :: sidebar}"></div>
- 
+
 <div class="main-content">
     <div class="topbar">
         <div>
@@ -32,12 +32,12 @@
             <a th:href="@{/productos}" class="btn btn-secondary">← Volver</a>
         </div>
     </div>
- 
+
     <div class="page-body">
- 
+
         <div id="alertaValidacion" class="alert alert--danger" style="display:none"></div>
         <div th:if="${mensajeError}" class="alert alert--danger"><span th:text="${mensajeError}"></span></div>
- 
+
         <!-- ═══ FORM OCULTO ═══════════════════════════════════ -->
         <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"
               onsubmit="return sincronizarYValidar()">
@@ -86,7 +86,7 @@
             <input type="hidden" id="hPrecioVentaL" name="precioVentaLente"    th:value="${producto.precioVentaLente}"/>
             <input type="hidden" id="hStockL"       name="stockLente"          th:value="${producto.stockLente}"/>
         </form>
- 
+
         <!-- ═══ SELECCIÓN DE TIPO ════════════════════════════ -->
         <div id="panelTipos" class="card mb-3" style="display:block">
             <div class="card-header"><div class="card-title">¿Qué tipo de producto vas a registrar?</div></div>
@@ -115,7 +115,7 @@
                 </div>
             </div>
         </div>
- 
+
         <!-- ═══ PANEL ARMAZÓN ════════════════════════════════ -->
         <div id="panelArmazon" style="display:none">
             <div class="card mb-3">
@@ -217,10 +217,10 @@
                 <button type="submit" form="formPrincipal" class="btn btn-primary"><span th:text="${editando} ? 'Guardar Cambios' : 'Crear Producto'"></span></button>
             </div>
         </div>
- 
+
         <!-- ═══ PANEL LENTE ══════════════════════════════════ -->
         <div id="panelLente" style="display:none">
- 
+
             <!-- Datos -->
             <div class="card mb-3">
                 <div class="card-header">
@@ -237,7 +237,7 @@
                         <div class="form-group"><label class="form-label">Código Manual (Descriptivo) <span class="form-hint">Opcional</span></label><input type="text" id="vCodInternoL" class="form-control" placeholder="Ej: LNT-0.25-0.50 PC/TR/AR" th:value="${producto.codigoInternoLente}"></div>
                     </div>
                     <div class="form-group"><label class="form-label">Descripción del Producto * <span class="form-hint">Ej: LENTE -0.25 -0.50 POLICARBONATO TRANSPARENTE ANTIREFLEJO</span></label><input type="text" id="vDetalleL" class="form-control" placeholder="Ej: LENTE -0.25 -0.50 POLICARBONATO TRANSPARENTE ANTIREFLEJO" th:value="${producto.detalle}"></div>
- 
+
                     <div class="lente-seccion-titulo" style="margin-top:20px"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Clasificación</div>
                     <div class="form-row form-row-2">
                         <div class="form-group">
@@ -259,7 +259,7 @@
                             </select>
                         </div>
                     </div>
- 
+
                     <div class="lente-seccion-titulo" style="margin-top:20px">🧪 Familia y Sub-Familia</div>
                     <div class="form-row form-row-2">
                         <div class="form-group">
@@ -307,7 +307,7 @@
                             </select>
                         </div>
                     </div>
- 
+
                     <div class="lente-seccion-titulo" style="margin-top:20px">🏭 Proveedor y Marca</div>
                     <div class="form-row form-row-2">
                         <div class="form-group">
@@ -329,7 +329,7 @@
                     <div class="form-group" style="margin-top:8px"><label class="form-label">Descripción adicional (opcional)</label><textarea id="vDescL" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea></div>
                 </div>
             </div>
- 
+
             <!-- ── Stock Inicial por Sucursal ─────────── -->
             <div class="card mb-3">
                 <div class="card-header">
@@ -383,7 +383,7 @@
                     </div>
                 </div>
             </div>
- 
+
             <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px">
                 <a th:href="@{/productos}" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" form="formPrincipal" class="btn btn-primary">
@@ -391,7 +391,7 @@
                 </button>
             </div>
         </div>
- 
+
         <!-- ═══ PANEL LIMPIEZA / ACCESORIO ═══════════════════ -->
         <div id="panelOtro" style="display:none">
             <div class="card mb-3">
@@ -479,10 +479,44 @@
                 <button type="submit" form="formPrincipal" class="btn btn-primary"><span th:text="${editando} ? 'Guardar Cambios' : 'Crear Producto'"></span></button>
             </div>
         </div>
- 
+
     </div>
 </div>
- 
+
+<!-- ═══ MODAL GESTIÓN DE TRATAMIENTOS ══════════════════════════════════════════ -->
+<div id="modalTratamientos" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,27,42,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;width:min(560px,95vw);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(13,27,42,0.35);overflow:hidden">
+        <!-- Cabecera -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #f1f5f9;background:#f8fafc">
+            <div>
+                <div style="font-weight:700;font-size:16px;color:#0f172a">Gestión de Sub-Familias</div>
+                <div style="font-size:12px;color:#64748b;margin-top:2px">Administra los tratamientos de lentes</div>
+            </div>
+            <button type="button" onclick="cerrarModalTratamientos()" style="background:none;border:1px solid #e2e8f0;cursor:pointer;color:#64748b;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f1f5f9';this.style.color='#1e293b'" onmouseout="this.style.background='none';this.style.color='#64748b'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <!-- Formulario de agregar -->
+        <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;background:#ffffff">
+            <div style="display:flex;gap:8px">
+                <input type="text" id="inputNuevoTratamiento" class="form-control" placeholder="Nombre del nuevo tratamiento (Ej: Antirreflejo)" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();guardarNuevoTratamiento();}">
+                <button type="button" class="btn btn-primary" onclick="guardarNuevoTratamiento()" id="btnGuardarTratamiento" style="white-space:nowrap;min-width:90px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar
+                </button>
+            </div>
+            <div id="alertaTratamiento" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px"></div>
+        </div>
+        <!-- Lista de tratamientos -->
+        <div style="overflow-y:auto;flex:1;padding:16px 24px 20px;background:#ffffff">
+            <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Tratamientos existentes</div>
+            <div id="listaTratamientosModal">
+                <div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">Cargando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .tipo-card { cursor:pointer;padding:24px 20px;border-radius:12px;border:2px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);text-align:center;min-width:130px;flex:1;max-width:170px;transition:all 0.2s; }
 .tipo-card:hover { border-color:rgba(39,194,201,0.5);background:rgba(39,194,201,0.07);transform:translateY(-2px); }
@@ -491,8 +525,15 @@
 .tipo-card:hover svg { transform:scale(1.1); }
 .lente-seccion-titulo { font-size:11px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid rgba(39,194,201,0.15); }
 .form-hint { font-size:11px;font-weight:400;color:var(--text-gris);margin-left:6px; }
+.trat-fila { display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;margin-bottom:4px;border:1px solid transparent;transition:background 0.15s; }
+.trat-fila:hover { background:#f8fafc;border-color:#e2e8f0; }
+.trat-fila .trat-nombre { flex:1;font-size:14px;color:#1e293b; }
+.trat-fila .trat-id { font-size:11px;color:#94a3b8;font-family:monospace;min-width:40px; }
+.btn-icon { background:none;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;padding:5px 8px;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;color:#64748b; }
+.btn-icon:hover { border-color:#0077A8;color:#0077A8;background:#e0f7fc; }
+.btn-icon.eliminar:hover { border-color:#DC2626;color:#DC2626;background:#fee2e2; }
 </style>
- 
+
 <script th:inline="javascript">
 const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
 const TITULOS = { ARMAZON:'Armazón', LENTE:'Lente', LIMPIEZA:'Producto de Limpieza', ACCESORIO:'Accesorio' };
@@ -503,7 +544,7 @@ const CAMPOS = {
     ACCESORIO:{ proveedor:'vProveedorO', codigo:'vCodigoO', codigoFabrica:'vCodigoFabricaO', detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null }
 };
 const proximoId = /*[[${proximoId != null ? proximoId : 0}]]*/ 0;
- 
+
 document.addEventListener('DOMContentLoaded', () => {
     if (tipoInicial && tipoInicial !== '' && tipoInicial !== 'GENERAL') seleccionarTipo(tipoInicial);
     else document.getElementById('panelTipos').style.display = 'block';
@@ -526,14 +567,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
- 
+
 function seleccionarTipo(tipo) {
     ['panelTipos','panelArmazon','panelLente','panelOtro'].forEach(id => document.getElementById(id).style.display = 'none');
     document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('activo'));
     const card = document.getElementById('card-' + tipo);
     if (card) card.classList.add('activo');
     document.getElementById('hTipo').value = tipo;
-    
+
     // Autocompletar el preview del código interno si estamos creando un producto nuevo
     if (proximoId > 0 && !document.getElementById('hCodigo').value) {
         let pref = 'PROD';
@@ -551,13 +592,13 @@ function seleccionarTipo(tipo) {
     else if (tipo === 'LENTE') { document.getElementById('panelLente').style.display = 'block'; }
     else { document.getElementById('tituloOtro').textContent = TITULOS[tipo] + ' — Datos'; document.getElementById('panelOtro').style.display = 'block'; }
 }
- 
+
 function cambiarTipo() {
     ['panelArmazon','panelLente','panelOtro'].forEach(id => document.getElementById(id).style.display = 'none');
     document.getElementById('panelTipos').style.display = 'block';
     document.getElementById('hTipo').value = '';
 }
- 
+
 function toggleStockArmazon(chk) { _toggleStock(chk,'A'); }
 function toggleStockLente(chk)   { _toggleStock(chk,'L'); }
 function toggleStockOtro(chk)    { _toggleStock(chk,'O'); }
@@ -569,7 +610,7 @@ function _toggleStock(chk, pre) {
     const hidden = document.getElementById('sucActiva_' + sid);
     if (hidden) hidden.value = chk.checked ? '1' : '0';
 }
- 
+
 function calcularPrecioFila(elemento) {
     const re = /^(costo|utilidad|iva|precio)(A|L|O)_(\d+)$/;
     const parts = elemento.id.match(re);
@@ -605,7 +646,7 @@ function calcularUtilidadFila(elemento) {
     const precio = parseFloat(precioInput?.value) || 0;
     const iva = parseFloat(ivaInput?.value) || 0;
     if (costo <= 0 || !utilInput || utilInput.readOnly) return;
-    
+
     // precio = costo * (1 + utilidad/100) * (1 + iva/100)
     // precio / (costo * (1 + iva/100)) = 1 + utilidad/100
     // utilidad = ((precio / (costo * (1 + iva/100))) - 1) * 100
@@ -613,7 +654,7 @@ function calcularUtilidadFila(elemento) {
     const utilidad = ((precio / (costo * factorIva)) - 1) * 100;
     utilInput.value = utilidad > 0 ? utilidad.toFixed(2) : 0;
 }
- 
+
 function sincronizarYValidar() {
     const tipo   = document.getElementById('hTipo').value;
     const alerta = document.getElementById('alertaValidacion');
@@ -623,7 +664,7 @@ function sincronizarYValidar() {
     const detalle = document.getElementById(c.detalle)?.value?.trim();
     if (!codigo)  { alerta.textContent = '⚠ Ocurrió un error al generar el código.';          alerta.style.display='block'; document.getElementById(c.codigo).focus();  return false; }
     if (!detalle) { alerta.textContent = '⚠ El nombre / detalle es obligatorio.'; alerta.style.display='block'; document.getElementById(c.detalle).focus(); return false; }
- 
+
     document.getElementById('hCodigo').value        = codigo;
     document.getElementById('hCodigoFabrica').value = c.codigoFabrica ? (document.getElementById(c.codigoFabrica)?.value?.trim() || '') : '';
     document.getElementById('hDetalle').value       = detalle;
@@ -637,7 +678,7 @@ function sincronizarYValidar() {
     document.getElementById('hTipoL').value     = c.tipoL    ? (document.getElementById(c.tipoL)?.value    || '') : '';
     document.getElementById('hMaterialL').value = c.matL     ? (document.getElementById(c.matL)?.value     || '') : '';
     document.getElementById('hTratL').value     = c.tratL    ? (document.getElementById(c.tratL)?.value    || '') : '';
- 
+
     if (tipo === 'ARMAZON') {
         document.getElementById('hMaterialA').value  = document.getElementById(c.materialA)?.value  || '';
         document.getElementById('hFamiliaA').value   = document.getElementById(c.familiaA)?.value   || '';
@@ -650,7 +691,7 @@ function sincronizarYValidar() {
         document.getElementById('hMedPuenteA').value = document.getElementById(c.medPuente)?.value  || '';
         document.getElementById('hMedVarA').value    = document.getElementById(c.medVar)?.value     || '';
     }
- 
+
     if (tipo === 'LENTE') {
         document.getElementById('hClasifL').value      = document.getElementById(c.clasif)?.value      || '';
         document.getElementById('hSubFamiliaL').value  = document.getElementById(c.subFamilia)?.value  || '';
@@ -666,7 +707,7 @@ function sincronizarYValidar() {
         });
         document.getElementById('hStockL').value = totalStock;
     }
- 
+
     alerta.style.display = 'none';
     const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
     const pre = prefijos[tipo] || 'O';
@@ -688,13 +729,13 @@ function sincronizarYValidar() {
     });
     return true;
 }
- 
 
- 
+
+
 async function agregarMarca(selectId) {
     const nombre = prompt('Nombre de la nueva marca:');
     if (!nombre?.trim()) return;
-    const csrf = document.querySelector('[name="_csrf"]').value;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
     const r = await fetch('/productos/api/marca', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
     const data = await r.json();
     if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
@@ -703,21 +744,159 @@ async function agregarMarca(selectId) {
 async function agregarCategoria(selectId) {
     const nombre = prompt('Nombre de la nueva categoría:');
     if (!nombre?.trim()) return;
-    const csrf = document.querySelector('[name="_csrf"]').value;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
     const r = await fetch('/productos/api/categoria', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
     const data = await r.json();
     if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
     else alert('Error: ' + data.error);
 }
-async function agregarTratamiento(selectId) {
-    const nombre = prompt('Nombre del nuevo tratamiento:');
-    if (!nombre?.trim()) return;
-    const csrf = document.querySelector('[name="_csrf"]').value;
-    const r = await fetch('/productos/api/tratamiento', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
-    const data = await r.json();
-    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
-    else alert('Error: ' + data.error);
+// ─── Modal Gestión de Tratamientos ──────────────────────────────
+let _tratamientoSelectId = null;
+
+function agregarTratamiento(selectId) {
+    _tratamientoSelectId = selectId;
+    const modal = document.getElementById('modalTratamientos');
+    modal.style.display = 'flex';
+    document.getElementById('inputNuevoTratamiento').value = '';
+    ocultarAlertaTratamiento();
+    cargarListaTratamientos();
+    setTimeout(() => document.getElementById('inputNuevoTratamiento').focus(), 80);
 }
+
+function cerrarModalTratamientos() {
+    document.getElementById('modalTratamientos').style.display = 'none';
+}
+
+function mostrarAlertaTratamiento(msg, esError) {
+    const el = document.getElementById('alertaTratamiento');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = esError ? 'rgba(239,68,68,0.12)' : 'rgba(39,194,201,0.12)';
+    el.style.color = esError ? '#ef4444' : 'var(--turquesa)';
+    el.style.border = esError ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(39,194,201,0.3)';
+}
+
+function ocultarAlertaTratamiento() {
+    document.getElementById('alertaTratamiento').style.display = 'none';
+}
+
+async function cargarListaTratamientos() {
+    const contenedor = document.getElementById('listaTratamientosModal');
+    contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">Cargando...</div>';
+    try {
+        const r = await fetch('/productos/api/tratamiento/lista');
+        const lista = await r.json();
+        if (lista.length === 0) {
+            contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">No hay tratamientos registrados aún.</div>';
+            return;
+        }
+        contenedor.innerHTML = lista.map(t => `
+            <div class="trat-fila" id="trat-fila-${t.id}">
+                <span class="trat-id">#${t.id}</span>
+                <span class="trat-nombre" id="trat-nombre-${t.id}">${t.nombre}</span>
+                <button type="button" class="btn-icon" title="Editar" onclick="editarTratamiento(${t.id}, '${t.nombre.replace(/'/g, "\\'")}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button type="button" class="btn-icon eliminar" title="Eliminar" onclick="eliminarTratamiento(${t.id}, '${t.nombre.replace(/'/g, "\\'")}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            </div>`).join('');
+    } catch(e) {
+        contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#DC2626;font-size:13px">Error al cargar tratamientos.</div>';
+    }
+}
+
+async function guardarNuevoTratamiento() {
+    const input = document.getElementById('inputNuevoTratamiento');
+    const nombre = input.value.trim();
+    if (!nombre) { mostrarAlertaTratamiento('Por favor escribe un nombre.', true); return; }
+    const btn = document.getElementById('btnGuardarTratamiento');
+    btn.disabled = true;
+    ocultarAlertaTratamiento();
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    try {
+        const r = await fetch('/productos/api/tratamiento', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
+        const data = await r.json();
+        if (data.ok) {
+            mostrarAlertaTratamiento(`✓ Tratamiento "${data.nombre}" agregado.`, false);
+            input.value = '';
+            // Auto-seleccionar en el desplegable principal
+            if (_tratamientoSelectId) {
+                const sel = document.getElementById(_tratamientoSelectId);
+                if (sel) {
+                    // Quitar si ya existe
+                    const yaExiste = Array.from(sel.options).find(o => o.value == data.id);
+                    if (!yaExiste) sel.appendChild(new Option(data.nombre, data.id));
+                    sel.value = data.id;
+                    // Sync al hidden
+                    document.getElementById('hTratL').value = data.id;
+                }
+            }
+            cargarListaTratamientos();
+        } else {
+            mostrarAlertaTratamiento(data.error || 'Error al guardar.', true);
+        }
+    } catch(e) {
+        mostrarAlertaTratamiento('Error de conexión.', true);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function editarTratamiento(id, nombreActual) {
+    const nuevoNombre = prompt('Editar tratamiento:', nombreActual);
+    if (!nuevoNombre?.trim() || nuevoNombre.trim() === nombreActual) return;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    try {
+        const r = await fetch(`/productos/api/tratamiento/${id}`, { method:'PUT', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nuevoNombre.trim())}&_csrf=${csrf}` });
+        const data = await r.json();
+        if (data.ok) {
+            // Actualizar texto en la fila del modal
+            const span = document.getElementById(`trat-nombre-${id}`);
+            if (span) span.textContent = data.nombre;
+            // Actualizar en el select principal si existe
+            if (_tratamientoSelectId) {
+                const sel = document.getElementById(_tratamientoSelectId);
+                const opt = sel ? Array.from(sel.options).find(o => o.value == id) : null;
+                if (opt) opt.text = data.nombre;
+            }
+            mostrarAlertaTratamiento(`✓ Tratamiento actualizado correctamente.`, false);
+        } else {
+            alert('Error: ' + (data.error || 'No se pudo actualizar.'));
+        }
+    } catch(e) {
+        alert('Error de conexión.');
+    }
+}
+
+async function eliminarTratamiento(id, nombre) {
+    if (!confirm(`¿Eliminar el tratamiento "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    try {
+        const r = await fetch(`/productos/api/tratamiento/${id}`, { method:'DELETE', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`_csrf=${csrf}` });
+        const data = await r.json();
+        if (data.ok) {
+            // Eliminar fila del modal
+            const fila = document.getElementById(`trat-fila-${id}`);
+            if (fila) fila.remove();
+            // Eliminar del select principal si existe
+            if (_tratamientoSelectId) {
+                const sel = document.getElementById(_tratamientoSelectId);
+                const opt = sel ? Array.from(sel.options).find(o => o.value == id) : null;
+                if (opt) { opt.remove(); sel.value = ''; document.getElementById('hTratL').value = ''; }
+            }
+            mostrarAlertaTratamiento(`✓ Tratamiento eliminado.`, false);
+            // Recargar si queda vacío
+            const lista = document.getElementById('listaTratamientosModal');
+            if (lista && lista.querySelectorAll('.trat-fila').length === 0) cargarListaTratamientos();
+        } else {
+            mostrarAlertaTratamiento(data.error || 'No se pudo eliminar.', true);
+        }
+    } catch(e) {
+        mostrarAlertaTratamiento('Error de conexión.', true);
+    }
+}
+
+// Cerrar modal al hacer clic en el fondo oscuro
+document.getElementById('modalTratamientos')?.addEventListener('click', function(e) {
+    if (e.target === this) cerrarModalTratamientos();
+});
 </script>
 </body>
 </html>
