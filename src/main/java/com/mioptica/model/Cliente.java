@@ -56,6 +56,9 @@ public class Cliente {
     @Column(name = "zona", length = 10)
     private String zona;
 
+    @Column(name = "departamento", length = 80)
+    private String departamento;
+
     @Column(name = "municipio", length = 80)
     private String municipio;
 
