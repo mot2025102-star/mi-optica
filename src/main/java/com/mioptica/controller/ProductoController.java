@@ -87,7 +87,6 @@ public class ProductoController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
     public String nuevo(Model model) {
         model.addAttribute("producto",     new Producto());
-        model.addAttribute("categorias",   productoService.listarCategorias());
         model.addAttribute("marcas",       productoService.listarMarcas());
         model.addAttribute("sucursales",   productoService.listarSucursales());
         model.addAttribute("tiposLente",   productoService.listarTiposLente());
@@ -112,7 +111,6 @@ public class ProductoController {
             inventarios.forEach(i -> invMap.put(i.getSucursal().getIdSucursal(), i));
 
             model.addAttribute("producto",     p);
-            model.addAttribute("categorias",   productoService.listarCategorias());
             model.addAttribute("marcas",       productoService.listarMarcas());
             model.addAttribute("sucursales",   productoService.listarSucursales());
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
@@ -153,7 +151,6 @@ public class ProductoController {
             RedirectAttributes ra) {
  
         if (result.hasErrors()) {
-            model.addAttribute("categorias",   productoService.listarCategorias());
             model.addAttribute("marcas",       productoService.listarMarcas());
             model.addAttribute("sucursales",   productoService.listarSucursales());
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
@@ -173,7 +170,6 @@ public class ProductoController {
                             : "Producto actualizado correctamente.");
         } catch (Exception e) {
             model.addAttribute("mensajeError", e.getMessage());
-            model.addAttribute("categorias",   productoService.listarCategorias());
             model.addAttribute("marcas",       productoService.listarMarcas());
             model.addAttribute("sucursales",   productoService.listarSucursales());
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
@@ -201,18 +197,6 @@ public class ProductoController {
     }
  
     // ─── REST API ─────────────────────────────────────────────────
-    @PostMapping("/api/categoria")
-    @ResponseBody
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
-    public ResponseEntity<Map<String, Object>> guardarCategoria(@RequestParam String nombre) {
-        try {
-            Categoria cat = productoService.guardarCategoria(nombre);
-            return ResponseEntity.ok(Map.of("ok", true, "id", cat.getIdCategoria(), "nombre", cat.getNombre()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
-        }
-    }
- 
     @PostMapping("/api/marca")
     @ResponseBody
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")

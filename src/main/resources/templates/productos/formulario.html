@@ -62,7 +62,6 @@
             <input type="hidden" id="hModelo"    name="modelo"                th:value="${producto.modelo}"/>
             <input type="hidden" id="hMarca"     name="marca.idMarca"         th:value="${producto.marca != null ? producto.marca.idMarca : ''}"/>
             <input type="hidden" id="hProveedor" name="proveedor.idProveedor" th:value="${producto.proveedor != null ? producto.proveedor.idProveedor : ''}"/>
-            <input type="hidden" id="hCategoria" name="categoria.idCategoria" th:value="${producto.categoria != null ? producto.categoria.idCategoria : ''}"/>
             <input type="hidden" id="hTipoL"     name="tipoLente.idTipo"               th:value="${producto.tipoLente != null ? producto.tipoLente.idTipo : ''}"/>
             <input type="hidden" id="hMaterialL" name="materialLente.idMaterial"       th:value="${producto.materialLente != null ? producto.materialLente.idMaterial : ''}"/>
             <input type="hidden" id="hTratL"     name="tratamientoLente.idTratamiento" th:value="${producto.tratamientoLente != null ? producto.tratamientoLente.idTratamiento : ''}"/>
@@ -673,7 +672,6 @@ function sincronizarYValidar() {
     document.getElementById('hUnidad').value    = c.unidad   ? (document.getElementById(c.unidad)?.value   || 'Unidad') : 'Unidad';
     document.getElementById('hModelo').value    = c.modelo   ? (document.getElementById(c.modelo)?.value   || '') : '';
     document.getElementById('hMarca').value     = c.marca    ? (document.getElementById(c.marca)?.value    || '') : '';
-    document.getElementById('hCategoria').value = '';
     document.getElementById('hProveedor').value = c.proveedor  ? (document.getElementById(c.proveedor)?.value  || '') : '';
     document.getElementById('hTipoL').value     = c.tipoL    ? (document.getElementById(c.tipoL)?.value    || '') : '';
     document.getElementById('hMaterialL').value = c.matL     ? (document.getElementById(c.matL)?.value     || '') : '';
@@ -737,15 +735,6 @@ async function agregarMarca(selectId) {
     if (!nombre?.trim()) return;
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     const r = await fetch('/productos/api/marca', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
-    const data = await r.json();
-    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
-    else alert('Error: ' + data.error);
-}
-async function agregarCategoria(selectId) {
-    const nombre = prompt('Nombre de la nueva categoría:');
-    if (!nombre?.trim()) return;
-    const csrf = document.querySelector('meta[name="_csrf"]').content;
-    const r = await fetch('/productos/api/categoria', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
     const data = await r.json();
     if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
     else alert('Error: ' + data.error);

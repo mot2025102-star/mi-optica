@@ -56,56 +56,10 @@ public class AuthController {
         return "login";
     }
 
-    // ─── Dashboards por rol ───────────────────────────────────────
-    @GetMapping("/dashboard/admin")
-    public String dashboardAdmin(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Usuario usuario = usuarioRepo.findByUsername(userDetails.getUsername()).orElseThrow();
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("stockBajo", usuario.getSucursal() != null ? inventarioRepo.findStockBajoBySucursal(usuario.getSucursal().getIdSucursal()) : java.util.List.of());
-        return "dashboard/admin";
-    }
-
-    @GetMapping("/dashboard/vendedor")
-    public String dashboardVendedor(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Usuario usuario = usuarioRepo.findByUsername(userDetails.getUsername()).orElseThrow();
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("stockBajo", usuario.getSucursal() != null ? inventarioRepo.findStockBajoBySucursal(usuario.getSucursal().getIdSucursal()) : java.util.List.of());
-        return "dashboard/vendedor";
-    }
-
-    @GetMapping("/dashboard/bodeguero")
-    public String dashboardBodeguero(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Usuario usuario = usuarioRepo.findByUsername(userDetails.getUsername()).orElseThrow();
-        model.addAttribute("usuario", usuario);
-        return "dashboard/bodeguero";
-    }
-
-    @GetMapping("/dashboard/optometrista")
-    public String dashboardOptometrista(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Usuario usuario = usuarioRepo.findByUsername(userDetails.getUsername()).orElseThrow();
-        model.addAttribute("usuario", usuario);
-        return "dashboard/optometrista";
-    }
-
-    @GetMapping("/dashboard/contador")
-    public String dashboardContador(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Usuario usuario = usuarioRepo.findByUsername(userDetails.getUsername()).orElseThrow();
-        model.addAttribute("usuario", usuario);
-        return "dashboard/contador";
-    }
-
-    // Redirige "/" al dashboard correcto
+    // Redirige "/" al dashboard unificado
     @GetMapping("/")
     public String root(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) return "redirect:/login";
-        String rol = userDetails.getAuthorities().iterator().next().getAuthority();
-        return "redirect:/dashboard/" + switch (rol) {
-            case "ROLE_ADMINISTRADOR" -> "admin";
-            case "ROLE_VENDEDOR"      -> "vendedor";
-            case "ROLE_BODEGUERO"     -> "bodeguero";
-            case "ROLE_OPTOMETRISTA"  -> "optometrista";
-            case "ROLE_CONTADOR"      -> "contador";
-            default -> "admin";
-        };
+        return "redirect:/dashboard";
     }
 }

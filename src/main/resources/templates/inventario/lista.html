@@ -93,23 +93,57 @@
                         <tr>
                             <th>Código</th>
                             <th>Producto</th>
-                            <th>Categoría</th>
+                            <th>Tipo</th>
                             <th th:if="${esAdmin}">Sucursal</th>
                             <th style="text-align:center">Existencia</th>
                             <th style="text-align:right">Costo</th>
                             <th style="text-align:right">Precio venta</th>
+                            <th style="text-align:right">Ganancia</th>
+                            <th style="text-align:right">% Ganancia</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${items.isEmpty()}">
-                            <td colspan="8" style="text-align:center;padding:50px;color:var(--gris-texto)">
+                            <td colspan="10" style="text-align:center;padding:50px;color:var(--gris-texto)">
                                 <div style="font-size:40px"></div>
                                 <div style="margin-top:10px">Sin registros de inventario.</div>
                             </td>
                         </tr>
 
-                        <tr th:each="inv : ${items}">
+                        <tr th:each="inv : ${items}"
+                            th:data-codigo="${inv.producto.codigo}"
+                            th:data-nombre="${inv.producto.detalle}"
+                            th:data-tipo="${inv.producto.tipoProducto}"
+                            th:data-marca="${inv.producto.marca != null ? inv.producto.marca.nombre : ''}"
+                            th:data-color="${inv.producto.color ?: ''}"
+                            th:data-modelo="${inv.producto.modelo ?: ''}"
+                            th:data-unidad="${inv.producto.unidadMedida ?: 'Unidad'}"
+                            th:data-existencia="${inv.existencia ?: 0}"
+                            th:data-costo="${inv.costo ?: 0}"
+                            th:data-precio="${inv.precioVenta ?: 0}"
+                            th:data-sucursal="${inv.sucursal.nombre}"
+                            th:data-activo="${inv.producto.activo}"
+                            th:data-desc="${inv.producto.descripcion ?: ''}"
+                            th:data-codigofabrica="${inv.producto.codigoFabrica ?: ''}"
+                            th:data-segmento="${inv.producto.segmentoArmazon ?: ''}"
+                            th:data-material="${inv.producto.materialArmazon ?: ''}"
+                            th:data-familia="${inv.producto.familiaArmazon ?: ''}"
+                            th:data-forma="${inv.producto.formaArmazon ?: ''}"
+                            th:data-gama="${inv.producto.gamaArmazon ?: ''}"
+                            th:data-clasif="${inv.producto.clasificacionLente ?: ''}"
+                            th:data-rango="${inv.producto.rangoLente ?: ''}"
+                            th:data-proveedor="${inv.producto.proveedor != null ? inv.producto.proveedor.nombre : ''}"
+                            th:data-medh="${inv.producto.medHorizontal ?: ''}"
+                            th:data-medv="${inv.producto.medVertical ?: ''}"
+                            th:data-medd="${inv.producto.medDiagonal ?: ''}"
+                            th:data-medp="${inv.producto.medPuente ?: ''}"
+                            th:data-medvar="${inv.producto.medVarrilla ?: ''}"
+                            th:data-codmanual="${inv.producto.codigoInternoLente ?: ''}"
+                            th:data-tipol="${inv.producto.tipoLente != null ? inv.producto.tipoLente.nombre : ''}"
+                            th:data-matl="${inv.producto.materialLente != null ? inv.producto.materialLente.nombre : ''}"
+                            th:data-tratl="${inv.producto.tratamientoLente != null ? inv.producto.tratamientoLente.nombre : ''}">
+
                             <td class="text-turquesa fw-600 text-sm"
                                 th:text="${inv.producto.codigo}">
                             </td>
@@ -119,12 +153,23 @@
                                      th:text="${inv.producto.unidadMedida ?: 'Unidad'}">
                                 </div>
                             </td>
+
+                            <!-- TIPO / CATEGORÍA derivada de tipoProducto -->
                             <td>
-                                <span th:if="${inv.producto.categoria != null}"
-                                      style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.1);color:var(--turquesa)"
-                                      th:text="${inv.producto.categoria.nombre}">
-                                </span>
+                                <th:block th:with="tp=${inv.producto.tipoProducto}">
+                                    <span th:if="${tp == 'ARMAZON'}"
+                                          style="font-size:11px;padding:3px 9px;border-radius:10px;background:rgba(99,102,241,0.12);color:#6366f1;font-weight:600">Armazón</span>
+                                    <span th:if="${tp == 'LENTE'}"
+                                          style="font-size:11px;padding:3px 9px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa);font-weight:600">Lente</span>
+                                    <span th:if="${tp == 'LIMPIEZA'}"
+                                          style="font-size:11px;padding:3px 9px;border-radius:10px;background:rgba(245,158,11,0.12);color:#d97706;font-weight:600">Limpieza</span>
+                                    <span th:if="${tp == 'ACCESORIO'}"
+                                          style="font-size:11px;padding:3px 9px;border-radius:10px;background:rgba(236,72,153,0.12);color:#ec4899;font-weight:600">Accesorio</span>
+                                    <span th:if="${tp == null or tp == 'GENERAL'}"
+                                          style="font-size:11px;padding:3px 9px;border-radius:10px;background:rgba(100,116,139,0.12);color:#64748b;font-weight:600">General</span>
+                                </th:block>
                             </td>
+
                             <td th:if="${esAdmin}" class="text-sm"
                                 th:text="${inv.sucursal.nombre}">
                             </td>
@@ -153,15 +198,47 @@
                                 <span th:if="${inv.precioVenta == null or inv.precioVenta.compareTo(T(java.math.BigDecimal).ZERO) == 0}">—</span>
                             </td>
 
+                            <!-- Ganancia (Q) -->
+                            <td style="text-align:right">
+                                <th:block th:with="gan=${(inv.costo != null and inv.precioVenta != null and inv.costo.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? inv.precioVenta.subtract(inv.costo) : null}">
+                                    <span th:if="${gan != null and gan.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                          style="color:#16a34a;font-weight:600;font-size:13px"
+                                          th:text="'Q ' + ${#numbers.formatDecimal(gan,1,'COMMA',2,'POINT')}"></span>
+                                    <span th:if="${gan == null or gan.compareTo(T(java.math.BigDecimal).ZERO) <= 0}"
+                                          style="color:var(--gris-texto)">—</span>
+                                </th:block>
+                            </td>
+
+                            <!-- % Ganancia sobre costo -->
+                            <td style="text-align:right">
+                                <th:block th:with="pct=${(inv.costo != null and inv.precioVenta != null and inv.costo.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? inv.precioVenta.subtract(inv.costo).multiply(new java.math.BigDecimal('100')).divide(inv.costo,2,T(java.math.RoundingMode).HALF_UP) : null}">
+                                    <span th:if="${pct != null and pct.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                          style="display:inline-block;padding:2px 8px;border-radius:8px;background:rgba(22,163,74,0.10);color:#16a34a;font-weight:700;font-size:12px"
+                                          th:text="${#numbers.formatDecimal(pct,1,'COMMA',1,'POINT')} + '%'"></span>
+                                    <span th:if="${pct == null or pct.compareTo(T(java.math.BigDecimal).ZERO) <= 0}"
+                                          style="color:var(--gris-texto)">—</span>
+                                </th:block>
+                            </td>
+
                             <td>
                                 <div class="d-flex gap-1">
+                                    <!-- VER DETALLE (nuevo) -->
+                                    <button class="icon-btn icon-btn--success has-tip"
+                                            onclick="verDetalleProducto(this)"
+                                            data-tip="Ver Detalle del Producto"
+                                            aria-label="Ver Detalle del Producto">
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                                        </svg>
+                                    </button>
                                     <!-- Kardex rápido -->
                                     <button class="icon-btn icon-btn--info has-tip"
                                             th:data-id="${inv.producto.idProducto}"
                                             th:data-nombre="${inv.producto.detalle}"
                                             onclick="verKardexBtn(this)"
-                                            data-tip="Ver Detalle Inventario"
-                                            aria-label="Ver Detalle Inventario">
+                                            data-tip="Ver Movimientos Kardex"
+                                            aria-label="Ver Movimientos Kardex">
                                         <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.8"/>
                                             <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -177,8 +254,8 @@
                                             th:data-precio="${inv.precioVenta ?: 0}"
                                             th:data-nombre="${inv.producto.detalle}"
                                             onclick="abrirAjusteBtn(this)"
-                                            data-tip="Editar Registro"
-                                            aria-label="Editar Registro">
+                                            data-tip="Ajustar Stock"
+                                            aria-label="Ajustar Stock">
                                         <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <path d="M8 7h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                             <path d="M6 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -273,6 +350,51 @@
     </div>
 </div>
 
+<!-- ─── Modal Vista Rápida / Detalle de Producto ─── -->
+<div class="modal-overlay" id="modalDetalle">
+    <div class="modal modal-lg" style="max-width:700px">
+        <div class="modal-header" style="background:linear-gradient(135deg,rgba(39,194,201,0.08),rgba(99,102,241,0.06));border-bottom:1px solid rgba(39,194,201,0.15)">
+            <div>
+                <div class="modal-title" id="detalleTitulo" style="font-size:17px"></div>
+                <div id="detalleCodigo" style="font-size:11px;font-family:monospace;color:var(--turquesa);margin-top:2px;opacity:0.85"></div>
+            </div>
+            <button class="modal-close" onclick="document.getElementById('modalDetalle').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" id="detalleBody" style="padding:0">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="document.getElementById('modalDetalle').classList.remove('show')">Cerrar</button>
+            <a id="detalleLinkEditar" href="#" class="btn btn-primary" style="display:none">Editar Producto →</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Mejoras visuales para el modal de detalle */
+.detalle-seccion { padding: 18px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.detalle-seccion:last-child { border-bottom: none; }
+.detalle-seccion-titulo {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--turquesa); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+}
+.detalle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.detalle-campo { display: flex; flex-direction: column; gap: 2px; }
+.detalle-campo label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+.detalle-campo span { font-size: 14px; color: #1e293b; font-weight: 500; }
+.tipo-badge-detalle {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+}
+.ganancia-card {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: 10px;
+    background: rgba(22,163,74,0.07); border: 1px solid rgba(22,163,74,0.15);
+}
+.ganancia-card .ganancia-val { font-size: 18px; font-weight: 700; color: #16a34a; }
+.ganancia-card .ganancia-label { font-size: 11px; color: #64748b; }
+</style>
+
 <script>
 function filtrar(q) {
     q = q.toLowerCase();
@@ -321,7 +443,7 @@ async function verKardex(idProd, nombre) {
         'Ajuste':          { icon:'', cls:'badge-secondary'},
     };
 
-    let h = '<div class="table-wrapper"><table class="table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Sucursal</th><th>Ref.</th><th style="text-align:center">Cant.</th><th style="text-align:center">Ant.</th><th style="text-align:center">Nueva</th></tr></thead><tbody>';
+    let h = '<div class="table-wrapper"><table class="table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Sucursal</th><th>Ref.</th><th style="text-align:center">Cant.</th><th style="text-align:center">Saldo</th></tr></thead><tbody>';
     data.forEach(m => {
         const t = TIPOS[m.tipo] || { icon:'•', cls:'badge-secondary' };
         h += `<tr>
@@ -330,12 +452,208 @@ async function verKardex(idProd, nombre) {
             <td class="text-sm text-gris">${m.sucursal}</td>
             <td class="text-sm text-gris">${m.ref}</td>
             <td style="text-align:center" class="fw-600">${m.cant}</td>
-            <td style="text-align:center" class="text-gris">${m.ant}</td>
-            <td style="text-align:center" class="fw-600 text-turquesa">${m.nueva}</td>
+            <td style="text-align:center" class="fw-600 text-turquesa">${m.saldo}</td>
         </tr>`;
     });
     h += '</tbody></table></div>';
     document.getElementById('kardexBody').innerHTML = h;
+}
+
+// ─── Modal Vista Rápida / Detalle de Producto ────────────────────────
+function verDetalleProducto(btn) {
+    const tr = btn.closest('tr');
+    const d = tr.dataset;
+
+    const tipo       = d.tipo || 'GENERAL';
+    const costo      = parseFloat(d.costo)  || 0;
+    const precio     = parseFloat(d.precio) || 0;
+    const existencia = parseFloat(d.existencia) || 0;
+
+    // Ganancia
+    const ganancia    = precio > 0 && costo > 0 ? precio - costo : null;
+    const pctGanancia = ganancia !== null && costo > 0 ? (ganancia / costo) * 100 : null;
+
+    // Badge de tipo
+    const tipoCfg = {
+        'ARMAZON':  { label: 'Armazón',   bg:'rgba(99,102,241,0.12)',  color:'#6366f1'  },
+        'LENTE':    { label: 'Lente',      bg:'rgba(39,194,201,0.12)',  color:'var(--turquesa)' },
+        'LIMPIEZA': { label: 'Limpieza',   bg:'rgba(245,158,11,0.12)', color:'#d97706' },
+        'ACCESORIO':{ label: 'Accesorio',  bg:'rgba(236,72,153,0.12)', color:'#ec4899' },
+        'GENERAL':  { label: 'General',    bg:'rgba(100,116,139,0.12)',color:'#64748b'  },
+    };
+    const tc = tipoCfg[tipo] || tipoCfg['GENERAL'];
+    const tipoBadge = `<span class="tipo-badge-detalle" style="background:${tc.bg};color:${tc.color}">${tc.label}</span>`;
+
+    // Estado
+    const estadoBadge = d.activo === 'true'
+        ? `<span class="badge badge--success" style="font-size:11px">Activo</span>`
+        : `<span class="badge badge--danger"  style="font-size:11px">Inactivo</span>`;
+
+    // Badge stock
+    let stockColor = existencia === 0 ? '#dc2626' : existencia <= 2 ? '#d97706' : '#16a34a';
+    let stockBg    = existencia === 0 ? 'rgba(220,38,38,0.08)' : existencia <= 2 ? 'rgba(217,119,6,0.08)' : 'rgba(22,163,74,0.08)';
+
+    // Campos adicionales por tipo
+    let extraHtml = '';
+    if (tipo === 'ARMAZON') {
+        const filas = [
+            { label: 'Material',   val: formatVal(d.material)  },
+            { label: 'Familia',    val: formatVal(d.familia)   },
+            { label: 'Forma',      val: formatVal(d.forma)     },
+            { label: 'Segmento',   val: formatVal(d.segmento)  },
+            { label: 'Gama',       val: formatVal(d.gama)      },
+            { label: 'Modelo/Fab', val: formatVal(d.codigofabrica) },
+        ].filter(f => f.val !== '—');
+        const medidas = [
+            { label: 'Horizontal', val: d.medh },
+            { label: 'Vertical',   val: d.medv },
+            { label: 'Diagonal',   val: d.medd },
+            { label: 'Puente',     val: d.medp },
+            { label: 'Varilla',    val: d.medvar }
+        ].filter(f => f.val && f.val !== '0' && f.val !== '0.0');
+        
+        if (filas.length) {
+            extraHtml += `<div class="detalle-seccion">
+                <div class="detalle-seccion-titulo">🕶 Clasificación Armazón</div>
+                <div class="detalle-grid">${filas.map(f => campoHtml(f.label, f.val)).join('')}</div>
+            </div>`;
+        }
+        if (medidas.length) {
+            extraHtml += `<div class="detalle-seccion">
+                <div class="detalle-seccion-titulo">📏 Medidas (mm)</div>
+                <div class="detalle-grid">${medidas.map(f => campoHtml(f.label, f.val)).join('')}</div>
+            </div>`;
+        }
+    } else if (tipo === 'LENTE') {
+        const filas = [
+            { label: 'Cod. Manual',   val: formatVal(d.codmanual) },
+            { label: 'Clasificación', val: formatVal(d.clasif)  },
+            { label: 'Tipo',          val: formatVal(d.tipol)   },
+            { label: 'Material',      val: formatVal(d.matl)    },
+            { label: 'Tratamiento',   val: formatVal(d.tratl)   },
+            { label: 'Rango',         val: formatVal(d.rango)   },
+            { label: 'Color',         val: formatVal(d.color)   },
+        ].filter(f => f.val !== '—');
+        if (filas.length) {
+            extraHtml += `<div class="detalle-seccion">
+                <div class="detalle-seccion-titulo">🔬 Clasificación Lente</div>
+                <div class="detalle-grid">${filas.map(f => campoHtml(f.label, f.val)).join('')}</div>
+            </div>`;
+        }
+    } else if (tipo === 'LIMPIEZA' || tipo === 'ACCESORIO') {
+        const filas = [
+            { label: 'Cod. Fábrica',  val: formatVal(d.codigofabrica) },
+            { label: 'Color',         val: formatVal(d.color)   },
+        ].filter(f => f.val !== '—');
+        if (filas.length) {
+            extraHtml += `<div class="detalle-seccion">
+                <div class="detalle-seccion-titulo">🔧 Detalles Adicionales</div>
+                <div class="detalle-grid">${filas.map(f => campoHtml(f.label, f.val)).join('')}</div>
+            </div>`;
+        }
+    }
+
+    // Descripción
+    const descHtml = d.desc
+        ? `<div class="detalle-seccion">
+                <div class="detalle-seccion-titulo">📝 Descripción</div>
+                <p style="margin:0;font-size:14px;color:#475569;line-height:1.6">${d.desc}</p>
+           </div>` : '';
+
+    // Ganancia card
+    let gananciaHtml = '';
+    if (ganancia !== null && ganancia > 0) {
+        gananciaHtml = `<div class="detalle-seccion">
+            <div class="detalle-seccion-titulo">💰 Rentabilidad</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="ganancia-card">
+                    <div>
+                        <div class="ganancia-val">Q ${ganancia.toFixed(2)}</div>
+                        <div class="ganancia-label">Ganancia por unidad</div>
+                    </div>
+                </div>
+                ${pctGanancia !== null ? `<div class="ganancia-card">
+                    <div>
+                        <div class="ganancia-val">${pctGanancia.toFixed(1)}%</div>
+                        <div class="ganancia-label">% sobre costo</div>
+                    </div>
+                </div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    // Armar modal
+    document.getElementById('detalleTitulo').textContent = d.nombre;
+    document.getElementById('detalleCodigo').textContent = d.codigo + (d.codigofabrica ? '  •  Fab: ' + d.codigofabrica : '');
+
+    document.getElementById('detalleBody').innerHTML = `
+        <!-- Info general -->
+        <div class="detalle-seccion">
+            <div class="detalle-seccion-titulo">📦 Información General</div>
+            <div class="detalle-grid">
+                ${campoHtml('Tipo / Categoría', tipoBadge, true)}
+                ${campoHtml('Estado', estadoBadge, true)}
+                ${campoHtml('Marca', formatVal(d.marca))}
+                ${campoHtml('Proveedor', formatVal(d.proveedor))}
+                ${tipo !== 'LENTE' && tipo !== 'LIMPIEZA' && tipo !== 'ACCESORIO' ? campoHtml('Color', formatVal(d.color)) : ''}
+                ${campoHtml('Unidad', formatVal(d.unidad))}
+                ${campoHtml('Sucursal', formatVal(d.sucursal))}
+            </div>
+        </div>
+        <!-- Stock y Precios -->
+        <div class="detalle-seccion">
+            <div class="detalle-seccion-titulo">📊 Stock y Precios</div>
+            <div class="detalle-grid">
+                <div class="detalle-campo">
+                    <label>Existencia</label>
+                    <span style="background:${stockBg};color:${stockColor};padding:3px 10px;border-radius:8px;font-weight:700;display:inline-block">${existencia}</span>
+                </div>
+                ${campoHtml('Costo',       costo  > 0 ? 'Q ' + costo.toFixed(2)  : '—')}
+                ${campoHtml('Precio Venta', precio > 0 ? 'Q ' + precio.toFixed(2) : '—')}
+            </div>
+        </div>
+        <!-- Ganancia -->
+        ${gananciaHtml}
+        <!-- Campos extra por tipo -->
+        ${extraHtml}
+        <!-- Descripción -->
+        ${descHtml}
+    `;
+
+    document.getElementById('modalDetalle').classList.add('show');
+}
+
+function campoHtml(label, val, rawHtml = false) {
+    return `<div class="detalle-campo">
+        <label>${label}</label>
+        <span>${rawHtml ? val : escHtml(val)}</span>
+    </div>`;
+}
+
+function formatVal(v) {
+    if (!v || v.trim() === '') return '—';
+    // Formatear algunos valores conocidos
+    const MAP = {
+        'ACERO_INOXIDABLE': 'Acero Inoxidable', 'TITANIUM': 'Titanium',
+        'ALUMINIO': 'Aluminio', 'MONEL': 'Monel', 'ACETATO': 'Acetato',
+        'TR90': 'TR-90', 'INYECTADO': 'Inyectado',
+        'COMPLETO': 'Completo (Full Frame)', 'RANURADO': 'Ranurado (Semi Rimless)', 'AEREO': 'Aéreo (Rimless)',
+        'CUADRADO': 'Cuadrado', 'OVALADO': 'Ovalado', 'RECTANGULAR': 'Rectangular',
+        'AVIADOR': 'Aviador', 'CAT_EYES': 'Cat Eyes',
+        'CABALLERO': 'Caballero', 'DAMA': 'Dama', 'NIÑO': 'Niño', 'UNISEX': 'Unisex',
+        'BASICA': 'Básica', 'MEDIA': 'Media', 'ALTA': 'Alta',
+        'OFTALMICO_TERMINADO': 'Oftálmico Terminado', 'OFTALMICO_PROCESADO': 'Oftálmico Procesado',
+        'CONTACTO_DESECHABLE': 'Contacto Desechable', 'CONTACTO_GAS_PERMEABLE': 'Contacto Gas Permeable',
+        'CONTACTO_HIBRIDO': 'Contacto Híbrido',
+        'BAJA': 'Baja', 'TRANSPARENTE': 'Transparente', 'GRIS': 'Gris',
+    };
+    return MAP[v] || v;
+}
+
+function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
 }
 </script>
 </body>

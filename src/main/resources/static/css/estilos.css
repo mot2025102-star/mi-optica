@@ -168,9 +168,9 @@ h4{ font-size:18px; }
   border-bottom:1px solid var(--gris-borde);
   display:flex;
   align-items:center;
-  padding:0 20px;
+  padding:0;
   z-index:100;
-  gap:16px;
+  gap:0;
   animation:topbarIn .6s var(--ease-out) both;
 }
 @keyframes topbarIn{
@@ -246,8 +246,9 @@ h4{ font-size:18px; }
 }
 
 .sidebar-nav{
-  display:flex; align-items:center;
+  display:flex; align-items:center; justify-content:flex-start;
   gap:2px;
+  margin-left:5px;
   flex:1;
   height:100%;
   overflow-x: auto;
@@ -281,7 +282,7 @@ h4{ font-size:18px; }
   font-weight:500;
   letter-spacing:.12em;
   text-transform:uppercase;
-  color:var(--slate-500);
+  color:var(--cyan-400);
   transition:color var(--t-fast) var(--ease);
   white-space:nowrap;
 }
@@ -298,13 +299,13 @@ h4{ font-size:18px; }
   transform-origin:right center;
   transition:transform var(--t-med) var(--ease-out);
 }
-.sidebar-item:hover{ color:var(--slate-700); }
+.sidebar-item:hover{ color:var(--cyan-200); }
 .sidebar-item:hover::after{
   transform:scaleX(1);
   transform-origin:left center;
 }
-.sidebar-item.active{ color:var(--cyan-400); }
-.sidebar-item.active::after{ transform:scaleX(1); }
+.sidebar-item.active{ color:rgba(0, 180, 216, 0.5); }
+.sidebar-item.active::after{ transform:scaleX(1); background: rgba(0, 180, 216, 0.5); }
 
 /* ── IMAGE PREVIEW ON HOVER ─────────────────────────────── */
 .nav-preview {
@@ -334,8 +335,8 @@ h4{ font-size:18px; }
 .sidebar-user{
   display:flex; align-items:center; gap:8px;
   flex-shrink:0;
-  padding-left:12px;
-  border-left:1px solid var(--gris-borde);
+  padding-left:10px;
+  margin-left: 0;
   height:32px;
   text-decoration:none;
   cursor:pointer;

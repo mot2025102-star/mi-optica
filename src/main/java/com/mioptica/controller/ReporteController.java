@@ -3,7 +3,7 @@ package com.mioptica.controller;
 import com.mioptica.dto.VentaDetalleDTO;
 import com.mioptica.model.FichaClinica;
 import com.mioptica.model.Inventario;
-import com.mioptica.repository.CategoriaRepository;
+
 import com.mioptica.repository.SucursalRepository;
 import com.mioptica.repository.UsuarioRepository;
 import com.mioptica.repository.VentaRepository;
@@ -39,7 +39,6 @@ public class ReporteController {
     private final ExportService       exportService;
     private final UsuarioRepository   usuarioRepo;
     private final SucursalRepository  sucursalRepo;
-    private final CategoriaRepository categoriaRepo;
     private final CorteCajaService    corteCajaService;
     private final FichaClinicaRepository fichaClinicaRepo;
     private final VentaRepository ventaRepo;
@@ -82,7 +81,7 @@ public class ReporteController {
         model.addAttribute("tab",         tab);
         model.addAttribute("esAdmin",     esAdmin);
         model.addAttribute("sucursales",  sucursalRepo.findByActivoTrue());
-        model.addAttribute("categorias",  categoriaRepo.findAll());
+
         model.addAttribute("vendedores",  usuarioRepo.findAllByOrderByActivoDescNombreCompletoAsc());
         model.addAttribute("activePage",  "reportes");
         return "reportes/lista";

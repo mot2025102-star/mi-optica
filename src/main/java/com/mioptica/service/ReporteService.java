@@ -93,9 +93,9 @@ public class ReporteService {
                 ? totalGeneral.divide(BigDecimal.valueOf(cantFacturas), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        List<ReporteFilaDTO> porProducto  = toDTO(reporteRepo.topProductos(fi, ff, idSuc, idCategoria),       totalGeneral);
+        List<ReporteFilaDTO> porProducto  = toDTO(reporteRepo.topProductos(fi, ff, idSuc),       totalGeneral);
         List<ReporteFilaDTO> porVendedor  = toDTO(reporteRepo.ventasPorVendedor(fi, ff, idSuc),  totalGeneral);
-        List<ReporteFilaDTO> porCategoria = toDTO(reporteRepo.ventasPorCategoria(fi, ff, idSuc, idCategoria), totalGeneral);
+        List<ReporteFilaDTO> porCategoria = toDTO(reporteRepo.ventasPorCategoria(fi, ff, idSuc), totalGeneral);
 
         List<Object[]>   rawDia     = reporteRepo.ventasPorDia(fi, ff, idSuc);
         List<String>     diasLabels = new ArrayList<>();
@@ -106,7 +106,7 @@ public class ReporteService {
         }
 
         List<VentaDetalleDTO> detalleVentas = toDetalleDTO(
-                reporteRepo.detalleVentas(fi, ff, idSuc, idCategoria, idVendedor));
+                reporteRepo.detalleVentas(fi, ff, idSuc, idVendedor));
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("totalGeneral",  totalGeneral);

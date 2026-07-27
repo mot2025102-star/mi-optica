@@ -20,7 +20,6 @@ import java.util.Optional;
 public class ProductoService {
  
     private final ProductoRepository          productoRepo;
-    private final CategoriaRepository         categoriaRepo;
     private final MarcaRepository             marcaRepo;
     private final InventarioRepository        inventarioRepo;
     private final SucursalRepository          sucursalRepo;
@@ -35,7 +34,6 @@ public class ProductoService {
     public List<Producto>          listarTodos()          { return productoRepo.findAll(); }
     public List<Producto>          listarActivos()        { return productoRepo.findByActivoTrueOrderByDetalleAsc(); }
     public List<Producto>          buscar(String q)       { return productoRepo.buscar(q); }
-    public List<Categoria>         listarCategorias()     { return categoriaRepo.findAllByOrderByNombreAsc(); }
     public List<Marca>             listarMarcas()         { return marcaRepo.findAllByOrderByNombreAsc(); }
     public List<Sucursal>          listarSucursales()     { return sucursalRepo.findByActivoTrue(); }
     public List<Tipo_lente>        listarTiposLente()     { return tipoLenteRepo.findAllByOrderByNombreAsc(); }
@@ -63,11 +61,6 @@ public class ProductoService {
     public Producto guardar(Producto producto, Map<String, String> stockParams) throws Exception {
  
         // ── Resolver entidades relacionadas desde BD ──────────────
-        if (producto.getCategoria() != null && producto.getCategoria().getIdCategoria() != null) {
-            producto.setCategoria(categoriaRepo.findById(producto.getCategoria().getIdCategoria()).orElse(null));
-        } else {
-            producto.setCategoria(null);
-        }
         if (producto.getMarca() != null && producto.getMarca().getIdMarca() != null) {
             producto.setMarca(marcaRepo.findById(producto.getMarca().getIdMarca()).orElse(null));
         } else {
@@ -230,12 +223,6 @@ public class ProductoService {
         kardexRepo.findByProducto(id)
                 .forEach(kardexRepo::delete);
         productoRepo.delete(p);
-    }
- 
-    // ─── Guardar categoría ────────────────────────────────────────
-    @Transactional
-    public Categoria guardarCategoria(String nombre) {
-        return categoriaRepo.save(new Categoria() {{ setNombre(nombre.trim()); }});
     }
  
     // ─── Guardar marca ────────────────────────────────────────────

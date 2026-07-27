@@ -59,18 +59,7 @@
                         </select>
                     </div>
 
-                    <!-- Filtro por categoría -->
-                    <div style="min-width:160px">
-                        <label class="form-label">Categoría</label>
-                        <select name="idCategoria" class="form-select">
-                            <option value="0" th:selected="${idCategoria==0}">Todas</option>
-                            <option th:each="c : ${categorias}"
-                                    th:value="${c.idCategoria}"
-                                    th:text="${c.nombre}"
-                                    th:selected="${idCategoria == c.idCategoria}">
-                            </option>
-                        </select>
-                    </div>
+
 
                    
 
@@ -120,15 +109,15 @@
 
         <!-- Tabs -->
         <div style="display:flex;gap:4px;margin-bottom:16px" class="no-print">
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='productos')}"
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idVendedor=${idVendedor},tab='productos')}"
                th:class="${tab=='productos'} ? 'btn btn-primary' : 'btn btn-secondary'">
                  Por producto
             </a>
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='vendedor')}"
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idVendedor=${idVendedor},tab='vendedor')}"
                th:class="${tab=='vendedor'} ? 'btn btn-primary' : 'btn btn-secondary'">
                  Por vendedor
             </a>
-            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idCategoria=${idCategoria},idVendedor=${idVendedor},tab='categoria')}"
+            <a th:href="@{/reportes(fi=${fi},ff=${ff},idSucursal=${idSucursal},idVendedor=${idVendedor},tab='categoria')}"
                th:class="${tab=='categoria'} ? 'btn btn-primary' : 'btn btn-secondary'">
                  Por categoría
             </a>

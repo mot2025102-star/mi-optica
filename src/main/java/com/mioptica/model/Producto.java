@@ -27,9 +27,6 @@ public class Producto {
     @Column(name = "detalle", nullable = false, length = 200)
     private String detalle;
  
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_categoria")
-    private Categoria categoria;
  
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_marca")
