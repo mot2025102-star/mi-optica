@@ -16,6 +16,8 @@ public interface InventarioRepository extends JpaRepository<Inventario, Integer>
 
     Optional<Inventario> findByProductoAndSucursal(Producto producto, Sucursal sucursal);
 
+    List<Inventario> findByProducto(Producto producto);
+
     List<Inventario> findBySucursal(Sucursal sucursal);
 
     List<Inventario> findBySucursalIdSucursal(Integer idSucursal);

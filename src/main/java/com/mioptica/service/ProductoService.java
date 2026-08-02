@@ -217,8 +217,7 @@ public class ProductoService {
     public void eliminar(Integer id) throws Exception {
         Producto p = productoRepo.findById(id)
                 .orElseThrow(() -> new Exception("Producto no encontrado."));
-        inventarioRepo.findAll().stream()
-                .filter(i -> i.getProducto().getIdProducto().equals(id))
+        inventarioRepo.findByProducto(p)
                 .forEach(inventarioRepo::delete);
         kardexRepo.findByProducto(id)
                 .forEach(kardexRepo::delete);
@@ -326,15 +325,13 @@ public class ProductoService {
     public BigDecimal stockTotal(Integer idProducto) {
         return productoRepo.findById(idProducto).map(p -> {
             if ("LENTE".equals(p.getTipoProducto())) {
-                BigDecimal stockInv = inventarioRepo.findAll().stream()
-                        .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
+                BigDecimal stockInv = inventarioRepo.findByProducto(p).stream()
                         .map(Inventario::getExistencia)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
                 if (stockInv.compareTo(BigDecimal.ZERO) > 0) return stockInv;
                 return p.getStockLente() != null ? new BigDecimal(p.getStockLente()) : BigDecimal.ZERO;
             }
-            return inventarioRepo.findAll().stream()
-                    .filter(i -> i.getProducto().getIdProducto().equals(idProducto))
+            return inventarioRepo.findByProducto(p).stream()
                     .map(Inventario::getExistencia)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }).orElse(BigDecimal.ZERO);
@@ -349,9 +346,8 @@ public class ProductoService {
                 return p.getPrecioVentaLente() != null ? p.getPrecioVentaLente() : null;
             }
             // Para armazón/limpieza/accesorio: precio de la primera sucursal
-            return inventarioRepo.findAll().stream()
-                    .filter(i -> i.getProducto().getIdProducto().equals(idProducto)
-                              && i.getPrecioVenta() != null
+            return inventarioRepo.findByProducto(p).stream()
+                    .filter(i -> i.getPrecioVenta() != null
                               && i.getPrecioVenta().compareTo(BigDecimal.ZERO) > 0)
                     .map(Inventario::getPrecioVenta)
                     .findFirst()

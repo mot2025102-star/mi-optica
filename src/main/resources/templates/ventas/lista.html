@@ -7,6 +7,9 @@
 <body>
 <div th:replace="~{fragments/layout :: sidebar}"></div>
 
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous"></script>
+
 <div class="main-content">
     <div class="topbar">
         <div>
@@ -14,11 +17,17 @@
             <div class="topbar-sub" th:text="'Del ' + ${#temporals.format(fi,'dd/MM/yyyy')} + ' al ' + ${#temporals.format(ff,'dd/MM/yyyy')}"></div>
         </div>
         <div class="topbar-actions">
+            <!-- Tabs -->
+            <div style="display:flex;gap:6px;margin-right:12px;background:var(--sidebar-bg,#1e293b);border-radius:8px;padding:4px">
+                <button id="tabListado" onclick="mostrarTab('listado')" class="btn btn-sm" style="background:var(--turquesa,#27c2c9);color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:12px;cursor:pointer;">Listado</button>
+                <button id="tabAnaliticas" onclick="mostrarTab('analiticas')" class="btn btn-sm" style="background:transparent;color:var(--gris-texto,#94a3b8);border:none;border-radius:6px;padding:6px 16px;font-size:12px;cursor:pointer;transition:all .2s">Analíticas</button>
+            </div>
             <a th:href="@{/ventas/nueva}" class="btn btn-primary"> Nueva Venta</a>
         </div>
     </div>
 
     <div class="page-body">
+    <div id="secListado">
 
         <div th:if="${mensajeOk}"    class="alert alert--success"> <span th:text="${mensajeOk}"></span></div>
         <div th:if="${mensajeError}" class="alert alert--danger">  <span th:text="${mensajeError}"></span></div>
@@ -29,14 +38,14 @@
                 <div class="stat-icon verde"><svg viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-size="16" font-weight="700" font-family="serif" stroke="none" fill="currentColor">Q</text></svg></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="'Q ' + ${#numbers.formatDecimal(totalPeriodo,1,'COMMA',2,'POINT')}">Q 0.00</div>
-                    <div class="stat-label">Total período</div>
+                    <div class="stat-label" th:text="'Total ' + ${labelPeriodo != null ? labelPeriodo : 'período'}">Total período</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon turquesa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${cantPeriodo}">0</div>
-                    <div class="stat-label">Facturas período</div>
+                    <div class="stat-label" th:text="'Facturas ' + ${labelPeriodo != null ? labelPeriodo : 'período'}">Facturas período</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -210,6 +219,78 @@
                 </table>
             </div>
         </div>
+    </div><!-- fin secListado -->
+
+    <!-- ════ TAB: ANALÍTICAS ════════════════════════════════════════ -->
+    <div id="secAnaliticas" style="display:none">
+
+        <!-- Filtro fechas (mismo que listado) -->
+        <div class="card mb-3">
+            <div class="card-body" style="padding:14px 20px">
+                <form id="formAnaliticas" th:action="@{/ventas}" method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                    <input type="hidden" name="tab" value="analiticas">
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div><label class="form-label">Desde</label><input type="date" id="aFi" name="fi" class="form-control" th:value="${fi}"></div>
+                        <span class="text-gris" style="margin-top:20px">al</span>
+                        <div><label class="form-label">Hasta</label><input type="date" id="aFf" name="ff" class="form-control" th:value="${ff}"></div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end">
+                        <button type="button" class="btn btn-primary" onclick="cargarAnaliticas()"
+                                style="display:inline-flex;align-items:center;gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Aplicar
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setAnHoy()">Hoy</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setAnMes()">Este mes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Grid de gráficas -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+
+            <!-- 1. Ventas por día -->
+            <div class="card" style="grid-column:1 / -1">
+                <div class="card-header"><div class="card-title">Ventas por día (rango seleccionado)</div></div>
+                <div class="card-body" style="padding:16px">
+                    <canvas id="chartDia" style="max-height:260px"></canvas>
+                </div>
+            </div>
+
+            <!-- 2. Por día de semana -->
+            <div class="card">
+                <div class="card-header"><div class="card-title">¿Qué día de la semana se vende más?</div></div>
+                <div class="card-body" style="padding:16px">
+                    <canvas id="chartSemana" style="max-height:260px"></canvas>
+                </div>
+            </div>
+
+            <!-- 3. Por mes -->
+            <div class="card">
+                <div class="card-header"><div class="card-title">Ventas por mes</div></div>
+                <div class="card-body" style="padding:16px">
+                    <canvas id="chartMes" style="max-height:260px"></canvas>
+                </div>
+            </div>
+
+            <!-- 4. Top productos -->
+            <div class="card" style="grid-column:1 / -1">
+                <div class="card-header"><div class="card-title">Top 10 productos más vendidos (por cantidad)</div></div>
+                <div class="card-body" style="padding:16px">
+                    <canvas id="chartProductos" style="max-height:300px"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Comparación entre sucursales -->
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-header"><div class="card-title">Comparación entre sucursales</div></div>
+            <div class="card-body" style="padding:16px">
+                <div id="sucursalesGrid" style="display:grid;gap:20px;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr))"></div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -294,6 +375,289 @@ async function verDetalle(id, num) {
     </div>`;
     document.getElementById('detBody').innerHTML = h;
 }
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// ANALÍTICAS — Tab switching + Chart.js
+// ════════════════════════════════════════════════════════════════
+
+const TURQUESA = '#27c2c9';
+const AMARILLO = '#f59e0b';
+const VERDE    = '#10b981';
+const MORADO   = '#8b5cf6';
+const ROJO     = '#ef4444';
+const AZUL     = '#3b82f6';
+
+// Colores para barras de semana
+const COLORES_SEMANA = [TURQUESA, AMARILLO, VERDE, MORADO, ROJO, AZUL, '#f97316'];
+
+let charts = {};  // mapa de instancias Chart.js activas
+
+// Paleta para sucursales
+const PALETA_SUC = [TURQUESA, AMARILLO, VERDE, MORADO, ROJO, AZUL, '#f97316', '#ec4899'];
+
+// ── Helper: obtener fechas del filtro de analíticas ────────────
+function getAnFechas() {
+    const fi = document.getElementById('aFi')?.value || document.querySelector('#formVentas [name="fi"]')?.value;
+    const ff = document.getElementById('aFf')?.value || document.querySelector('#formVentas [name="ff"]')?.value;
+    return { fi, ff };
+}
+
+// ── Tab switching ──────────────────────────────────────────────
+function mostrarTab(tab) {
+    const secListado    = document.getElementById('secListado');
+    const secAnaliticas = document.getElementById('secAnaliticas');
+    const btnListado    = document.getElementById('tabListado');
+    const btnAnaliticas = document.getElementById('tabAnaliticas');
+
+    if (tab === 'listado') {
+        if (secListado)    secListado.style.display    = '';
+        if (secAnaliticas) secAnaliticas.style.display = 'none';
+        btnListado.style.background    = 'var(--turquesa, #27c2c9)';
+        btnListado.style.color         = '#fff';
+        btnAnaliticas.style.background = 'transparent';
+        btnAnaliticas.style.color      = 'var(--gris-texto, #94a3b8)';
+    } else {
+        if (secListado)    secListado.style.display    = 'none';
+        if (secAnaliticas) secAnaliticas.style.display = '';
+        btnAnaliticas.style.background = 'var(--turquesa, #27c2c9)';
+        btnAnaliticas.style.color      = '#fff';
+        btnListado.style.background    = 'transparent';
+        btnListado.style.color         = 'var(--gris-texto, #94a3b8)';
+        // Sync fechas del filtro de listado → filtro de analíticas
+        const fi = document.querySelector('#formVentas [name="fi"]')?.value;
+        const ff = document.querySelector('#formVentas [name="ff"]')?.value;
+        if (fi && document.getElementById('aFi')) document.getElementById('aFi').value = fi;
+        if (ff && document.getElementById('aFf')) document.getElementById('aFf').value = ff;
+        cargarAnaliticas();
+    }
+}
+
+// ── Helper: destruir chart si existe ──────────────────────────
+function destruirChart(id) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ── Opciones base para gráficas de bar/line ───────────────────
+function opcionesBase(yLabel = 'Q') {
+    return {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => yLabel === 'Q'
+                        ? ' Q ' + Number(ctx.parsed.y ?? ctx.parsed.x).toLocaleString('es-GT', {minimumFractionDigits:2})
+                        : ' ' + Number(ctx.parsed.y ?? ctx.parsed.x).toLocaleString('es-GT') + ' uds.'
+                }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#94a3b8', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.07)' },
+                 beginAtZero: true }
+        }
+    };
+}
+
+// ── 1. Gráfica de línea: ventas por día ───────────────────────
+async function cargarPorDia(fi, ff) {
+    const r = await fetch(`/ventas/analiticas/por-dia?fi=${fi}&ff=${ff}`);
+    const d = await r.json();
+    destruirChart('dia');
+    if (!d.labels.length) return;
+    charts['dia'] = new Chart(document.getElementById('chartDia'), {
+        type: 'line',
+        data: {
+            labels: d.labels,
+            datasets: [{
+                data: d.data,
+                borderColor: TURQUESA,
+                backgroundColor: 'rgba(39,194,201,0.12)',
+                pointBackgroundColor: TURQUESA,
+                pointRadius: 4,
+                tension: 0.35,
+                fill: true
+            }]
+        },
+        options: opcionesBase('Q')
+    });
+}
+
+// ── 2. Gráfica de barras: por día de semana ───────────────────
+async function cargarPorDiaSemana(fi, ff) {
+    const r = await fetch(`/ventas/analiticas/por-dia-semana?fi=${fi}&ff=${ff}`);
+    const d = await r.json();
+    destruirChart('semana');
+    if (!d.labels.length) return;
+    charts['semana'] = new Chart(document.getElementById('chartSemana'), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{
+                data: d.data,
+                backgroundColor: d.labels.map((_, i) => COLORES_SEMANA[i % COLORES_SEMANA.length]),
+                borderRadius: 6
+            }]
+        },
+        options: opcionesBase('Q')
+    });
+}
+
+// ── 3. Gráfica de barras: por mes ─────────────────────────────
+async function cargarPorMes(fi, ff) {
+    const r = await fetch(`/ventas/analiticas/por-mes?fi=${fi}&ff=${ff}`);
+    const d = await r.json();
+    destruirChart('mes');
+    if (!d.labels.length) return;
+    charts['mes'] = new Chart(document.getElementById('chartMes'), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{
+                data: d.data,
+                backgroundColor: AMARILLO,
+                borderRadius: 6
+            }]
+        },
+        options: opcionesBase('Q')
+    });
+}
+
+// ── 4. Gráfica horizontal: top productos ──────────────────────
+async function cargarTopProductos(fi, ff) {
+    const r = await fetch(`/ventas/analiticas/top-productos?fi=${fi}&ff=${ff}`);
+    const d = await r.json();
+    destruirChart('productos');
+    if (!d.labels.length) return;
+    const opts = {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ' ' + Number(ctx.parsed.x).toLocaleString('es-GT') + ' uds.' } }
+        },
+        scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
+    };
+    charts['productos'] = new Chart(document.getElementById('chartProductos'), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{
+                data: d.data,
+                backgroundColor: VERDE,
+                borderRadius: 4
+            }]
+        },
+        options: opts
+    });
+}
+
+// ── 5. Comparación por sucursal ───────────────────────────────
+async function cargarPorSucursal(fi, ff) {
+    const r = await fetch(`/ventas/analiticas/por-sucursal?fi=${fi}&ff=${ff}`);
+    const sucursales = await r.json();
+    const grid = document.getElementById('sucursalesGrid');
+    grid.innerHTML = '';
+
+    // Destruir mini-charts anteriores
+    Object.keys(charts).filter(k => k.startsWith('suc_')).forEach(k => { charts[k].destroy(); delete charts[k]; });
+
+    sucursales.forEach((suc, idx) => {
+        const color = PALETA_SUC[idx % PALETA_SUC.length];
+        const canvasId = `chartSuc_${suc.idSucursal}`;
+
+        const col = document.createElement('div');
+        col.innerHTML = `
+            <div class="card" style="border-top:3px solid ${color}">
+                <div class="card-header">
+                    <div class="card-title" style="color:${color}">${suc.nombre}</div>
+                </div>
+                <div class="card-body" style="padding:14px">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+                        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center">
+                            <div style="font-size:20px;font-weight:700;color:${color}">Q ${Number(suc.total).toLocaleString('es-GT', {minimumFractionDigits:2})}</div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Total vendido</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center">
+                            <div style="font-size:20px;font-weight:700;color:${color}">${suc.facturas}</div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Facturas</div>
+                        </div>
+                    </div>
+                    <canvas id="${canvasId}" style="max-height:160px"></canvas>
+                </div>
+            </div>`;
+        grid.appendChild(col);
+
+        if (suc.diasLabels && suc.diasLabels.length) {
+            charts[`suc_${suc.idSucursal}`] = new Chart(document.getElementById(canvasId), {
+                type: 'bar',
+                data: {
+                    labels: suc.diasLabels,
+                    datasets: [{
+                        data: suc.diasData,
+                        backgroundColor: color + 'cc',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', maxRotation: 45, font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.06)' }, beginAtZero: true }
+                    }
+                }
+            });
+        } else {
+            document.getElementById(canvasId).parentElement.innerHTML +=
+                '<div style="text-align:center;color:#94a3b8;font-size:12px;padding:20px 0">Sin ventas en el período</div>';
+            document.getElementById(canvasId).style.display = 'none';
+        }
+    });
+}
+
+// ── Cargar todas las gráficas ─────────────────────────────────
+async function cargarAnaliticas() {
+    const { fi, ff } = getAnFechas();
+    if (!fi || !ff) return;
+    await Promise.all([
+        cargarPorDia(fi, ff),
+        cargarPorDiaSemana(fi, ff),
+        cargarPorMes(fi, ff),
+        cargarTopProductos(fi, ff),
+        cargarPorSucursal(fi, ff)
+    ]);
+}
+
+// ── Botones rápidos del filtro de analíticas ──────────────────
+function setAnHoy() {
+    const h = new Date().toISOString().split('T')[0];
+    document.getElementById('aFi').value = h;
+    document.getElementById('aFf').value = h;
+    cargarAnaliticas();
+}
+function setAnMes() {
+    const d = new Date();
+    const fi = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
+    const ff = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().split('T')[0];
+    document.getElementById('aFi').value = fi;
+    document.getElementById('aFf').value = ff;
+    cargarAnaliticas();
+}
+
+// ── Al cargar la página, wrap el listado en su div ────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // Leer parámetro tab de la URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'analiticas') {
+        mostrarTab('analiticas');
+    }
+});
 </script>
 </body>
 </html>

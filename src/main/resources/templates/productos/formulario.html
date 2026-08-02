@@ -132,7 +132,6 @@
                         <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button></div></div>
                     </div>
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button></div></div>
                         <div class="form-group">
                             <label class="form-label">Proveedor</label>
                             <select id="vProveedorA" class="form-select tom-select-proveedor" placeholder="Buscar proveedor...">
@@ -408,7 +407,6 @@
                         <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button></div></div>
                     </div>
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button></div></div>
                         <div class="form-group">
                             <label class="form-label">Proveedor</label>
                             <select id="vProveedorO" class="form-select tom-select-proveedor" placeholder="Buscar proveedor...">

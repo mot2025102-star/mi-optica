@@ -96,6 +96,19 @@ public class VentaController {
         }
         model.addAttribute("utilidadPorVenta", utilidadPorVenta);
 
+        String labelPeriodo = "período";
+        if (fi.equals(ff)) {
+            if (fi.equals(LocalDate.now())) {
+                labelPeriodo = "hoy";
+            } else {
+                labelPeriodo = "del día";
+            }
+        } else if (fi.equals(LocalDate.now().withDayOfMonth(1)) && 
+                  (ff.equals(LocalDate.now()) || ff.equals(LocalDate.now().with(java.time.temporal.TemporalAdjusters.lastDayOfMonth())))) {
+            labelPeriodo = "este mes";
+        }
+
+        model.addAttribute("labelPeriodo", labelPeriodo);
         model.addAttribute("ventas",       ventas);
         model.addAttribute("totalPeriodo", totalPeriodo);
         model.addAttribute("cantPeriodo",  cantPeriodo);

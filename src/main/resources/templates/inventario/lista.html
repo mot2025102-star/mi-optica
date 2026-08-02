@@ -16,6 +16,10 @@
             </div>
         </div>
         <div class="topbar-actions">
+            <!-- Tabs de Sucursales -->
+            <div id="sucursalTabs" style="display:flex;gap:6px;margin-right:12px;background:var(--sidebar-bg,#1e293b);border-radius:8px;padding:4px" th:if="${esAdmin}">
+                <!-- Llenado por JS -->
+            </div>
             <a th:href="@{/kardex}" class="btn btn-secondary"> Ver Kardex</a>
             <a th:href="@{/traslados}" class="btn btn-secondary"> Traslados</a>
         </div>
@@ -396,12 +400,90 @@
 </style>
 
 <script>
+let sucursalActual = 'Todas';
+
 function filtrar(q) {
     q = q.toLowerCase();
-    document.querySelectorAll('#tblInv tbody tr').forEach(tr =>
-        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'
-    );
+    document.querySelectorAll('#tblInv tbody tr').forEach(tr => {
+        if (tr.children.length === 1) return; // fila "Sin registros"
+        
+        const textMatch = tr.textContent.toLowerCase().includes(q);
+        const sucMatch = (sucursalActual === 'Todas' || tr.dataset.sucursal === sucursalActual);
+        
+        tr.style.display = (textMatch && sucMatch) ? '' : 'none';
+    });
+    actualizarStatsVisibles();
 }
+
+function filtrarPorSucursal(sucursal) {
+    sucursalActual = sucursal;
+    
+    // Actualizar estilos de tabs
+    document.querySelectorAll('.tab-sucursal').forEach(btn => {
+        if (btn.dataset.suc === sucursal) {
+            btn.style.background = 'var(--turquesa, #27c2c9)';
+            btn.style.color = '#fff';
+        } else {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--gris-texto, #94a3b8)';
+        }
+    });
+
+    // Re-aplicar el filtro de texto actual (que a su vez aplica el filtro de sucursal)
+    const q = document.querySelector('input[placeholder="Filtro rápido..."]').value;
+    filtrar(q);
+}
+
+function actualizarStatsVisibles() {
+    let stockBajo = 0;
+    let sinStock = 0;
+    let stockOk = 0;
+    let total = 0;
+
+    document.querySelectorAll('#tblInv tbody tr').forEach(tr => {
+        if (tr.children.length === 1) return;
+        if (tr.style.display !== 'none') {
+            total++;
+            const ext = parseFloat(tr.dataset.existencia);
+            if (ext === 0) sinStock++;
+            else if (ext <= 2) stockBajo++;
+            else stockOk++;
+        }
+    });
+
+    // Actualizar las tarjetas
+    const cards = document.querySelectorAll('.stat-value');
+    if (cards.length >= 4) {
+        cards[0].textContent = sinStock;
+        cards[1].textContent = stockBajo;
+        cards[2].textContent = stockOk;
+        cards[3].textContent = total;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Si es admin, construir los tabs de sucursales dinámicamente basados en los datos de la tabla
+    const tabsContainer = document.getElementById('sucursalTabs');
+    if (tabsContainer) {
+        const sucursales = new Set();
+        document.querySelectorAll('#tblInv tbody tr').forEach(tr => {
+            if (tr.dataset.sucursal) sucursales.add(tr.dataset.sucursal);
+        });
+
+        if (sucursales.size > 0) {
+            let html = `<button data-suc="Todas" onclick="filtrarPorSucursal('Todas')" class="btn btn-sm tab-sucursal" style="background:var(--turquesa,#27c2c9);color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:12px;cursor:pointer;transition:all .2s">Todas</button>`;
+            
+            // Ordenar alfabéticamente
+            Array.from(sucursales).sort().forEach(suc => {
+                html += `<button data-suc="${suc}" onclick="filtrarPorSucursal('${suc}')" class="btn btn-sm tab-sucursal" style="background:transparent;color:var(--gris-texto,#94a3b8);border:none;border-radius:6px;padding:6px 16px;font-size:12px;cursor:pointer;transition:all .2s">${suc}</button>`;
+            });
+            
+            tabsContainer.innerHTML = html;
+        } else {
+            tabsContainer.style.display = 'none';
+        }
+    }
+});
 
 function abrirAjusteBtn(btn) {
     abrirAjuste(btn.dataset.prod, btn.dataset.suc, btn.dataset.exist,

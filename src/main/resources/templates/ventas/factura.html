@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -179,8 +179,10 @@
 <body>
 
 <div class="sheet">
-    <div class="brand center">
-        <h1>MI ÓPTICA</h1>
+    <div class="brand center" style="padding-top: 0; margin-top: 0;">
+        <img th:src="@{/logo/Logo123.png}" alt="Logo" style="width: 70%; height: auto; display: block; margin: 0 auto 4px auto;">
+        <div class="small" th:if="${venta.sucursal.direccion != null}" th:text="${venta.sucursal.direccion}"></div>
+        <div class="small" th:if="${venta.sucursal.telefono != null}" th:text="${'Tel: ' + venta.sucursal.telefono}"></div>
         <div class="small">Factura / Recibo de Venta</div>
         <div class="badge" th:text="${venta.estado}">Pagada</div>
     </div>
@@ -209,6 +211,14 @@
         <div class="row">
             <span class="label">NIT</span>
             <span th:text="${venta.cliente != null and venta.cliente.nit != null and !#strings.isEmpty(venta.cliente.nit) ? venta.cliente.nit : 'CF'}">CF</span>
+        </div>
+        <div class="row">
+            <span class="label">Pago</span>
+            <span>
+                <th:block th:each="pago, stat : ${venta.pagos}">
+                    <span th:text="${pago.metodoPago} + (${!stat.last} ? ', ' : '')"></span>
+                </th:block>
+            </span>
         </div>
     </div>
 
@@ -240,7 +250,15 @@
             <span class="label">Descuento</span>
             <span th:text="${'- Q ' + #numbers.formatDecimal(venta.descuento,1,'COMMA',2,'POINT')}">- Q 0.00</span>
         </div>
-        <div class="row grand-total">
+        <div class="row" style="margin-top:4px; padding-top:4px; border-top:1px dotted var(--line);">
+            <span class="label">Subtotal (sin IVA)</span>
+            <span th:text="${'Q ' + #numbers.formatDecimal(venta.total / 1.12, 1, 'COMMA', 2, 'POINT')}">Q 0.00</span>
+        </div>
+        <div class="row">
+            <span class="label">IVA (12%)</span>
+            <span th:text="${'Q ' + #numbers.formatDecimal(venta.total - (venta.total / 1.12), 1, 'COMMA', 2, 'POINT')}">Q 0.00</span>
+        </div>
+        <div class="row grand-total" style="margin-top:4px;">
             <span>TOTAL</span>
             <span th:text="${'Q ' + #numbers.formatDecimal(venta.total,1,'COMMA',2,'POINT')}">Q 0.00</span>
         </div>
@@ -252,6 +270,7 @@
     </div>
 
     <div class="footer-note center tiny">
+        <div style="margin-bottom:6px; font-style:italic;">Documento sin validez fiscal — uso interno / comprobante de venta</div>
         <div>Gracias por su compra</div>
         <div>Conserve este comprobante</div>
     </div>
