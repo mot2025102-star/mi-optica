@@ -17,6 +17,7 @@ public interface FichaClinicaRepository extends JpaRepository<FichaClinica, Inte
     @Query("SELECT f FROM FichaClinica f " +
            "JOIN FETCH f.cliente " +
            "JOIN FETCH f.sucursal " +
+           "JOIN FETCH f.optometrista " +
            "WHERE f.saldo > 0 " +
            "ORDER BY f.saldo DESC, f.fecha ASC")
     List<FichaClinica> findConSaldoPendiente();
@@ -25,6 +26,7 @@ public interface FichaClinicaRepository extends JpaRepository<FichaClinica, Inte
     @Query("SELECT f FROM FichaClinica f " +
            "JOIN FETCH f.cliente " +
            "JOIN FETCH f.sucursal " +
+           "JOIN FETCH f.optometrista " +
            "WHERE f.saldo > 0 AND f.sucursal.idSucursal = :idSuc " +
            "ORDER BY f.saldo DESC, f.fecha ASC")
     List<FichaClinica> findConSaldoPendienteBySucursal(@Param("idSuc") Integer idSuc);
@@ -54,6 +56,7 @@ public interface FichaClinicaRepository extends JpaRepository<FichaClinica, Inte
     @Query("SELECT f FROM FichaClinica f " +
            "JOIN FETCH f.cliente " +
            "JOIN FETCH f.sucursal " +
+           "JOIN FETCH f.optometrista " +
            "WHERE f.fecha BETWEEN :fi AND :ff " +
            "ORDER BY f.fecha DESC")
     List<FichaClinica> findByFechaBetweenOrderByFechaDesc(
@@ -64,6 +67,7 @@ public interface FichaClinicaRepository extends JpaRepository<FichaClinica, Inte
     @Query("SELECT f FROM FichaClinica f " +
            "JOIN FETCH f.cliente " +
            "JOIN FETCH f.sucursal " +
+           "JOIN FETCH f.optometrista " +
            "WHERE f.fecha BETWEEN :fi AND :ff " +
            "AND f.sucursal.idSucursal = :idSuc " +
            "ORDER BY f.fecha DESC")

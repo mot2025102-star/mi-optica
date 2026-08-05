@@ -56,7 +56,7 @@ public class ReporteController {
             @RequestParam(defaultValue = "0") Integer idSucursal,
             @RequestParam(defaultValue = "0") Integer idCategoria,
             @RequestParam(defaultValue = "0") Integer idVendedor,
-            @RequestParam(defaultValue = "productos") String tab,
+            @RequestParam(defaultValue = "graficas") String tab,
             @AuthenticationPrincipal UserDetails ud,
             Model model) {
  
