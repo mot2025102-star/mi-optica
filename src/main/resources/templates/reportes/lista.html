@@ -23,7 +23,7 @@
                class="btn btn-secondary"> Excel</a>
             <a th:href="@{/reportes/exportar/pdf(fi=${fi},ff=${ff},idSucursal=${idSucursal})}"
                class="btn btn-secondary"> PDF</a>
-            <button class="btn btn-secondary" onclick="window.print()"> Imprimir</button>
+            <button class="btn btn-secondary" onclick="imprimirReportes()"> Imprimir</button>
             <a th:href="@{/reportes/fichas}" class="btn btn-secondary"> Reporte Fichas</a>
         </div>
     </div>
@@ -653,6 +653,55 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarPorSucursal(fi, ff);
     }
 });
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// IMPRIMIR REPORTES — Convierte canvas a imágenes estáticas
+// ══════════════════════════════════════════════════════════════
+function imprimirReportes() {
+    const canvases = document.querySelectorAll('canvas');
+    const replacements = [];
+
+    // Paso 1: Convertir cada canvas a una imagen estática
+    canvases.forEach(canvas => {
+        try {
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL('image/png');
+            img.style.width = '100%';
+            img.style.maxHeight = '280px';
+            img.style.objectFit = 'contain';
+            img.className = 'print-chart-img';
+
+            // Guardar referencia para restaurar después
+            replacements.push({
+                canvas: canvas,
+                parent: canvas.parentNode,
+                img: img
+            });
+
+            // Reemplazar canvas por imagen
+            canvas.parentNode.insertBefore(img, canvas);
+            canvas.style.display = 'none';
+        } catch (e) {
+            console.warn('No se pudo convertir canvas:', e);
+        }
+    });
+
+    // Paso 2: Imprimir
+    setTimeout(() => {
+        window.print();
+
+        // Paso 3: Restaurar los canvas originales
+        setTimeout(() => {
+            replacements.forEach(r => {
+                r.canvas.style.display = '';
+                if (r.img.parentNode) {
+                    r.img.parentNode.removeChild(r.img);
+                }
+            });
+        }, 500);
+    }, 300);
+}
 </script>
 
 </body>

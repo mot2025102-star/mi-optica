@@ -110,7 +110,9 @@ public class ReporteController {
  
             @SuppressWarnings("unchecked")
             List<VentaDetalleDTO> ventas = (List<VentaDetalleDTO>) datos.get("detalleVentas");
-            byte[] archivo = exportService.exportarExcel(ventas, fi, ff);
+            String nomUsuario = usuario.getNombreCompleto();
+            String nomSucursal = idSucursal == 0 ? "Todas las sucursales" : sucursalRepo.findById(idSucursal).map(s -> s.getNombre()).orElse("Desconocida");
+            byte[] archivo = exportService.exportarExcel(ventas, fi, ff, nomUsuario, nomSucursal);
  
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -146,7 +148,9 @@ public class ReporteController {
  
             @SuppressWarnings("unchecked")
             List<VentaDetalleDTO> ventas = (List<VentaDetalleDTO>) datos.get("detalleVentas");
-            byte[] archivo = exportService.exportarPdf(ventas, fi, ff);
+            String nomUsuario = usuario.getNombreCompleto();
+            String nomSucursal = idSucursal == 0 ? "Todas las sucursales" : sucursalRepo.findById(idSucursal).map(s -> s.getNombre()).orElse("Desconocida");
+            byte[] archivo = exportService.exportarPdf(ventas, fi, ff, nomUsuario, nomSucursal);
  
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -154,6 +158,7 @@ public class ReporteController {
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(archivo);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -322,7 +327,9 @@ public ResponseEntity<byte[]> exportarFichasClinicas(
                 ? fichaClinicaRepo.findByFechaBetweenOrderByFechaDesc(fi, ff)
                 : fichaClinicaRepo.findByFechaBetweenAndSucursalOrderByFechaDesc(fi, ff, idSucursal);
 
-        byte[] archivo = exportService.exportarFichasClinicas(fichas, fi, ff);
+        String nomUsuario = usuario.getNombreCompleto();
+        String nomSucursal = idSucursal == 0 ? "Todas las sucursales" : sucursalRepo.findById(idSucursal).map(s -> s.getNombre()).orElse("Desconocida");
+        byte[] archivo = exportService.exportarFichasClinicas(fichas, fi, ff, nomUsuario, nomSucursal);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -351,7 +358,9 @@ public ResponseEntity<byte[]> exportarSaldosPendientes(
                 ? fichaClinicaRepo.findConSaldoPendiente()
                 : fichaClinicaRepo.findConSaldoPendienteBySucursal(idSucursal);
 
-        byte[] archivo = exportService.exportarSaldosPendientes(fichas);
+        String nomUsuario = usuario.getNombreCompleto();
+        String nomSucursal = idSucursal == 0 ? "Todas las sucursales" : sucursalRepo.findById(idSucursal).map(s -> s.getNombre()).orElse("Desconocida");
+        byte[] archivo = exportService.exportarSaldosPendientes(fichas, nomUsuario, nomSucursal);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -378,7 +387,9 @@ public ResponseEntity<byte[]> exportarVentasPorCliente(
             idSucursal = usuario.getSucursal().getIdSucursal();
 
         List<Object[]> rows = ventaRepo.detalleVentasPorCliente(fi, ff, idSucursal);
-        byte[] archivo = exportService.exportarVentasPorCliente(rows, fi, ff);
+        String nomUsuario = usuario.getNombreCompleto();
+        String nomSucursal = idSucursal == 0 ? "Todas las sucursales" : sucursalRepo.findById(idSucursal).map(s -> s.getNombre()).orElse("Desconocida");
+        byte[] archivo = exportService.exportarVentasPorCliente(rows, fi, ff, nomUsuario, nomSucursal);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -403,7 +414,9 @@ public ResponseEntity<byte[]> exportarProductos(
             idSucursal = usuario.getSucursal().getIdSucursal();
 
         List<Inventario> inventarios = inventarioRepo.findArazonesYLentesBySucursal(idSucursal);
-        byte[] archivo = exportService.exportarProductosArmazonesLentes(inventarios);
+        String nomUsuario = usuario.getNombreCompleto();
+        String nomSucursal = idSucursal == 0 ? "Todas las sucursales" : sucursalRepo.findById(idSucursal).map(s -> s.getNombre()).orElse("Desconocida");
+        byte[] archivo = exportService.exportarProductosArmazonesLentes(inventarios, nomUsuario, nomSucursal);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,

@@ -35,71 +35,98 @@ public class ExportService {
         return "Q " + nf.format(valor.doubleValue());
     }
     // ─── HELPER: Membrete con logo ────────────────────────────────
-private int insertarMembrete(XSSFWorkbook workbook, Sheet sheet, 
-                              String tituloReporte, LocalDate fi, LocalDate ff) throws Exception {
-    // Logo
-    try {
-        InputStream logoStream = new ClassPathResource("static/img/logo optica.jpeg").getInputStream();
-        byte[] logoBytes = IOUtils.toByteArray(logoStream);
-        int logoIdx = workbook.addPicture(logoBytes, XSSFWorkbook.PICTURE_TYPE_JPEG);
-        Drawing<?> drawing = sheet.createDrawingPatriarch();
-        ClientAnchor anchor = workbook.getCreationHelper().createClientAnchor();
-        anchor.setCol1(0); anchor.setRow1(0);
-        anchor.setCol2(2); anchor.setRow2(3);
-        drawing.createPicture(anchor, logoIdx);
-    } catch (Exception e) {
-        System.err.println("No se pudo cargar el logo: " + e.getMessage());
+    private int insertarMembrete(XSSFWorkbook workbook, Sheet sheet, 
+                                 String tituloReporte, LocalDate fi, LocalDate ff,
+                                 String usuarioGenerador, String nombreSucursal) throws Exception {
+        // Estilos
+        CellStyle estiloNombre = workbook.createCellStyle();
+        Font fNombre = workbook.createFont();
+        fNombre.setBold(true);
+        fNombre.setFontHeightInPoints((short) 16);
+        estiloNombre.setFont(fNombre);
+
+        CellStyle estiloSlogan = workbook.createCellStyle();
+        Font fSlogan = workbook.createFont();
+        fSlogan.setFontHeightInPoints((short) 11);
+        fSlogan.setItalic(true);
+        estiloSlogan.setFont(fSlogan);
+
+        CellStyle estiloNormal = workbook.createCellStyle();
+        Font fNormal = workbook.createFont();
+        fNormal.setFontHeightInPoints((short) 11);
+        estiloNormal.setFont(fNormal);
+
+        CellStyle estiloTitulo = workbook.createCellStyle();
+        Font fTitulo = workbook.createFont();
+        fTitulo.setBold(true);
+        fTitulo.setFontHeightInPoints((short) 14);
+        estiloTitulo.setFont(fTitulo);
+
+        int rowIdx = 0;
+
+        // El logo es el título, así que no escribimos "Mi Óptica" en texto.
+        // Espacio para el logo (Filas 0 y 1)
+        rowIdx += 2; 
+
+        Row r2 = sheet.createRow(rowIdx++);
+        Cell c2 = r2.createCell(0);
+        c2.setCellValue("Dirección: 6A Avenida 3-81, Cdad. de Guatemala 01001, Guatemala");
+        c2.setCellStyle(estiloNormal);
+
+        Row r3 = sheet.createRow(rowIdx++);
+        Cell c3 = r3.createCell(0);
+        c3.setCellValue("Teléfono: 4599-4217 | Correo: mioptica2020@gmail.com");
+        c3.setCellStyle(estiloNormal);
+
+        rowIdx++; // Línea vacía
+
+        Row r5 = sheet.createRow(rowIdx++);
+        Cell c5 = r5.createCell(0);
+        c5.setCellValue(tituloReporte);
+        c5.setCellStyle(estiloTitulo);
+
+        if (fi != null && ff != null) {
+            Row r6 = sheet.createRow(rowIdx++);
+            r6.createCell(0).setCellValue("Período: " + fi + " al " + ff);
+        }
+
+        Row r7 = sheet.createRow(rowIdx++);
+        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        r7.createCell(0).setCellValue("Fecha y Hora de Generación: " + java.time.LocalDateTime.now().format(dtf));
+
+        Row r8 = sheet.createRow(rowIdx++);
+        r8.createCell(0).setCellValue("Generado por: " + (usuarioGenerador != null ? usuarioGenerador : "Sistema"));
+
+        Row r9 = sheet.createRow(rowIdx++);
+        r9.createCell(0).setCellValue("Sucursal: " + (nombreSucursal != null ? nombreSucursal : "Todas"));
+
+        rowIdx++; // Línea vacía separadora
+
+        // Insertar Logo en A1:C2
+        try {
+            InputStream logoStream = new ClassPathResource("templates/logo/Logo123.png").getInputStream();
+            byte[] logoBytes = IOUtils.toByteArray(logoStream);
+            int logoIdx = workbook.addPicture(logoBytes, XSSFWorkbook.PICTURE_TYPE_PNG);
+            Drawing<?> drawing = sheet.createDrawingPatriarch();
+            ClientAnchor anchor = workbook.getCreationHelper().createClientAnchor();
+            
+            // FILAS: Inicia en fila 0, termina en fila 3 (ocupa 3 filas: 0, 1 y 2)
+            anchor.setRow1(0); 
+            anchor.setRow2(2); 
+            
+            anchor.setCol1(0); 
+            anchor.setCol2(1); //donde empieza y termina 
+            
+            drawing.createPicture(anchor, logoIdx);
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el logo: " + e.getMessage());
+        }
+
+        return rowIdx;
     }
-
-    // Estilo título
-    CellStyle estiloNombre = workbook.createCellStyle();
-    Font fNombre = workbook.createFont();
-    fNombre.setBold(true);
-    fNombre.setFontHeightInPoints((short) 16);
-    fNombre.setColor(IndexedColors.DARK_TEAL.getIndex());
-    estiloNombre.setFont(fNombre);
-
-    CellStyle estiloSlogan = workbook.createCellStyle();
-    Font fSlogan = workbook.createFont();
-    fSlogan.setFontHeightInPoints((short) 10);
-    fSlogan.setItalic(true);
-    estiloSlogan.setFont(fSlogan);
-
-    CellStyle estiloTitulo = workbook.createCellStyle();
-    Font fTitulo = workbook.createFont();
-    fTitulo.setBold(true);
-    fTitulo.setFontHeightInPoints((short) 12);
-    estiloTitulo.setFont(fTitulo);
-
-    // Filas del membrete
-    Row r0 = sheet.createRow(0);
-    Cell cNombre = r0.createCell(2);
-    cNombre.setCellValue("Mi Óptica");
-    cNombre.setCellStyle(estiloNombre);
-
-    Row r1 = sheet.createRow(1);
-    Cell cSlogan = r1.createCell(2);
-    cSlogan.setCellValue("Mi Mejor Visión");
-    cSlogan.setCellStyle(estiloSlogan);
-
-    Row r2 = sheet.createRow(2);
-    Cell cTitulo = r2.createCell(2);
-    cTitulo.setCellValue(tituloReporte);
-    cTitulo.setCellStyle(estiloTitulo);
-
-    Row r3 = sheet.createRow(3);
-    if (fi != null && ff != null) {
-        r3.createCell(2).setCellValue("Período: " + fi + " al " + ff);
-    }
-
-    // Línea separadora vacía
-    sheet.createRow(4);
-
-    return 5; // primera fila disponible para datos
-}
 
     // ─── EXPORTAR EXCEL ───────────────────────────────────────────
-    public byte[] exportarExcel(List<VentaDetalleDTO> ventas, LocalDate fi, LocalDate ff) throws Exception {
+    public byte[] exportarExcel(List<VentaDetalleDTO> ventas, LocalDate fi, LocalDate ff, String usuario, String sucursal) throws Exception {
 
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Reporte de Ventas");
@@ -122,7 +149,7 @@ private int insertarMembrete(XSSFWorkbook workbook, Sheet sheet,
             dataStyle.setBorderRight(BorderStyle.THIN);
 
             // Fila título
-            int rowNum = insertarMembrete(workbook, sheet, "Reporte de Ventas", fi, ff);
+            int rowNum = insertarMembrete(workbook, sheet, "Reporte de Ventas", fi, ff, usuario, sucursal);
             Row header = sheet.createRow(rowNum++);
             String[] columnas = {"N° Factura", "Fecha", "Vendedor", "Categoría",
                                 "Producto / Modelo", "Cantidad", "Total Q", "Forma de Pago"};
@@ -152,6 +179,7 @@ private int insertarMembrete(XSSFWorkbook workbook, Sheet sheet,
             for (int i = 0; i <= 7; i++) {
                 sheet.autoSizeColumn(i);
             }
+            sheet.setColumnWidth(0, 27 * 256); // Fija el ancho de la columna A automáticamente
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
@@ -160,29 +188,48 @@ private int insertarMembrete(XSSFWorkbook workbook, Sheet sheet,
     }
 
     // ─── EXPORTAR PDF ─────────────────────────────────────────────
-    public byte[] exportarPdf(List<VentaDetalleDTO> ventas, LocalDate fi, LocalDate ff) throws Exception {
+    public byte[] exportarPdf(List<VentaDetalleDTO> ventas, LocalDate fi, LocalDate ff, String usuario, String sucursal) throws Exception {
 
         Document document = new Document(PageSize.A4.rotate());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, out);
         document.open();
 
-        // Título
-        com.itextpdf.text.Font tituloFont = new com.itextpdf.text.Font(
-                com.itextpdf.text.Font.FontFamily.HELVETICA, 16,
-                com.itextpdf.text.Font.BOLD, BaseColor.DARK_GRAY);
+        // Agregar Logo
+        try {
+            InputStream logoStream = new ClassPathResource("templates/logo/Logo123.png").getInputStream();
+            com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance(IOUtils.toByteArray(logoStream));
+            logo.scaleToFit(200, 60);
+            logo.setAlignment(Element.ALIGN_LEFT);
+            document.add(logo);
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el logo en PDF: " + e.getMessage());
+        }
+
+        // Agregar Dirección y Teléfono
+        com.itextpdf.text.Font textFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, BaseColor.BLACK);
+        Paragraph address = new Paragraph("Dirección: 6A Avenida 3-81, Cdad. de Guatemala 01001, Guatemala\nTeléfono: 4599-4217 | Correo: mioptica2020@gmail.com", textFont);
+        address.setAlignment(Element.ALIGN_LEFT);
+        address.setSpacingAfter(15);
+        document.add(address);
+
+        // Título del Reporte
+        com.itextpdf.text.Font tituloFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD, BaseColor.BLACK);
         Paragraph titulo = new Paragraph("Reporte de Ventas", tituloFont);
-        titulo.setAlignment(Element.ALIGN_CENTER);
+        titulo.setAlignment(Element.ALIGN_LEFT);
         document.add(titulo);
 
-        // Subtítulo
-        com.itextpdf.text.Font subFont = new com.itextpdf.text.Font(
-                com.itextpdf.text.Font.FontFamily.HELVETICA, 10,
-                com.itextpdf.text.Font.NORMAL, BaseColor.GRAY);
-        Paragraph sub = new Paragraph("Del " + fi + " al " + ff, subFont);
-        sub.setAlignment(Element.ALIGN_CENTER);
-        sub.setSpacingAfter(15);
-        document.add(sub);
+        // Metadatos
+        String fechaGen = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String metaText = "Período: " + fi + " al " + ff + "\n" +
+                          "Fecha y Hora de Generación: " + fechaGen + "\n" +
+                          "Generado por: " + (usuario != null ? usuario : "Sistema") + "\n" +
+                          "Sucursal: " + (sucursal != null ? sucursal : "Todas las sucursales");
+        
+        Paragraph meta = new Paragraph(metaText, textFont);
+        meta.setAlignment(Element.ALIGN_LEFT);
+        meta.setSpacingAfter(15);
+        document.add(meta);
 
         // Tabla
         PdfPTable table = new PdfPTable(8);
@@ -240,7 +287,7 @@ private int insertarMembrete(XSSFWorkbook workbook, Sheet sheet,
         return out.toByteArray();
     }
     // ─── EXCEL FICHAS CLÍNICAS ────────────────────────────────────
-public byte[] exportarFichasClinicas(List<FichaClinica> fichas, LocalDate fi, LocalDate ff) throws Exception {
+public byte[] exportarFichasClinicas(List<FichaClinica> fichas, LocalDate fi, LocalDate ff, String usuario, String sucursal) throws Exception {
     try (XSSFWorkbook workbook = new XSSFWorkbook()) {
         Sheet sheet = workbook.createSheet("Fichas Clínicas");
 
@@ -261,7 +308,7 @@ public byte[] exportarFichasClinicas(List<FichaClinica> fichas, LocalDate fi, Lo
         dataStyle.setBorderRight(BorderStyle.THIN);
 
         // Título
-        int rowNum = insertarMembrete(workbook, sheet, "Fichas Clínicas", fi, ff);
+        int rowNum = insertarMembrete(workbook, sheet, "Fichas Clínicas", fi, ff, usuario, sucursal);
         Row header = sheet.createRow(rowNum++);
         String[] columnas = {"#", "N° Ficha", "Fecha", "NIT", "Cliente",
                             "Optometrista", "Total Q", "Abono Q", "Saldo Q",
@@ -291,6 +338,7 @@ public byte[] exportarFichasClinicas(List<FichaClinica> fichas, LocalDate fi, Lo
         }
 
         for (int i = 0; i <= 10; i++) sheet.autoSizeColumn(i);
+        sheet.setColumnWidth(0, 27 * 256); // Fija el ancho de la columna A automáticamente
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
@@ -299,7 +347,7 @@ public byte[] exportarFichasClinicas(List<FichaClinica> fichas, LocalDate fi, Lo
 }
 
 // ─── EXCEL SALDOS PENDIENTES ──────────────────────────────────
-public byte[] exportarSaldosPendientes(List<FichaClinica> fichas) throws Exception {
+public byte[] exportarSaldosPendientes(List<FichaClinica> fichas, String usuario, String sucursal) throws Exception {
     try (XSSFWorkbook workbook = new XSSFWorkbook()) {
         Sheet sheet = workbook.createSheet("Saldos Pendientes");
 
@@ -319,7 +367,7 @@ public byte[] exportarSaldosPendientes(List<FichaClinica> fichas) throws Excepti
         dataStyle.setBorderRight(BorderStyle.THIN);
 
         // Título
-       int rowNum = insertarMembrete(workbook, sheet, "Saldos Pendientes", null, null);
+       int rowNum = insertarMembrete(workbook, sheet, "Saldos Pendientes", null, null, usuario, sucursal);
        Row header = sheet.createRow(rowNum++);
         String[] columnas = {"#", "N° Ficha", "Fecha", "Cliente", "Teléfono",
                             "Total Q", "Abono Q", "Saldo Q", "Días Pendiente", "Estado Entrega"};
@@ -345,6 +393,7 @@ public byte[] exportarSaldosPendientes(List<FichaClinica> fichas) throws Excepti
         }
 
         for (int i = 0; i <= 9; i++) sheet.autoSizeColumn(i);
+        sheet.setColumnWidth(0, 27 * 256); // Fija el ancho de la columna A automáticamente
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
@@ -352,7 +401,7 @@ public byte[] exportarSaldosPendientes(List<FichaClinica> fichas) throws Excepti
     }
 }
 // ─── EXCEL VENTAS POR CLIENTE ─────────────────────────────────
-public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalDate ff) throws Exception {
+public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalDate ff, String usuario, String sucursal) throws Exception {
     try (XSSFWorkbook workbook = new XSSFWorkbook()) {
         Sheet sheet = workbook.createSheet("Ventas por Cliente");
 
@@ -379,13 +428,24 @@ public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalD
         dataStyle.setBorderLeft(BorderStyle.THIN);
         dataStyle.setBorderRight(BorderStyle.THIN);
 
+        DataFormat format = workbook.createDataFormat();
+
+        CellStyle dataStyleCurrency = workbook.createCellStyle();
+        dataStyleCurrency.cloneStyleFrom(dataStyle);
+        dataStyleCurrency.setDataFormat(format.getFormat("\"Q\" #,##0.00"));
+
         CellStyle subtotalStyle = workbook.createCellStyle();
         Font subtotalFont = workbook.createFont();
         subtotalFont.setBold(true);
         subtotalStyle.setFont(subtotalFont);
+        subtotalStyle.setDataFormat(format.getFormat("\"Q\" #,##0.00"));
+
+        CellStyle subtotalLabelStyle = workbook.createCellStyle();
+        subtotalLabelStyle.setFont(subtotalFont);
+        subtotalLabelStyle.setAlignment(HorizontalAlignment.RIGHT);
 
         // Título
-        int rowNum = insertarMembrete(workbook, sheet, "Ventas por cliente", fi, ff);
+        int rowNum = insertarMembrete(workbook, sheet, "Ventas por cliente", fi, ff, usuario, sucursal);
         String clienteActual = null;
         int numFila = 1;
         BigDecimal subtotalCliente = BigDecimal.ZERO;
@@ -405,8 +465,12 @@ public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalD
                 // Subtotal del cliente anterior
                 if (clienteActual != null) {
                     Row subRow = sheet.createRow(rowNum++);
-                    Cell subCell = subRow.createCell(6);
-                    subCell.setCellValue("TOTAL " + clienteActual + ": " + formatoQuetzales(subtotalCliente));
+                    Cell subLabelCell = subRow.createCell(6);
+                    subLabelCell.setCellValue("TOTAL " + clienteActual + ":");
+                    subLabelCell.setCellStyle(subtotalLabelStyle);
+
+                    Cell subCell = subRow.createCell(7);
+                    subCell.setCellValue(subtotalCliente.doubleValue());
                     subCell.setCellStyle(subtotalStyle);
                     rowNum++; // espacio
                 }
@@ -436,12 +500,29 @@ public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalD
             dataRow.createCell(0).setCellValue(numFila++);
             dataRow.createCell(1).setCellValue(fecha);
             dataRow.createCell(2).setCellValue(factura);
-            dataRow.createCell(3).setCellValue(idProducto);
+
+            Cell cellId = dataRow.createCell(3);
+            try { cellId.setCellValue(Long.parseLong(idProducto)); } catch(Exception e) { cellId.setCellValue(idProducto); }
+
             dataRow.createCell(4).setCellValue(descripcion);
-            dataRow.createCell(5).setCellValue(formatoQuetzales(precio));
-            dataRow.createCell(6).setCellValue(cantidad.toString());
-            dataRow.createCell(7).setCellValue(formatoQuetzales(subtotal));
-            for (int i = 0; i <= 7; i++) dataRow.getCell(i).setCellStyle(dataStyle);
+
+            Cell cellPrecio = dataRow.createCell(5);
+            cellPrecio.setCellValue(precio.doubleValue());
+
+            Cell cellCantidad = dataRow.createCell(6);
+            cellCantidad.setCellValue(cantidad.doubleValue());
+
+            Cell cellTotal = dataRow.createCell(7);
+            cellTotal.setCellValue(subtotal.doubleValue());
+
+            for (int i = 0; i <= 7; i++) {
+                Cell c = dataRow.getCell(i);
+                if (i == 5 || i == 7) {
+                    c.setCellStyle(dataStyleCurrency);
+                } else {
+                    c.setCellStyle(dataStyle);
+                }
+            }
 
             subtotalCliente = subtotalCliente.add(subtotal);
         }
@@ -449,12 +530,17 @@ public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalD
         // Subtotal del último cliente
         if (clienteActual != null) {
             Row subRow = sheet.createRow(rowNum);
-            Cell subCell = subRow.createCell(6);
-            subCell.setCellValue("TOTAL " + clienteActual + ": " + formatoQuetzales(subtotalCliente));
+            Cell subLabelCell = subRow.createCell(6);
+            subLabelCell.setCellValue("TOTAL " + clienteActual + ":");
+            subLabelCell.setCellStyle(subtotalLabelStyle);
+
+            Cell subCell = subRow.createCell(7);
+            subCell.setCellValue(subtotalCliente.doubleValue());
             subCell.setCellStyle(subtotalStyle);
         }
 
         for (int i = 0; i <= 7; i++) sheet.autoSizeColumn(i);
+        sheet.setColumnWidth(0, 27 * 256); // Fija el ancho de la columna A automáticamente
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
@@ -462,7 +548,7 @@ public byte[] exportarVentasPorCliente(List<Object[]> rows, LocalDate fi, LocalD
     }
 }
 // ─── EXCEL PRODUCTOS ARMAZONES Y LENTES ──────────────────────
-public byte[] exportarProductosArmazonesLentes(List<Inventario> inventarios) throws Exception {
+public byte[] exportarProductosArmazonesLentes(List<Inventario> inventarios, String usuario, String sucursal) throws Exception {
     try (XSSFWorkbook workbook = new XSSFWorkbook()) {
         Sheet sheet = workbook.createSheet("Productos");
 
@@ -489,7 +575,7 @@ public byte[] exportarProductosArmazonesLentes(List<Inventario> inventarios) thr
         dataStyle.setBorderRight(BorderStyle.THIN);
 
         // Título
-        int rowNum = insertarMembrete(workbook, sheet, "Armazones y Lentes", null, null);
+        int rowNum = insertarMembrete(workbook, sheet, "Armazones y Lentes", null, null, usuario, sucursal);
         
         
 
@@ -548,6 +634,7 @@ public byte[] exportarProductosArmazonesLentes(List<Inventario> inventarios) thr
         }
 
         for (int i = 0; i <= 6; i++) sheet.autoSizeColumn(i);
+        sheet.setColumnWidth(0, 27 * 256); // Fija el ancho de la columna A automáticamente
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
