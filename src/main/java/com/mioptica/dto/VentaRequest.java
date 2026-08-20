@@ -37,6 +37,7 @@ public class VentaRequest {
     private String rxPanoramico;
 
     // ── TAREA 1: Campos nuevos ─────────────────────────────────────
+    private String rxDip;         // D.I.P total
     private String rxDpOd;        // Distancia pupilar OD
     private String rxDpOi;        // Distancia pupilar OI
     private String rxAlturaOd;    // Altura OD
@@ -72,12 +73,16 @@ public class VentaRequest {
     private String fiOiAdd;
 
     // Medidas del paciente (ficha interna)
+    private String fiDip;
     private String fiDpOd;
     private String fiDpOi;
     private String fiAlturaOd;
     private String fiAlturaOi;
     private String fiSegmento;
     private String fiLenteRecomendado;
+    private String fiPantoscopico;
+    private String fiVertex;
+    private String fiPanoramico;
     private String fiFechaEntregaOrden;
 
     private Integer rxIdCliente; // cliente para la orden (puede ser null=CF)

@@ -189,11 +189,15 @@
                                     <div style="font-size:11px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📏 Medidas del Paciente</div>
                                     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
                                         <div style="display:flex;align-items:center;gap:8px">
-                                            <label class="form-label mb-0">DP OD</label>
+                                            <label class="form-label mb-0" style="font-weight:700">D.I.P.</label>
+                                            <input id="fiDip" class="form-control form-control-sm" style="width:90px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">NDP OD</label>
                                             <input id="fiDpOd" class="form-control form-control-sm" style="width:80px" placeholder="mm">
                                         </div>
                                         <div style="display:flex;align-items:center;gap:8px">
-                                            <label class="form-label mb-0">DP OI</label>
+                                            <label class="form-label mb-0">NDP OI</label>
                                             <input id="fiDpOi" class="form-control form-control-sm" style="width:80px" placeholder="mm">
                                         </div>
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -207,6 +211,20 @@
                                         <div style="display:flex;align-items:center;gap:8px">
                                             <label class="form-label mb-0">Segmento</label>
                                             <input id="fiSegmento" class="form-control form-control-sm" style="width:100px" placeholder="ej: bifocal">
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Pantoscópico</label>
+                                            <input id="fiPantoscopico" class="form-control form-control-sm" style="width:80px" placeholder="°">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Vertex</label>
+                                            <input id="fiVertex" class="form-control form-control-sm" style="width:80px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">Panorámico</label>
+                                            <input id="fiPanoramico" class="form-control form-control-sm" style="width:80px" placeholder="°">
                                         </div>
                                     </div>
                                     <div class="form-group" style="margin-bottom:0">
@@ -291,11 +309,15 @@
                                     <div style="font-size:11px;font-weight:700;color:var(--turquesa);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📏 Medidas del Paciente</div>
                                     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
                                         <div style="display:flex;align-items:center;gap:8px">
-                                            <label class="form-label mb-0">DP OD</label>
+                                            <label class="form-label mb-0" style="font-weight:700">D.I.P.</label>
+                                            <input id="rxDip" class="form-control form-control-sm" style="width:90px" placeholder="mm">
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:8px">
+                                            <label class="form-label mb-0">NDP OD</label>
                                             <input id="rxDpOd" class="form-control form-control-sm" style="width:80px" placeholder="mm">
                                         </div>
                                         <div style="display:flex;align-items:center;gap:8px">
-                                            <label class="form-label mb-0">DP OI</label>
+                                            <label class="form-label mb-0">NDP OI</label>
                                             <input id="rxDpOi" class="form-control form-control-sm" style="width:80px" placeholder="mm">
                                         </div>
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -858,6 +880,22 @@ async function selCliente(id, nombre, nit) {
             document.getElementById('fiOiEje').value      = rx.rxOiEje      || '';
             document.getElementById('fiOiAdd').value      = rx.rxOiAdicion  || '';
 
+            // Medidas del paciente (DIP, NDP, Alturas, Segmento)
+            document.getElementById('fiDip').value            = rx.rxDip        || '';
+            document.getElementById('fiDpOd').value           = rx.rxNdpOd      || '';
+            document.getElementById('fiDpOi').value           = rx.rxNdpOi      || '';
+            document.getElementById('fiAlturaOd').value       = rx.rxOdAltura   || '';
+            document.getElementById('fiAlturaOi').value       = rx.rxOiAltura   || '';
+            document.getElementById('fiSegmento').value       = rx.rxSegmento   || '';
+
+            // Medidas del armazón
+            document.getElementById('fiPantoscopico').value   = rx.pantoscopico || '';
+            document.getElementById('fiVertex').value         = rx.vertex       || '';
+            document.getElementById('fiPanoramico').value     = rx.panoramico   || '';
+
+            // Lente recomendado
+            document.getElementById('fiLenteRecomendado').value = rx.lenteRecomendado || '';
+
             // Mostrar badge informativo junto al nombre del cliente
             document.getElementById('clienteInfo').innerHTML +=
                 `&nbsp;<span class="badge badge--info" style="margin-left:6px;font-size:11px">
@@ -874,6 +912,16 @@ async function selCliente(id, nombre, nit) {
             document.getElementById('fiOiCilindro').value = '';
             document.getElementById('fiOiEje').value = '';
             document.getElementById('fiOiAdd').value = '';
+            document.getElementById('fiDip').value = '';
+            document.getElementById('fiDpOd').value = '';
+            document.getElementById('fiDpOi').value = '';
+            document.getElementById('fiAlturaOd').value = '';
+            document.getElementById('fiAlturaOi').value = '';
+            document.getElementById('fiSegmento').value = '';
+            document.getElementById('fiPantoscopico').value = '';
+            document.getElementById('fiVertex').value = '';
+            document.getElementById('fiPanoramico').value = '';
+            document.getElementById('fiLenteRecomendado').value = '';
         }
     } catch (e) {
         // Falla silenciosa: no interrumpir el flujo de venta
@@ -960,6 +1008,7 @@ async function registrarVenta() {
         rxVertex:            recetaExterna ? vRx('rxVertex')           : null,
         rxPanoramico:        recetaExterna ? vRx('rxPanoramico')       : null,
         // TAREA 1: campos nuevos
+        rxDip:               recetaExterna ? vRx('rxDip')              : null,
         rxDpOd:              recetaExterna ? vRx('rxDpOd')             : null,
         rxDpOi:              recetaExterna ? vRx('rxDpOi')             : null,
         rxAlturaOd:          recetaExterna ? vRx('rxAlturaOd')         : null,
@@ -979,12 +1028,16 @@ async function registrarVenta() {
         fiOiCilindro:        vRx('fiOiCilindro'),
         fiOiEje:             vRx('fiOiEje'),
         fiOiAdd:             vRx('fiOiAdd'),
+        fiDip:               vRx('fiDip'),
         fiDpOd:              vRx('fiDpOd'),
         fiDpOi:              vRx('fiDpOi'),
         fiAlturaOd:          vRx('fiAlturaOd'),
         fiAlturaOi:          vRx('fiAlturaOi'),
         fiSegmento:          vRx('fiSegmento'),
         fiLenteRecomendado:  vRx('fiLenteRecomendado'),
+        fiPantoscopico:      vRx('fiPantoscopico'),
+        fiVertex:            vRx('fiVertex'),
+        fiPanoramico:        vRx('fiPanoramico'),
         fiFechaEntregaOrden: vRx('fiFechaEntregaOrden')
     };
 

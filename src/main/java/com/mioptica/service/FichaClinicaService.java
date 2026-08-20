@@ -45,9 +45,11 @@ public class FichaClinicaService {
         FichaClinica saved = fichaRepo.save(ficha);
 
         // ── Auto-generar Orden de Laboratorio solo si es nueva ───
-        if (esNueva) {
-            generarOrdenDesdeFicha(saved);
-        }
+        // (Desactivado: ahora se genera automáticamente desde Venta)
+        // if (esNueva) {
+        //     generarOrdenDesdeFicha(saved);
+        // }
+
 
         return saved;
     }

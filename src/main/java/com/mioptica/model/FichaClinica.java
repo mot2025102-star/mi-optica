@@ -104,6 +104,8 @@ public class FichaClinica {
     @Column(name = "rx_ndp_od", precision = 5, scale = 2) private BigDecimal rxNdpOd;
     @Column(name = "rx_ndp_oi", precision = 5, scale = 2) private BigDecimal rxNdpOi;
 
+    @Column(name = "rx_segmento", length = 100) private String rxSegmento;
+
     // Medidas de ajuste del armazón (se envían a la Orden de Laboratorio)
     @Column(name = "vertex",       length = 10) private String vertex;        // mm
     @Column(name = "pantoscopico", length = 10) private String pantoscopico;  // °

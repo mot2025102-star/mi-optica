@@ -404,17 +404,20 @@ public class VentaService {
             orden.setOiAdd(externa ? req.getRxOiAdd() : req.getFiOiAdd());
 
             // Medidas del paciente (DIP, Alturas, etc.)
-            orden.setOdDip(externa ? req.getRxDpOd() : req.getFiDpOd());
-            orden.setOiDip(externa ? req.getRxDpOi() : req.getFiDpOi());
+            String dipTotal = externa ? req.getRxDip() : req.getFiDip();
+            orden.setOdDip(dipTotal);
+            orden.setOiDip(dipTotal);
+            
+            orden.setOdNdpod(externa ? req.getRxDpOd() : req.getFiDpOd());
+            orden.setOiNdpoi(externa ? req.getRxDpOi() : req.getFiDpOi());
+            
             orden.setOdAltura(externa ? req.getRxAlturaOd() : req.getFiAlturaOd());
             orden.setOiAltura(externa ? req.getRxAlturaOi() : req.getFiAlturaOi());
             
-            // Extraer pantoscópico, vertex, panorámico si es externa (la ficha interna en UI no los tiene, pero por si acaso)
-            if (externa) {
-                orden.setPantoscopico(req.getRxPantoscopico());
-                orden.setVertex(req.getRxVertex());
-                orden.setPanoramico(req.getRxPanoramico());
-            }
+            // Medidas del armazón
+            orden.setPantoscopico(externa ? req.getRxPantoscopico() : req.getFiPantoscopico());
+            orden.setVertex(externa ? req.getRxVertex() : req.getFiVertex());
+            orden.setPanoramico(externa ? req.getRxPanoramico() : req.getFiPanoramico());
             
             StringBuilder obs = new StringBuilder();
             String lenteRec = externa ? req.getRxLenteRecomendado() : req.getFiLenteRecomendado();
@@ -436,6 +439,28 @@ public class VentaService {
             if (fEntr != null && !fEntr.isBlank()) {
                 orden.setFechaEntregaEstimada(LocalDate.parse(fEntr));
             }
+
+            // --- Agregar productos de tipo lente y armazón a la orden ---
+            java.util.List<DetalleOrdenLab> productosLab = new java.util.ArrayList<>();
+            for (VentaRequest.ItemVenta item : req.getItems()) {
+                if (item.getIdProducto() != null && item.getCantidad() != null && item.getCantidad().compareTo(BigDecimal.ZERO) > 0) {
+                    Producto p = productoRepo.findById(item.getIdProducto()).orElse(null);
+                    if (p != null && (p.esLente() || p.esArmazon())) {
+                        DetalleOrdenLab detLab = new DetalleOrdenLab();
+                        detLab.setOrden(orden);
+                        detLab.setCodigo(p.getCodigo());
+                        detLab.setCantidad(item.getCantidad().intValue());
+                        detLab.setDescripcion(p.getDetalle());
+                        
+                        if (p.getMaterialLente() != null) detLab.setMaterial(p.getMaterialLente().getNombre());
+                        if (p.getTratamientoLente() != null) detLab.setTratamiento(p.getTratamientoLente().getNombre());
+                        detLab.setColorTinte(p.getColor());
+                        
+                        productosLab.add(detLab);
+                    }
+                }
+            }
+            orden.setProductos(productosLab);
 
             ordenRepo.save(orden);
 

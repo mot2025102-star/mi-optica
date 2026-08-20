@@ -178,7 +178,7 @@
     </div>
 
     <a th:href="@{/perfil}" class="sidebar-user" title="Ver mi perfil">
-        <!-- Avatar: foto si existe, iniciales si no -->
+        <!-- foto de avatar -->
         <div class="sidebar-user-avatar" style="overflow:hidden;position:relative">
             <sec:authentication property="principal.username" var="username"/>
             <!-- Buscar usuario en el modelo para ver si tiene foto -->
@@ -202,7 +202,7 @@
         <a th:href="@{/dashboard}" class="sidebar-item" th:classappend="${activePage == 'dashboard'} ? ' active' : ''">
             <span class="nav-preview" style="--nav-img:url('/img/Generald_Blanca.png')"></span>
             <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-            <span class="sidebar-item-text">Dashboard</span>
+            <span class="sidebar-item-text">Menú principal</span>
         </a>
 
         <!-- Ventas -->

@@ -349,6 +349,27 @@ public class FichaClinicaController {
         rx.put("rxOiCilindro", f.getRxOiCilindro() != null ? f.getRxOiCilindro() : "");
         rx.put("rxOiEje",      f.getRxOiEje()      != null ? f.getRxOiEje()      : "");
         rx.put("rxOiAdicion",  f.getRxOiAdicion()  != null ? f.getRxOiAdicion()  : "");
+        
+        // Medidas adicionales
+        rx.put("rxDip",      f.getRxDip()      != null ? f.getRxDip().toString()      : "");
+        rx.put("rxNdpOd",    f.getRxNdpOd()    != null ? f.getRxNdpOd().toString()    : "");
+        rx.put("rxNdpOi",    f.getRxNdpOi()    != null ? f.getRxNdpOi().toString()    : "");
+        rx.put("rxOdAltura", f.getRxOdAltura() != null ? f.getRxOdAltura().toString() : "");
+        rx.put("rxOiAltura", f.getRxOiAltura() != null ? f.getRxOiAltura().toString() : "");
+        rx.put("rxSegmento", f.getRxSegmento() != null ? f.getRxSegmento()            : "");
+        
+        rx.put("pantoscopico", f.getPantoscopico() != null ? f.getPantoscopico() : "");
+        rx.put("vertex",       f.getVertex()       != null ? f.getVertex()       : "");
+        rx.put("panoramico",   f.getPanoramico()   != null ? f.getPanoramico()   : "");
+
+        // Lente recomendado
+        String lenteRec = "";
+        if (f.getSugTipoLente() != null && !f.getSugTipoLente().isBlank()) lenteRec += f.getSugTipoLente();
+        if (f.getSugMaterialLente() != null && !f.getSugMaterialLente().isBlank()) {
+            lenteRec += (lenteRec.isEmpty() ? "" : ", ") + f.getSugMaterialLente();
+        }
+        rx.put("lenteRecomendado", lenteRec);
+
         rx.put("fechaFicha",   f.getFecha()        != null ? f.getFecha().toString() : "");
 
         return ResponseEntity.ok(rx);
