@@ -89,6 +89,27 @@ public class InventarioService {
         inventarioRepo.delete(inv);
     }
  
+    // ─── Buscar inventario por producto y sucursal ─────────────────
+    public Inventario buscarPorProductoYSucursal(Integer idProducto, Integer idSucursal) {
+        return inventarioRepo.findByProducto_IdProductoAndSucursal_IdSucursal(idProducto, idSucursal).orElse(null);
+    }
+
+    // ─── Actualización Masiva ──────────────────────────────
+    @Transactional
+    public void actualizarPreciosMasivo(Integer sucursalId, List<com.mioptica.controller.ProductoController.PrecioUpdateRequest> updates) throws Exception {
+        if (sucursalId == null || sucursalId <= 0) {
+            throw new Exception("Debe seleccionar una sucursal válida para actualizar precios masivamente.");
+        }
+        for (var update : updates) {
+            Inventario inv = inventarioRepo.findByProducto_IdProductoAndSucursal_IdSucursal(update.idProducto, sucursalId).orElse(null);
+            if (inv != null) {
+                inv.setCosto(update.costo);
+                inv.setPrecioVenta(update.precioVenta);
+                inventarioRepo.save(inv);
+            }
+        }
+    }
+
     // ─── Agregar ingreso ──────────────────────────────────────────
     @Transactional
     public void agregarIngreso(Integer idProducto,

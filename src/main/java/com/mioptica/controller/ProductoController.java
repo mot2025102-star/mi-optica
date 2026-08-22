@@ -33,51 +33,146 @@ public class ProductoController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','VENDEDOR','CONTADOR','BODEGUERO','OPTOMETRISTA')")
     public String lista(
             @RequestParam(defaultValue = "")       String  q,
-            @RequestParam(defaultValue = "")       String  tipo,   // ← cambia de "cat/Integer" a "tipo/String"
+            @RequestParam(defaultValue = "")       String  tipo,
             @RequestParam(defaultValue = "0")      Integer mar,
             @RequestParam(defaultValue = "activo") String  est,
             @RequestParam(defaultValue = "tabla")  String  vista,
+            @RequestParam(defaultValue = "0")      Integer suc,
+            @RequestParam(defaultValue = "0")      Integer fMarca,
+            @RequestParam(defaultValue = "")       String  fModelo,
+            @RequestParam(defaultValue = "")       String  fMaterial,
+            @RequestParam(defaultValue = "0")      Integer fTipoFiltro,
+            @RequestParam(defaultValue = "")       String  fColor,
+            @RequestParam(defaultValue = "")       String  fForma,
+            @RequestParam(defaultValue = "")       String  fGenero,
+            @RequestParam(defaultValue = "0")      Integer fTratamiento,
+            @RequestParam(defaultValue = "")       String  fRango,
+            @RequestParam(defaultValue = "0")      Integer fProveedor,
             Model model) {
 
         var productos = q.isBlank() ? productoService.listarTodos()
                                     : productoService.buscar(q);
 
-        // ── Filtro por tipo de producto ───────────────────────────────
+        // Filtro Categoria principal
         if (!tipo.isBlank()) {
             productos = productos.stream()
                 .filter(p -> tipo.equalsIgnoreCase(p.getTipoProducto()))
                 .toList();
         }
-
-        if (mar > 0) { int m = mar; productos = productos.stream()
-            .filter(p -> p.getMarca() != null && p.getMarca().getIdMarca().equals(m))
-            .toList(); }
-
+        
+        // Filtro estatus
         if ("activo".equals(est))        productos = productos.stream().filter(Producto::getActivo).toList();
         else if ("inactivo".equals(est)) productos = productos.stream().filter(p -> !p.getActivo()).toList();
+
+        // Filtros dinámicos
+        if (fMarca > 0) {
+            productos = productos.stream().filter(p -> p.getMarca() != null && p.getMarca().getIdMarca().equals(fMarca)).toList();
+        } else if (mar > 0) {
+            productos = productos.stream().filter(p -> p.getMarca() != null && p.getMarca().getIdMarca().equals(mar)).toList();
+        }
+        if (!fModelo.isBlank()) {
+            productos = productos.stream().filter(p -> p.getCodigoFabrica() != null && p.getCodigoFabrica().toLowerCase().contains(fModelo.toLowerCase())).toList();
+        }
+        if (!fMaterial.isBlank()) {
+            productos = productos.stream().filter(p -> 
+                (p.getMaterialLente() != null && String.valueOf(p.getMaterialLente().getIdMaterial()).equals(fMaterial)) ||
+                (p.getMaterialArmazon() != null && p.getMaterialArmazon().equalsIgnoreCase(fMaterial))
+            ).toList();
+        }
+        if (fTipoFiltro > 0) {
+            productos = productos.stream().filter(p -> p.getTipoLente() != null && p.getTipoLente().getIdTipo().equals(fTipoFiltro)).toList();
+        }
+        if (!fColor.isBlank()) {
+            productos = productos.stream().filter(p -> fColor.equalsIgnoreCase(p.getColor())).toList();
+        }
+        if (!fForma.isBlank()) {
+            productos = productos.stream().filter(p -> fForma.equalsIgnoreCase(p.getFormaArmazon())).toList();
+        }
+        if (!fGenero.isBlank()) {
+            productos = productos.stream().filter(p -> fGenero.equalsIgnoreCase(p.getSegmentoArmazon())).toList();
+        }
+        if (fTratamiento > 0) {
+            productos = productos.stream().filter(p -> p.getTratamientoLente() != null && p.getTratamientoLente().getIdTratamiento().equals(fTratamiento)).toList();
+        }
+        if (!fRango.isBlank()) {
+            productos = productos.stream().filter(p -> fRango.equalsIgnoreCase(p.getGamaArmazon())).toList();
+        }
+        if (fProveedor > 0) {
+            productos = productos.stream().filter(p -> p.getProveedor() != null && p.getProveedor().getIdProveedor().equals(fProveedor)).toList();
+        }
 
         long activos   = productos.stream().filter(Producto::getActivo).count();
         long inactivos = productos.size() - activos;
 
-        var stockMap  = new HashMap<Integer, BigDecimal>();
-        var precioMap = new HashMap<Integer, BigDecimal>();
+        var stockMap    = new HashMap<Integer, BigDecimal>();
+        var precioMap   = new HashMap<Integer, BigDecimal>();
+        var costoMap    = new HashMap<Integer, BigDecimal>();
+        var utilidadMap = new HashMap<Integer, BigDecimal>();
+
         productos.forEach(p -> {
-            stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto()));
-            BigDecimal pv = productoService.precioVenta(p.getIdProducto());
-            if (pv != null) precioMap.put(p.getIdProducto(), pv);
+            if (suc > 0) {
+                var inv = inventarioService.buscarPorProductoYSucursal(p.getIdProducto(), suc);
+                if (inv != null) {
+                    stockMap.put(p.getIdProducto(), inv.getExistencia());
+                    precioMap.put(p.getIdProducto(), inv.getPrecioVenta());
+                    costoMap.put(p.getIdProducto(), inv.getCosto());
+                    // Inventario no tiene campo utilidad; calcular desde costo y precio
+                    if (inv.getCosto() != null && inv.getCosto().compareTo(BigDecimal.ZERO) > 0 && inv.getPrecioVenta() != null) {
+                        BigDecimal util = inv.getPrecioVenta().subtract(inv.getCosto())
+                                .multiply(BigDecimal.valueOf(100))
+                                .divide(inv.getCosto(), 2, java.math.RoundingMode.HALF_UP);
+                        utilidadMap.put(p.getIdProducto(), util);
+                    } else {
+                        utilidadMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                    }
+                } else {
+                    stockMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                    precioMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                    costoMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                    utilidadMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                }
+            } else {
+                stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto()));
+                BigDecimal pv = productoService.precioVenta(p.getIdProducto());
+                if (pv != null) precioMap.put(p.getIdProducto(), pv);
+                costoMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                utilidadMap.put(p.getIdProducto(), BigDecimal.ZERO);
+            }
         });
 
         model.addAttribute("productos",  productos);
         model.addAttribute("stockMap",   stockMap);
         model.addAttribute("precioMap",  precioMap);
+        model.addAttribute("costoMap",   costoMap);
+        model.addAttribute("utilidadMap",utilidadMap);
         model.addAttribute("marcas",     productoService.listarMarcas());
+        model.addAttribute("sucursales", productoService.listarSucursales());
+        model.addAttribute("tiposLente", productoService.listarTiposLente());
+        model.addAttribute("materiales", productoService.listarMateriales());
+        model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("proveedores", proveedorService.listarActivos());
+        
         model.addAttribute("activos",    activos);
         model.addAttribute("inactivos",  inactivos);
         model.addAttribute("q",          q);
-        model.addAttribute("tipo",       tipo);   // ← antes era "cat"
+        model.addAttribute("tipo",       tipo);
         model.addAttribute("mar",        mar);
         model.addAttribute("est",        est);
         model.addAttribute("vista",      vista);
+        model.addAttribute("suc",        suc);
+        
+        // Pass filter values back to view
+        model.addAttribute("fMarca", fMarca);
+        model.addAttribute("fModelo", fModelo);
+        model.addAttribute("fMaterial", fMaterial);
+        model.addAttribute("fTipoFiltro", fTipoFiltro);
+        model.addAttribute("fColor", fColor);
+        model.addAttribute("fForma", fForma);
+        model.addAttribute("fGenero", fGenero);
+        model.addAttribute("fTratamiento", fTratamiento);
+        model.addAttribute("fRango", fRango);
+        model.addAttribute("fProveedor", fProveedor);
+
         model.addAttribute("activePage", "productos");
         return "productos/lista";
     }
@@ -275,5 +370,30 @@ public class ProductoController {
                         "costo", p.getCosto(),
                         "precioVenta", p.getPrecioVenta())))
                 .orElse(ResponseEntity.ok(Map.of("ok", false)));
+    }
+
+    // ─── ACTUALIZACIÓN MASIVA DE PRECIOS ─────────────────────────
+    public static class PrecioUpdateRequest {
+        public Integer idProducto;
+        public BigDecimal costo;
+        public BigDecimal utilidad;
+        public BigDecimal precioVenta;
+    }
+
+    public static class MasivoRequest {
+        public Integer sucursalId;
+        public List<PrecioUpdateRequest> updates;
+    }
+
+    @PostMapping("/actualizar-precios-masivo")
+    @ResponseBody
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> actualizarPreciosMasivo(@RequestBody MasivoRequest request) {
+        try {
+            inventarioService.actualizarPreciosMasivo(request.sucursalId, request.updates);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

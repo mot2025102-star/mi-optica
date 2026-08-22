@@ -282,12 +282,13 @@
                     <div class="lente-seccion-titulo" style="margin-top:20px"><svg style="width:14px;height:14px;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg> Especificaciones</div>
                     <div class="form-row form-row-2">
                         <div class="form-group">
-                            <label class="form-label">Rangos</label>
-                            <select id="vRangoL" class="form-select">
+                            <label class="form-label">Rango de graduación</label>
+                            <select id="vGamaL" class="form-select">
                                 <option value="">— Selecciona —</option>
-                                <option value="BAJA"  th:selected="${producto.rangoLente == 'BAJA'}">Baja</option>
-                                <option value="MEDIA" th:selected="${producto.rangoLente == 'MEDIA'}">Media</option>
-                                <option value="ALTA"  th:selected="${producto.rangoLente == 'ALTA'}">Alta</option>
+                                <option value="Básica"  th:selected="${producto.gamaArmazon == 'Básica'}">Básica</option>
+                                <option value="Media"   th:selected="${producto.gamaArmazon == 'Media'}">Media</option>
+                                <option value="Alta"    th:selected="${producto.gamaArmazon == 'Alta'}">Alta</option>
+                                <option value="Lente procesado" th:selected="${producto.gamaArmazon == 'Lente procesado'}">Lente procesado</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -536,7 +537,7 @@ const tipoInicial = /*[[${producto.tipoProducto}]]*/ '';
 const TITULOS = { ARMAZON:'Armazón', LENTE:'Lente', LIMPIEZA:'Producto de Limpieza', ACCESORIO:'Accesorio' };
 const CAMPOS = {
     ARMAZON:  { proveedor:'vProveedorA', codigo:'vCodigoA', codigoFabrica:'vCodigoFabricaA', detalle:'vDetalleA',desc:'vDescA',color:'vColorA',unidad:'vUnidadA',marca:'vMarcaA',categoria:null,modelo:'vModeloA',tipoL:null,matL:null,tratL:null,materialA:'vMaterialA',familiaA:'vFamiliaA',formaA:'vFormaA',segmentoA:'vSegmentoA',gamaA:'vGamaA',medHoriz:'vMedHorizA',medVert:'vMedVertA',medDiag:'vMedDiagA',medPuente:'vMedPuenteA',medVar:'vMedVarrillaA' },
-    LENTE:    { proveedor:'vProveedorL', codigo:'vCodigoL', codigoFabrica:null,              detalle:'vDetalleL',desc:'vDescL',color:'vColorL',unidad:null,marca:'vMarcaL',categoria:null,modelo:null,tipoL:'vTipoL',matL:'vMaterialL',tratL:'vSubFamiliaL',clasif:'vClasifL',subFamilia:null,rango:'vRangoL',proveedorLente:'vProveedorL',codInterno:'vCodInternoL',costo:'vCostoL',utilidad:'vUtilidadL',iva:'vIvaL',precioVenta:'vPrecioVentaL' },
+    LENTE:    { proveedor:'vProveedorL', codigo:'vCodigoL', codigoFabrica:null,              detalle:'vDetalleL',desc:'vDescL',color:'vColorL',unidad:null,marca:'vMarcaL',categoria:null,modelo:null,tipoL:'vTipoL',matL:'vMaterialL',tratL:'vSubFamiliaL',clasif:'vClasifL',subFamilia:null,gamaA:'vGamaL',rango:null,proveedorLente:'vProveedorL',codInterno:'vCodInternoL',costo:'vCostoL',utilidad:'vUtilidadL',iva:'vIvaL',precioVenta:'vPrecioVentaL' },
     LIMPIEZA: { proveedor:'vProveedorO', codigo:'vCodigoO', codigoFabrica:'vCodigoFabricaO', detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null },
     ACCESORIO:{ proveedor:'vProveedorO', codigo:'vCodigoO', codigoFabrica:'vCodigoFabricaO', detalle:'vDetalleO',desc:'vDescO',color:'vColorO',unidad:'vUnidadO',marca:'vMarcaO',categoria:null,modelo:null,tipoL:null,matL:null,tratL:null }
 };

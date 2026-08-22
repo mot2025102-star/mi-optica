@@ -45,10 +45,9 @@
                 radial-gradient(circle, rgba(0,180,216,.05) 1px, transparent 1px);
             background-size: auto, auto, 28px 28px;
         }
-
-        /* ══════════════════════════════
+        /*
            FASE 1 — REVEAL
-        ══════════════════════════════ */
+        */
         .reveal-scene { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
         .reveal-black {
             position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -71,10 +70,9 @@
             96%  { opacity: 1; }
             100% { left: 118%; opacity: 0; }
         }
-
-        /* ══════════════════════════════
-           FASE 2 — LOGO ANIMADO
-        ══════════════════════════════ */
+        /*
+           LOGO ANIMADO
+        */
         .logo-wrap {
             display: flex; flex-direction: column; align-items: center; gap: 6px;
             opacity: 0; animation: logoFadeIn 0.6s 1.8s ease forwards;
@@ -103,7 +101,7 @@
         @keyframes blinkTop { 0%,38%,58%,100% { transform: scaleY(0); } 45%,52% { transform: scaleY(1); } }
         @keyframes blinkBot { 0%,38%,58%,100% { transform: scaleY(0); } 45%,52% { transform: scaleY(1); } }
 
-        /* ══ LAYOUT ══ */
+        /* 6LAYOUT */
         .login-page {
             min-height: 100vh;
             display: flex;

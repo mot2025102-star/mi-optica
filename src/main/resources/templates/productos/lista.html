@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -55,20 +55,26 @@
  
         <div class="card mb-3">
             <div class="card-body" style="padding:14px 20px">
-                <form th:action="@{/productos}" method="get"
+                <form th:action="@{/productos}" method="get" id="formFiltros"
                       style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
                     <input type="hidden" name="vista" th:value="${vista}">
-                    <div style="flex:3;min-width:200px">
+                    
+                    <div style="flex:1;min-width:150px">
                         <label class="form-label">Buscar</label>
-                        <div style="position:relative">
-                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-texto)"></span>
-                            <input type="text" name="q" class="form-control" style="padding-left:36px"
-                                   placeholder="Código, nombre, modelo..." th:value="${q}">
-                        </div>
+                        <input type="text" name="q" class="form-control" placeholder="Código, nombre, modelo..." th:value="${q}">
                     </div>
-                    <div style="min-width:150px">
+                    
+                    <div style="min-width:130px">
+                        <label class="form-label">Sucursal</label>
+                        <select name="suc" class="form-select">
+                            <option value="0">Todas</option>
+                            <option th:each="s : ${sucursales}" th:value="${s.idSucursal}" th:text="${s.nombre}" th:selected="${suc == s.idSucursal}"></option>
+                        </select>
+                    </div>
+
+                    <div style="min-width:140px">
                         <label class="form-label">Categoría</label>
-                        <select name="tipo" class="form-select">
+                        <select name="tipo" class="form-select" onchange="this.form.submit()">
                             <option value=""         th:selected="${tipo == ''}">Todas</option>
                             <option value="ARMAZON"  th:selected="${tipo == 'ARMAZON'}"> Armazones</option>
                             <option value="LENTE"    th:selected="${tipo == 'LENTE'}"> Lentes</option>
@@ -76,15 +82,8 @@
                             <option value="ACCESORIO" th:selected="${tipo == 'ACCESORIO'}"> Accesorios</option>
                         </select>
                     </div>
-                    <div style="min-width:140px">
-                        <label class="form-label">Marca</label>
-                        <select name="mar" class="form-select">
-                            <option value="0">Todas</option>
-                            <option th:each="m : ${marcas}" th:value="${m.idMarca}"
-                                    th:text="${m.nombre}" th:selected="${mar == m.idMarca}"></option>
-                        </select>
-                    </div>
-                    <div style="min-width:130px">
+
+                    <div style="min-width:120px">
                         <label class="form-label">Estado</label>
                         <select name="est" class="form-select">
                             <option value="activo"   th:selected="${est=='activo'}"> Activos</option>
@@ -92,9 +91,36 @@
                             <option value="todos"    th:selected="${est=='todos'}">Todos</option>
                         </select>
                     </div>
-                    <div style="display:flex;gap:8px;align-items:flex-end">
-                        <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Filtrar</button>
-                        <a th:href="@{/productos}" class="btn btn-secondary">✖</a>
+
+                    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;width:100%">
+                        <!-- Filtros Dinámicos -->
+                        <th:block th:if="${tipo == 'ARMAZON'}">
+                            <div style="min-width:120px"><label class="form-label">Marca</label><select name="fMarca" class="form-select"><option value="0">Todas</option><option th:each="m:${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${fMarca == m.idMarca}"></option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Modelo</label><input type="text" name="fModelo" class="form-control" th:value="${fModelo}" placeholder="Modelo"></div>
+                            <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option value="ACERO_INOXIDABLE" th:selected="${fMaterial == 'ACERO_INOXIDABLE'}">Acero Inox</option><option value="TITANIUM" th:selected="${fMaterial == 'TITANIUM'}">Titanium</option><option value="ALUMINIO" th:selected="${fMaterial == 'ALUMINIO'}">Aluminio</option><option value="MONEL" th:selected="${fMaterial == 'MONEL'}">Monel</option><option value="ACETATO" th:selected="${fMaterial == 'ACETATO'}">Acetato</option><option value="TR90" th:selected="${fMaterial == 'TR90'}">TR-90</option><option value="INYECTADO" th:selected="${fMaterial == 'INYECTADO'}">Inyectado</option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fForma" class="form-select"><option value="">Todos</option><option value="COMPLETO" th:selected="${fForma == 'COMPLETO'}">Aro completo</option><option value="RANURADO" th:selected="${fForma == 'RANURADO'}">Ranurado</option><option value="AEREO" th:selected="${fForma == 'AEREO'}">Perforado</option></select></div>
+                            <div style="min-width:100px"><label class="form-label">Color</label><input type="text" name="fColor" class="form-control" th:value="${fColor}"></div>
+                            <div style="min-width:120px"><label class="form-label">Forma</label><select name="fForma" class="form-select"><option value="">Todas</option><option value="CUADRADO" th:selected="${fForma == 'CUADRADO'}">Cuadrado</option><option value="OVALADO" th:selected="${fForma == 'OVALADO'}">Ovalado</option><option value="RECTANGULAR" th:selected="${fForma == 'RECTANGULAR'}">Rectangular</option><option value="AVIADOR" th:selected="${fForma == 'AVIADOR'}">Aviador</option><option value="CAT_EYES" th:selected="${fForma == 'CAT_EYES'}">Cat Eyes</option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Género</label><select name="fGenero" class="form-select"><option value="">Todos</option><option value="CABALLERO" th:selected="${fGenero == 'CABALLERO'}">Masculino</option><option value="DAMA" th:selected="${fGenero == 'DAMA'}">Femenino</option><option value="UNISEX" th:selected="${fGenero == 'UNISEX'}">Unisex</option><option value="NIÑO" th:selected="${fGenero == 'NIÑO'}">Niño/a</option></select></div>
+                        </th:block>
+                        <th:block th:if="${tipo == 'LENTE'}">
+                            <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fTipoFiltro" class="form-select"><option value="0">Todos</option><option th:each="t:${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}" th:selected="${fTipoFiltro == t.idTipo}"></option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option th:each="m:${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}" th:selected="${fMaterial == ''+m.idMaterial}"></option></select></div>
+                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option value="TRANSPARENTE" th:selected="${fColor == 'TRANSPARENTE'}">Transparente</option><option value="GRIS" th:selected="${fColor == 'GRIS'}">Gris</option><option value="CAFÉ" th:selected="${fColor == 'CAFÉ'}">Café</option><option value="RUBY" th:selected="${fColor == 'RUBY'}">Ruby</option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Tratamiento</label><select name="fTratamiento" class="form-select"><option value="0">Todos</option><option th:each="tr:${tratamientos}" th:value="${tr.idTratamiento}" th:text="${tr.nombre}" th:selected="${fTratamiento == tr.idTratamiento}"></option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Rango grad.</label><select name="fRango" class="form-select"><option value="">Todos</option><option value="Básica" th:selected="${fRango == 'Básica'}">Básica</option><option value="Media" th:selected="${fRango == 'Media'}">Media</option><option value="Alta" th:selected="${fRango == 'Alta'}">Alta</option><option value="Lente procesado" th:selected="${fRango == 'Lente procesado'}">Lente procesado</option></select></div>
+                        </th:block>
+                        <th:block th:if="${tipo == 'LIMPIEZA' or tipo == 'ACCESORIO'}">
+                            <div style="min-width:120px"><label class="form-label">Marca</label><select name="fMarca" class="form-select"><option value="0">Todas</option><option th:each="m:${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${fMarca == m.idMarca}"></option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Proveedor</label><select name="fProveedor" class="form-select"><option value="0">Todos</option><option th:each="pr:${proveedores}" th:value="${pr.idProveedor}" th:text="${pr.nombre}" th:selected="${fProveedor == pr.idProveedor}"></option></select></div>
+                        </th:block>
+                    </div>
+                    
+                    <div style="display:flex;gap:8px;align-items:flex-end;width:100%;margin-top:8px">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a th:href="@{/productos}" class="btn btn-secondary">Limpiar</a>
+                        <div style="flex-grow:1"></div>
+                        <button type="button" class="btn btn-primary" style="background-color: var(--amarillo); color: black;" onclick="abrirModalPrecios()">Cambiar de precios</button>
                     </div>
                 </form>
             </div>
@@ -123,9 +149,24 @@
                             <tr>
                                 <th>Código</th>
                                 <th>Producto</th>
-                                <th>Tipo</th>
-                                <th>Marca</th>
-                                <th>Color</th>
+                                
+                                <th th:if="${tipo == 'ARMAZON'}">Modelo</th>
+                                <th th:if="${tipo == 'ARMAZON'}">Marca</th>
+                                <th th:if="${tipo == 'ARMAZON'}">Material</th>
+                                <th th:if="${tipo == 'ARMAZON'}">Color</th>
+                                
+                                <th th:if="${tipo == 'LENTE'}">Rango Grad.</th>
+                                <th th:if="${tipo == 'LENTE'}">Material</th>
+                                <th th:if="${tipo == 'LENTE'}">Tratamiento</th>
+                                <th th:if="${tipo == 'LENTE'}">Color</th>
+                                
+                                <th th:if="${tipo == 'LIMPIEZA' or tipo == 'ACCESORIO'}">Marca</th>
+                                <th th:if="${tipo == 'LIMPIEZA' or tipo == 'ACCESORIO'}">Proveedor</th>
+                                
+                                <th th:if="${tipo == ''}">Tipo</th>
+                                <th th:if="${tipo == ''}">Marca</th>
+                                <th th:if="${tipo == ''}">Color</th>
+                                
                                 <th style="text-align:center">Stock</th>
                                 <th style="text-align:right">Precio Venta</th>
                                 <th>Estado</th>
@@ -155,30 +196,43 @@
                                          th:text="${#strings.abbreviate(p.descripcion, 50)}"></div>
                                 </td>
  
-                                <td>
-                                    <span th:if="${p.tipoProducto == 'ARMAZON'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa)">Armazón</span>
-                                    <span th:if="${p.tipoProducto == 'LENTE'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.12);color:#64b4ff">Lente</span>
-                                    <span th:if="${p.tipoProducto == 'LIMPIEZA'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)">Limpieza</span>
-                                    <span th:if="${p.tipoProducto == 'ACCESORIO'}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(180,100,255,0.12);color:#b464ff">Accesorio</span>
-                                    <span th:if="${p.tipoProducto == null or p.tipoProducto == 'GENERAL'}"
-                                          class="text-gris text-sm">General</span>
-                                    <div th:if="${p.tipoProducto == 'LENTE' and p.clasificacionLente != null}"
-                                         class="text-gris" style="font-size:10px;margin-top:3px"
-                                         th:text="${p.clasificacionLente}"></div>
-                                </td>
- 
-                                <td>
-                                    <span th:if="${p.marca != null}"
-                                          style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"
-                                          th:text="${p.marca.nombre}"></span>
-                                    <span th:if="${p.marca == null}" class="text-gris text-sm">—</span>
-                                </td>
- 
-                                <td class="text-sm" th:text="${p.color != null and !p.color.isEmpty() ? p.color : '—'}"></td>
+                                <!-- ARMAZÓN -->
+                                <th:block th:if="${tipo == 'ARMAZON'}">
+                                    <td class="text-sm" th:text="${p.codigoFabrica ?: '—'}"></td>
+                                    <td><span th:if="${p.marca != null}" class="badge badge--info" style="background:rgba(245,197,24,0.12);color:var(--amarillo)" th:text="${p.marca.nombre}"></span><span th:if="${p.marca == null}" class="text-gris text-sm">—</span></td>
+                                    <td class="text-sm" th:text="${p.materialArmazon ?: '—'}"></td>
+                                    <td class="text-sm" th:text="${p.color ?: '—'}"></td>
+                                </th:block>
+
+                                <!-- LENTE -->
+                                <th:block th:if="${tipo == 'LENTE'}">
+                                    <td class="text-sm" th:text="${p.gamaArmazon ?: '—'}"></td>
+                                    <td class="text-sm" th:text="${p.materialLente != null ? p.materialLente.nombre : '—'}"></td>
+                                    <td class="text-sm" th:text="${p.tratamientoLente != null ? p.tratamientoLente.nombre : '—'}"></td>
+                                    <td class="text-sm" th:text="${p.color ?: '—'}"></td>
+                                </th:block>
+
+                                <!-- LIMPIEZA / ACCESORIO -->
+                                <th:block th:if="${tipo == 'LIMPIEZA' or tipo == 'ACCESORIO'}">
+                                    <td><span th:if="${p.marca != null}" class="badge badge--info" style="background:rgba(245,197,24,0.12);color:var(--amarillo)" th:text="${p.marca.nombre}"></span><span th:if="${p.marca == null}" class="text-gris text-sm">—</span></td>
+                                    <td class="text-sm" th:text="${p.proveedor != null ? p.proveedor.nombre : '—'}"></td>
+                                </th:block>
+
+                                <!-- DEFAULT (TODAS) -->
+                                <th:block th:if="${tipo == ''}">
+                                    <td>
+                                        <span th:if="${p.tipoProducto == 'ARMAZON'}" style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(39,194,201,0.12);color:var(--turquesa)">Armazón</span>
+                                        <span th:if="${p.tipoProducto == 'LENTE'}" style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.12);color:#64b4ff">Lente</span>
+                                        <span th:if="${p.tipoProducto == 'LIMPIEZA'}" style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)">Limpieza</span>
+                                        <span th:if="${p.tipoProducto == 'ACCESORIO'}" style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(180,100,255,0.12);color:#b464ff">Accesorio</span>
+                                        <span th:if="${p.tipoProducto == null or p.tipoProducto == 'GENERAL'}" class="text-gris text-sm">General</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${p.marca != null}" style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)" th:text="${p.marca.nombre}"></span>
+                                        <span th:if="${p.marca == null}" class="text-gris text-sm">—</span>
+                                    </td>
+                                    <td class="text-sm" th:text="${p.color != null and !p.color.isEmpty() ? p.color : '—'}"></td>
+                                </th:block>
  
                                 <td style="text-align:center">
                                     <th:block th:with="stock=${stockMap[p.idProducto]}">
@@ -409,7 +463,124 @@
     </div>
 </div>
  
+<!-- Modal Cambio Masivo Precios -->
+<div class="modal-overlay" id="modalPrecios">
+    <div class="modal" style="width: 80%; max-width: 900px;">
+        <div class="modal-header">
+            <div class="modal-title"> Cambio Masivo de Precios</div>
+            <button class="modal-close" onclick="document.getElementById('modalPrecios').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+            <div class="alert alert--info mb-3">
+                Mostrando productos para la sucursal seleccionada. Modifique Costo y Utilidad (%) para recalcular el nuevo precio de venta.
+            </div>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Código / Producto</th>
+                            <th style="text-align:center">Stock Actual</th>
+                            <th style="text-align:right">Costo (Q)</th>
+                            <th style="text-align:right">Utilidad (%)</th>
+                            <th style="text-align:right">PV Actual</th>
+                            <th style="text-align:right">Nuevo PV (Q)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbPrecios">
+                        <tr th:each="p : ${productos}">
+                            <td>
+                                <div class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></div>
+                                <div class="text-sm" th:text="${p.detalle}"></div>
+                            </td>
+                            <td style="text-align:center" th:text="${stockMap[p.idProducto] ?: 0}"></td>
+                            
+                            <td style="text-align:right; width: 120px;">
+                                <input type="number" class="form-control form-control-sm m-costo" th:data-id="${p.idProducto}" step="0.01" min="0" th:value="${costoMap[p.idProducto] ?: 0}" oninput="recalcularPrecios(this)">
+                            </td>
+                            <td style="text-align:right; width: 120px;">
+                                <input type="number" class="form-control form-control-sm m-utilidad" th:data-id="${p.idProducto}" step="0.01" min="0" th:value="${utilidadMap[p.idProducto] ?: 0}" oninput="recalcularPrecios(this)">
+                            </td>
+                            
+                            <td style="text-align:right" class="text-gris text-sm" th:text="${precioMap[p.idProducto] ?: 0}"></td>
+                            
+                            <td style="text-align:right; width: 120px;">
+                                <input type="number" class="form-control form-control-sm text-turquesa fw-600 m-pv" th:data-id="${p.idProducto}" step="0.01" min="0" readonly th:value="${precioMap[p.idProducto] ?: 0}">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:flex-end; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="document.getElementById('modalPrecios').classList.remove('show')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarPreciosMasivo()">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const currentSucursal = /*[[${suc}]]*/ 0;
+</script>
 <script>
+function abrirModalPrecios() {
+    if (currentSucursal === 0) {
+        alert("Atención: No has seleccionado una sucursal. Los cambios globales (Sucursal=Todas) pueden no aplicarse correctamente dependiendo de la lógica de negocio. Se recomienda seleccionar una Sucursal específica en el filtro superior.");
+    }
+    document.getElementById('modalPrecios').classList.add('show');
+}
+
+function recalcularPrecios(input) {
+    const tr = input.closest('tr');
+    const costo = parseFloat(tr.querySelector('.m-costo').value) || 0;
+    const utilidad = parseFloat(tr.querySelector('.m-utilidad').value) || 0;
+    // Assuming simple calculation: Costo * (1 + Utilidad/100)
+    // You can adjust if IVA is needed globally
+    let pv = costo * (1 + utilidad/100);
+    tr.querySelector('.m-pv').value = pv.toFixed(2);
+}
+
+async function guardarPreciosMasivo() {
+    const updates = [];
+    document.querySelectorAll('#tbPrecios tr').forEach(tr => {
+        const idProd = tr.querySelector('.m-costo').getAttribute('data-id');
+        const costo = parseFloat(tr.querySelector('.m-costo').value) || 0;
+        const util = parseFloat(tr.querySelector('.m-utilidad').value) || 0;
+        const pv = parseFloat(tr.querySelector('.m-pv').value) || 0;
+        updates.push({
+            idProducto: parseInt(idProd),
+            costo: costo,
+            utilidad: util,
+            precioVenta: pv
+        });
+    });
+    
+    if (updates.length === 0) return;
+    
+    const payload = {
+        sucursalId: currentSucursal,
+        updates: updates
+    };
+    
+    try {
+        const res = await fetch('/productos/actualizar-precios-masivo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN']: document.querySelector('meta[name="_csrf"]')?.content || ''
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('Precios actualizados exitosamente.');
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (e) {
+        alert('Error de conexión.');
+    }
+}
 function cambiarVista(v) {
     document.getElementById('vistaTabla').style.display = v === 'tabla' ? '' : 'none';
     document.getElementById('vistaCards').style.display = v === 'cards' ? '' : 'none';
