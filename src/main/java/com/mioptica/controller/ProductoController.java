@@ -44,6 +44,7 @@ public class ProductoController {
             @RequestParam(defaultValue = "0")      Integer fTipoFiltro,
             @RequestParam(defaultValue = "")       String  fColor,
             @RequestParam(defaultValue = "")       String  fForma,
+            @RequestParam(defaultValue = "")       String  fFamilia,
             @RequestParam(defaultValue = "")       String  fGenero,
             @RequestParam(defaultValue = "0")      Integer fTratamiento,
             @RequestParam(defaultValue = "")       String  fRango,
@@ -87,6 +88,9 @@ public class ProductoController {
         }
         if (!fForma.isBlank()) {
             productos = productos.stream().filter(p -> fForma.equalsIgnoreCase(p.getFormaArmazon())).toList();
+        }
+        if (!fFamilia.isBlank()) {
+            productos = productos.stream().filter(p -> fFamilia.equalsIgnoreCase(p.getFamiliaArmazon())).toList();
         }
         if (!fGenero.isBlank()) {
             productos = productos.stream().filter(p -> fGenero.equalsIgnoreCase(p.getSegmentoArmazon())).toList();
@@ -135,8 +139,23 @@ public class ProductoController {
                 stockMap.put(p.getIdProducto(), productoService.stockTotal(p.getIdProducto()));
                 BigDecimal pv = productoService.precioVenta(p.getIdProducto());
                 if (pv != null) precioMap.put(p.getIdProducto(), pv);
-                costoMap.put(p.getIdProducto(), BigDecimal.ZERO);
-                utilidadMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                // Obtener costo y utilidad del primer registro de inventario disponible
+                var invList = inventarioService.listarTodo().stream()
+                        .filter(i -> i.getProducto().getIdProducto().equals(p.getIdProducto()))
+                        .toList();
+                BigDecimal costoFirst = invList.stream()
+                        .filter(i -> i.getCosto() != null && i.getCosto().compareTo(BigDecimal.ZERO) > 0)
+                        .map(Inventario::getCosto)
+                        .findFirst().orElse(BigDecimal.ZERO);
+                costoMap.put(p.getIdProducto(), costoFirst);
+                if (costoFirst.compareTo(BigDecimal.ZERO) > 0 && pv != null && pv.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal util = pv.subtract(costoFirst)
+                            .multiply(BigDecimal.valueOf(100))
+                            .divide(costoFirst, 2, java.math.RoundingMode.HALF_UP);
+                    utilidadMap.put(p.getIdProducto(), util);
+                } else {
+                    utilidadMap.put(p.getIdProducto(), BigDecimal.ZERO);
+                }
             }
         });
 
@@ -150,6 +169,7 @@ public class ProductoController {
         model.addAttribute("tiposLente", productoService.listarTiposLente());
         model.addAttribute("materiales", productoService.listarMateriales());
         model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("colores", productoService.listarColores());
         model.addAttribute("proveedores", proveedorService.listarActivos());
         
         model.addAttribute("activos",    activos);
@@ -168,6 +188,7 @@ public class ProductoController {
         model.addAttribute("fTipoFiltro", fTipoFiltro);
         model.addAttribute("fColor", fColor);
         model.addAttribute("fForma", fForma);
+        model.addAttribute("fFamilia", fFamilia);
         model.addAttribute("fGenero", fGenero);
         model.addAttribute("fTratamiento", fTratamiento);
         model.addAttribute("fRango", fRango);
@@ -187,6 +208,7 @@ public class ProductoController {
         model.addAttribute("tiposLente",   productoService.listarTiposLente());
         model.addAttribute("materiales",   productoService.listarMateriales());
         model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("colores",      productoService.listarColores());
         model.addAttribute("proveedores",  proveedorService.listarActivos());
         model.addAttribute("editando",     false);
         model.addAttribute("activePage",   "productos");
@@ -211,6 +233,7 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+            model.addAttribute("colores",      productoService.listarColores());
             model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("invMap",       invMap);
             model.addAttribute("editando",     true);

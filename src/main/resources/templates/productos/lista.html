@@ -98,15 +98,15 @@
                             <div style="min-width:120px"><label class="form-label">Marca</label><select name="fMarca" class="form-select"><option value="0">Todas</option><option th:each="m:${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${fMarca == m.idMarca}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Modelo</label><input type="text" name="fModelo" class="form-control" th:value="${fModelo}" placeholder="Modelo"></div>
                             <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option value="ACERO_INOXIDABLE" th:selected="${fMaterial == 'ACERO_INOXIDABLE'}">Acero Inox</option><option value="TITANIUM" th:selected="${fMaterial == 'TITANIUM'}">Titanium</option><option value="ALUMINIO" th:selected="${fMaterial == 'ALUMINIO'}">Aluminio</option><option value="MONEL" th:selected="${fMaterial == 'MONEL'}">Monel</option><option value="ACETATO" th:selected="${fMaterial == 'ACETATO'}">Acetato</option><option value="TR90" th:selected="${fMaterial == 'TR90'}">TR-90</option><option value="INYECTADO" th:selected="${fMaterial == 'INYECTADO'}">Inyectado</option></select></div>
-                            <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fForma" class="form-select"><option value="">Todos</option><option value="COMPLETO" th:selected="${fForma == 'COMPLETO'}">Aro completo</option><option value="RANURADO" th:selected="${fForma == 'RANURADO'}">Ranurado</option><option value="AEREO" th:selected="${fForma == 'AEREO'}">Perforado</option></select></div>
-                            <div style="min-width:100px"><label class="form-label">Color</label><input type="text" name="fColor" class="form-control" th:value="${fColor}"></div>
+                            <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fFamilia" class="form-select"><option value="">Todos</option><option value="COMPLETO" th:selected="${fFamilia == 'COMPLETO'}">Aro completo</option><option value="RANURADO" th:selected="${fFamilia == 'RANURADO'}">Ranurado</option><option value="AEREO" th:selected="${fFamilia == 'AEREO'}">Perforado</option></select></div>
+                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${fColor == c}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Forma</label><select name="fForma" class="form-select"><option value="">Todas</option><option value="CUADRADO" th:selected="${fForma == 'CUADRADO'}">Cuadrado</option><option value="OVALADO" th:selected="${fForma == 'OVALADO'}">Ovalado</option><option value="RECTANGULAR" th:selected="${fForma == 'RECTANGULAR'}">Rectangular</option><option value="AVIADOR" th:selected="${fForma == 'AVIADOR'}">Aviador</option><option value="CAT_EYES" th:selected="${fForma == 'CAT_EYES'}">Cat Eyes</option></select></div>
                             <div style="min-width:120px"><label class="form-label">Género</label><select name="fGenero" class="form-select"><option value="">Todos</option><option value="CABALLERO" th:selected="${fGenero == 'CABALLERO'}">Masculino</option><option value="DAMA" th:selected="${fGenero == 'DAMA'}">Femenino</option><option value="UNISEX" th:selected="${fGenero == 'UNISEX'}">Unisex</option><option value="NIÑO" th:selected="${fGenero == 'NIÑO'}">Niño/a</option></select></div>
                         </th:block>
                         <th:block th:if="${tipo == 'LENTE'}">
                             <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fTipoFiltro" class="form-select"><option value="0">Todos</option><option th:each="t:${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}" th:selected="${fTipoFiltro == t.idTipo}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option th:each="m:${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}" th:selected="${fMaterial == ''+m.idMaterial}"></option></select></div>
-                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option value="TRANSPARENTE" th:selected="${fColor == 'TRANSPARENTE'}">Transparente</option><option value="GRIS" th:selected="${fColor == 'GRIS'}">Gris</option><option value="CAFÉ" th:selected="${fColor == 'CAFÉ'}">Café</option><option value="RUBY" th:selected="${fColor == 'RUBY'}">Ruby</option></select></div>
+                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${fColor == c}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Tratamiento</label><select name="fTratamiento" class="form-select"><option value="0">Todos</option><option th:each="tr:${tratamientos}" th:value="${tr.idTratamiento}" th:text="${tr.nombre}" th:selected="${fTratamiento == tr.idTratamiento}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Rango grad.</label><select name="fRango" class="form-select"><option value="">Todos</option><option value="Básica" th:selected="${fRango == 'Básica'}">Básica</option><option value="Media" th:selected="${fRango == 'Media'}">Media</option><option value="Alta" th:selected="${fRango == 'Alta'}">Alta</option><option value="Lente procesado" th:selected="${fRango == 'Lente procesado'}">Lente procesado</option></select></div>
                         </th:block>
@@ -249,22 +249,13 @@
                                 </td>
  
                                 <td style="text-align:right">
-                                    <span th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente != null}"
-                                          class="fw-600 text-turquesa"
-                                          style="font-size:13px"
-                                          th:text="'Q ' + ${#numbers.formatDecimal(p.precioVentaLente, 1, 2)}">
-                                    </span>
-                                    <span th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente == null}"
-                                          class="text-gris text-sm">—</span>
-                                    <th:block th:if="${p.tipoProducto != 'LENTE'}">
-                                        <th:block th:with="inv=${precioMap != null ? precioMap[p.idProducto] : null}">
-                                            <span th:if="${inv != null}"
-                                                  class="fw-600"
-                                                  style="font-size:13px"
-                                                  th:text="'Q ' + ${#numbers.formatDecimal(inv, 1, 2)}">
-                                            </span>
-                                            <span th:if="${inv == null}" class="text-gris text-sm">—</span>
-                                        </th:block>
+                                    <th:block th:with="inv=${precioMap != null ? precioMap[p.idProducto] : null}">
+                                        <span th:if="${inv != null}"
+                                              class="fw-600 text-turquesa"
+                                              style="font-size:13px"
+                                              th:text="'Q ' + ${#numbers.formatDecimal(inv, 1, 2)}">
+                                        </span>
+                                        <span th:if="${inv == null}" class="text-gris text-sm">—</span>
                                     </th:block>
                                 </td>
  
@@ -397,13 +388,12 @@
                         </div>
                         <div style="text-align:right">
                             <div class="text-gris text-sm">Precio</div>
-                            <div th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente != null}"
-                                 class="fw-600 text-turquesa" style="font-size:14px"
-                                 th:text="'Q ' + ${#numbers.formatDecimal(p.precioVentaLente, 1, 2)}"></div>
-                            <div th:if="${p.tipoProducto == 'LENTE' and p.precioVentaLente == null}"
-                                 class="text-gris text-sm">—</div>
-                            <div th:if="${p.tipoProducto != 'LENTE'}"
-                                 class="text-gris text-sm">—</div>
+                            <th:block th:with="inv=${precioMap != null ? precioMap[p.idProducto] : null}">
+                                <div th:if="${inv != null}"
+                                     class="fw-600 text-turquesa" style="font-size:14px"
+                                     th:text="'Q ' + ${#numbers.formatDecimal(inv, 1, 2)}"></div>
+                                <div th:if="${inv == null}" class="text-gris text-sm">—</div>
+                            </th:block>
                         </div>
                         <div class="d-flex gap-1">
                             <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
@@ -472,17 +462,28 @@
         </div>
         <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
             <div class="alert alert--info mb-3">
-                Mostrando productos para la sucursal seleccionada. Modifique Costo y Utilidad (%) para recalcular el nuevo precio de venta.
+                Mostrando productos para la sucursal seleccionada. Ingrese el Nuevo Costo y Nueva Utilidad para aplicar a todos los productos listados.
             </div>
+            
+            <div style="display:flex; gap:16px; margin-bottom:16px; background:var(--card-bg); padding:16px; border-radius:8px; border:1px solid var(--border-color)">
+                <div style="flex:1">
+                    <label class="form-label">Nuevo Costo (Q)</label>
+                    <input type="number" id="globalCosto" class="form-control" step="0.01" min="0" value="0" oninput="recalcularTodosPrecios()">
+                </div>
+                <div style="flex:1">
+                    <label class="form-label">Nueva Utilidad (%)</label>
+                    <input type="number" id="globalUtilidad" class="form-control" step="0.01" min="0" value="0" oninput="recalcularTodosPrecios()">
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table class="table">
                     <thead>
                         <tr>
                             <th>Código / Producto</th>
-                            <th style="text-align:center">Stock Actual</th>
-                            <th style="text-align:right">Costo (Q)</th>
-                            <th style="text-align:right">Utilidad (%)</th>
-                            <th style="text-align:right">PV Actual</th>
+                            <th style="text-align:right">Costo Actual (Q)</th>
+                            <th style="text-align:right">Utilidad Actual (%)</th>
+                            <th style="text-align:right">PV Actual (Q)</th>
                             <th style="text-align:right">Nuevo PV (Q)</th>
                         </tr>
                     </thead>
@@ -492,19 +493,13 @@
                                 <div class="text-turquesa fw-600 text-sm" th:text="${p.codigo}"></div>
                                 <div class="text-sm" th:text="${p.detalle}"></div>
                             </td>
-                            <td style="text-align:center" th:text="${stockMap[p.idProducto] ?: 0}"></td>
                             
-                            <td style="text-align:right; width: 120px;">
-                                <input type="number" class="form-control form-control-sm m-costo" th:data-id="${p.idProducto}" step="0.01" min="0" th:value="${costoMap[p.idProducto] ?: 0}" oninput="recalcularPrecios(this)">
-                            </td>
-                            <td style="text-align:right; width: 120px;">
-                                <input type="number" class="form-control form-control-sm m-utilidad" th:data-id="${p.idProducto}" step="0.01" min="0" th:value="${utilidadMap[p.idProducto] ?: 0}" oninput="recalcularPrecios(this)">
-                            </td>
+                            <td style="text-align:right" class="text-gris text-sm" th:text="${costoMap[p.idProducto] != null ? #numbers.formatDecimal(costoMap[p.idProducto], 1, 2) : '0.00'}"></td>
+                            <td style="text-align:right" class="text-gris text-sm" th:text="${utilidadMap[p.idProducto] != null ? #numbers.formatDecimal(utilidadMap[p.idProducto], 1, 2) : '0.00'}"></td>
+                            <td style="text-align:right" class="text-gris text-sm" th:text="${precioMap[p.idProducto] != null ? #numbers.formatDecimal(precioMap[p.idProducto], 1, 2) : '0.00'}"></td>
                             
-                            <td style="text-align:right" class="text-gris text-sm" th:text="${precioMap[p.idProducto] ?: 0}"></td>
-                            
-                            <td style="text-align:right; width: 120px;">
-                                <input type="number" class="form-control form-control-sm text-turquesa fw-600 m-pv" th:data-id="${p.idProducto}" step="0.01" min="0" readonly th:value="${precioMap[p.idProducto] ?: 0}">
+                            <td style="text-align:right; width: 140px;">
+                                <input type="text" class="form-control form-control-sm text-turquesa fw-600 m-pv" th:data-id="${p.idProducto}" readonly value="0.00">
                             </td>
                         </tr>
                     </tbody>
@@ -518,46 +513,54 @@
     </div>
 </div>
 
-<script th:inline="javascript">
-    const currentSucursal = /*[[${suc}]]*/ 0;
-</script>
 <script>
 function abrirModalPrecios() {
-    if (currentSucursal === 0) {
+    const selectedSucursal = document.querySelector('select[name="suc"]').value;
+    if (!selectedSucursal || selectedSucursal === "0" || selectedSucursal === "") {
         alert("Atención: No has seleccionado una sucursal. Los cambios globales (Sucursal=Todas) pueden no aplicarse correctamente dependiendo de la lógica de negocio. Se recomienda seleccionar una Sucursal específica en el filtro superior.");
     }
     document.getElementById('modalPrecios').classList.add('show');
 }
 
-function recalcularPrecios(input) {
-    const tr = input.closest('tr');
-    const costo = parseFloat(tr.querySelector('.m-costo').value) || 0;
-    const utilidad = parseFloat(tr.querySelector('.m-utilidad').value) || 0;
-    // Assuming simple calculation: Costo * (1 + Utilidad/100)
-    // You can adjust if IVA is needed globally
+function recalcularTodosPrecios() {
+    const costo = parseFloat(document.getElementById('globalCosto').value) || 0;
+    const utilidad = parseFloat(document.getElementById('globalUtilidad').value) || 0;
+    
     let pv = costo * (1 + utilidad/100);
-    tr.querySelector('.m-pv').value = pv.toFixed(2);
+    let pvStr = pv.toFixed(2);
+    
+    document.querySelectorAll('#tbPrecios tr').forEach(tr => {
+        tr.querySelector('.m-pv').value = pvStr;
+    });
 }
 
 async function guardarPreciosMasivo() {
+    const costoGlobal = parseFloat(document.getElementById('globalCosto').value) || 0;
+    const utilGlobal = parseFloat(document.getElementById('globalUtilidad').value) || 0;
+    const pvGlobal = parseFloat(document.querySelectorAll('.m-pv')[0]?.value || 0);
+    
+    const selectedSucursal = document.querySelector('select[name="suc"]').value;
+
+    if (!selectedSucursal || selectedSucursal === "0" || selectedSucursal === "") {
+        alert("Seleccione una sucursal en los filtros antes de guardar.");
+        return;
+    }
+
     const updates = [];
     document.querySelectorAll('#tbPrecios tr').forEach(tr => {
-        const idProd = tr.querySelector('.m-costo').getAttribute('data-id');
-        const costo = parseFloat(tr.querySelector('.m-costo').value) || 0;
-        const util = parseFloat(tr.querySelector('.m-utilidad').value) || 0;
-        const pv = parseFloat(tr.querySelector('.m-pv').value) || 0;
+        const idProd = tr.querySelector('.m-pv').getAttribute('data-id');
         updates.push({
             idProducto: parseInt(idProd),
-            costo: costo,
-            utilidad: util,
-            precioVenta: pv
+            costo: costoGlobal,
+            utilidad: utilGlobal,
+            precioVenta: pvGlobal
         });
     });
     
     if (updates.length === 0) return;
     
     const payload = {
-        sucursalId: currentSucursal,
+        sucursalId: parseInt(selectedSucursal),
         updates: updates
     };
     

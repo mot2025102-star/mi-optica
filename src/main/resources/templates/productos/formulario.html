@@ -41,14 +41,12 @@
         <!-- ═══ FORM OCULTO ═══════════════════════════════════ -->
         <form th:action="@{/productos/guardar}" method="post" id="formPrincipal"
               onsubmit="return sincronizarYValidar()">
-            <input type="hidden" name="existencia_1" id="hExistencia_1" value="0">
-            <input type="hidden" name="costo_1"      id="hCosto_1"      value="0">
-            <input type="hidden" name="precio_1"     id="hPrecio_1"     value="0">
-            <input type="hidden" name="existencia_2" id="hExistencia_2" value="0">
-            <input type="hidden" name="costo_2"      id="hCosto_2"      value="0">
-            <input type="hidden" name="precio_2"     id="hPrecio_2"     value="0">
-            <input type="hidden" id="sucActiva_1"    name="sucActiva_1" value="0">
-            <input type="hidden" id="sucActiva_2"    name="sucActiva_2" value="0">
+            <th:block th:each="s : ${sucursales}">
+                <input type="hidden" th:name="'existencia_' + ${s.idSucursal}" th:id="'hExistencia_' + ${s.idSucursal}" value="0">
+                <input type="hidden" th:name="'costo_' + ${s.idSucursal}"      th:id="'hCosto_' + ${s.idSucursal}"      value="0">
+                <input type="hidden" th:name="'precio_' + ${s.idSucursal}"     th:id="'hPrecio_' + ${s.idSucursal}"     value="0">
+                <input type="hidden" th:name="'sucActiva_' + ${s.idSucursal}"  th:id="'sucActiva_' + ${s.idSucursal}"   value="0">
+            </th:block>
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <input type="hidden" name="idProducto"   th:value="${producto.idProducto}"/>
             <input type="hidden" id="hTipo"      name="tipoProducto"
@@ -138,6 +136,18 @@
                                 <option value="">— Buscar proveedor —</option>
                                 <option th:each="p : ${proveedores}" th:value="${p.idProveedor}" th:text="${p.nombre + (p.empresa != null and !p.empresa.isBlank() ? ' (' + p.empresa + ')' : '')}" th:selected="${producto.proveedor != null and producto.proveedor.idProveedor == p.idProveedor}"></option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Color</label>
+                            <div style="display:flex;gap:8px">
+                                <select id="vColorA" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${producto.color == c}"></option>
+                                    <!-- Si el producto tiene un color que ya no está en la lista principal, lo mostramos -->
+                                    <option th:if="${producto.color != null and !colores.contains(producto.color)}" th:value="${producto.color}" th:text="${producto.color}" selected></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarColorPersonalizado('vColorA')">＋</button>
+                            </div>
                         </div>
                     </div>
                     <div class="form-row form-row-2">
@@ -293,17 +303,15 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Color</label>
-                            <select id="vColorL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option value="TRANSPARENTE" th:selected="${producto.color == 'TRANSPARENTE'}">Transparente</option>
-                                <option value="GRIS"         th:selected="${producto.color == 'GRIS'}">Gris</option>
-                                <option value="CAFÉ"         th:selected="${producto.color == 'CAFÉ'}">Café</option>
-                                <option value="RUBY"         th:selected="${producto.color == 'RUBY'}">Ruby</option>
-                                <option value="AQUAMARINE"   th:selected="${producto.color == 'AQUAMARINE'}">Aquamarine</option>
-                                <option value="VIOLETA"      th:selected="${producto.color == 'VIOLETA'}">Violeta</option>
-                                <option value="HONEY"        th:selected="${producto.color == 'HONEY'}">Honey</option>
-                                <option value="AZUL"         th:selected="${producto.color == 'AZUL'}">Azul</option>
-                            </select>
+                            <div style="display:flex;gap:8px">
+                                <select id="vColorL" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${producto.color == c}"></option>
+                                    <!-- Si el producto tiene un color que ya no está en la lista principal, lo mostramos -->
+                                    <option th:if="${producto.color != null and !colores.contains(producto.color)}" th:value="${producto.color}" th:text="${producto.color}" selected></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarColorPersonalizado('vColorL')">＋</button>
+                            </div>
                         </div>
                     </div>
 
@@ -691,12 +699,13 @@ function sincronizarYValidar() {
 
     if (tipo === 'LENTE') {
         document.getElementById('hClasifL').value      = document.getElementById(c.clasif)?.value      || '';
-        document.getElementById('hSubFamiliaL').value  = document.getElementById(c.subFamilia)?.value  || '';
         document.getElementById('hRangoL').value       = document.getElementById(c.rango)?.value       || '';
         document.getElementById('hCodInternoL').value  = document.getElementById(c.codInterno)?.value  || '';
 
         let totalStock = 0;
-        [1,2].forEach(sid => {
+        const sucursalesIds = Array.from(document.querySelectorAll('input[id^="sucActiva_"]')).map(el => parseInt(el.id.split('_')[1]));
+        
+        sucursalesIds.forEach(sid => {
             const div = document.getElementById('divL' + sid);
             if (div && div.style.display !== 'none') {
                 totalStock += parseInt(document.getElementById('existL_' + sid)?.value || 0);
@@ -708,7 +717,9 @@ function sincronizarYValidar() {
     alerta.style.display = 'none';
     const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
     const pre = prefijos[tipo] || 'O';
-    [1,2].forEach(sid => {
+    
+    const allSucursalesIds = Array.from(document.querySelectorAll('input[id^="sucActiva_"]')).map(el => parseInt(el.id.split('_')[1]));
+    allSucursalesIds.forEach(sid => {
         const div    = document.getElementById('div' + pre + sid);
         const hidden = document.getElementById('sucActiva_' + sid);
         if (div) {
@@ -825,6 +836,27 @@ async function guardarNuevoTratamiento() {
     } finally {
         btn.disabled = false;
     }
+}
+
+function agregarColorPersonalizado(selectId) {
+    const nuevoColor = prompt('Escribe el nuevo color (Ej: ESMERALDA):');
+    if (!nuevoColor || !nuevoColor.trim()) return;
+    
+    const colorMayus = nuevoColor.trim().toUpperCase();
+    const sel = document.getElementById(selectId);
+    
+    // Verificar si ya existe
+    const existe = Array.from(sel.options).find(o => o.value.toUpperCase() === colorMayus);
+    if (existe) {
+        sel.value = existe.value;
+    } else {
+        sel.appendChild(new Option(colorMayus, colorMayus));
+        sel.value = colorMayus;
+    }
+    
+    // Si hay un hidden input de sync, actualizarlo
+    const hidden = document.getElementById('hColor');
+    if (hidden) hidden.value = colorMayus;
 }
 
 async function editarTratamiento(id, nombreActual) {

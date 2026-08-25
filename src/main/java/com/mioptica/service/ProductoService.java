@@ -39,6 +39,7 @@ public class ProductoService {
     public List<Tipo_lente>        listarTiposLente()     { return tipoLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Material_lente>    listarMateriales()     { return materialLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Tratamiento_lente> listarTratamientos()   { return tratamientoLenteRepo.findAllByOrderByIdTratamientoAsc(); }
+    public List<String>            listarColores()        { return productoRepo.findDistinctColores(); }
     public List<Precio_lente>      listarPreciosLente()   { return precioLenteRepo.findAllByOrderByTipoNombreAscMaterialNombreAsc(); }
  
     // ─── Obtener uno ──────────────────────────────────────────────
@@ -128,16 +129,9 @@ public class ProductoService {
  
                 BigDecimal existencia = parseBD(stockParams.get("existencia_" + sid));
  
-                // Para LENTE: costo y precio vienen del panel Precios (campo directo del modelo)
-                BigDecimal costo;
-                BigDecimal precio;
-                if ("LENTE".equals(guardado.getTipoProducto())) {
-                    costo  = guardado.getCostoLente()       != null ? guardado.getCostoLente()       : parseBD(stockParams.get("costo_"  + sid));
-                    precio = guardado.getPrecioVentaLente() != null ? guardado.getPrecioVentaLente() : parseBD(stockParams.get("precio_" + sid));
-                } else {
-                    costo  = parseBD(stockParams.get("costo_"  + sid));
-                    precio = parseBD(stockParams.get("precio_" + sid));
-                }
+                // Siempre usar costo/precio por sucursal desde el formulario
+                BigDecimal costo  = parseBD(stockParams.get("costo_"  + sid));
+                BigDecimal precio = parseBD(stockParams.get("precio_" + sid));
  
                 // ── Guardar en inventario ─────────────────────────
                 boolean yaExiste = inventarioRepo
@@ -177,15 +171,9 @@ public class ProductoService {
                 String activa = stockParams.getOrDefault("sucActiva_" + sid, "0");
                 if (!"1".equals(activa)) continue;
 
-                BigDecimal costo;
-                BigDecimal precio;
-                if ("LENTE".equals(guardado.getTipoProducto())) {
-                    costo  = guardado.getCostoLente()       != null ? guardado.getCostoLente()       : parseBD(stockParams.get("costo_"  + sid));
-                    precio = guardado.getPrecioVentaLente() != null ? guardado.getPrecioVentaLente() : parseBD(stockParams.get("precio_" + sid));
-                } else {
-                    costo  = parseBD(stockParams.get("costo_"  + sid));
-                    precio = parseBD(stockParams.get("precio_" + sid));
-                }
+                // Siempre usar costo/precio por sucursal desde el formulario
+                BigDecimal costo  = parseBD(stockParams.get("costo_"  + sid));
+                BigDecimal precio = parseBD(stockParams.get("precio_" + sid));
 
                 inventarioRepo.findByProductoAndSucursal(guardado, suc).ifPresent(inv -> {
                     inv.setCosto(costo);
@@ -342,16 +330,19 @@ public class ProductoService {
     // Otros: toma el precio de la primera sucursal en inventario
     public BigDecimal precioVenta(Integer idProducto) {
         return productoRepo.findById(idProducto).map(p -> {
-            if ("LENTE".equals(p.getTipoProducto())) {
-                return p.getPrecioVentaLente() != null ? p.getPrecioVentaLente() : null;
-            }
-            // Para armazón/limpieza/accesorio: precio de la primera sucursal
-            return inventarioRepo.findByProducto(p).stream()
+            // Para TODOS los tipos: primero intentar desde inventario
+            BigDecimal precioInv = inventarioRepo.findByProducto(p).stream()
                     .filter(i -> i.getPrecioVenta() != null
                               && i.getPrecioVenta().compareTo(BigDecimal.ZERO) > 0)
                     .map(Inventario::getPrecioVenta)
                     .findFirst()
                     .orElse(null);
+            if (precioInv != null) return precioInv;
+            // Fallback para LENTE: campo global del producto
+            if ("LENTE".equals(p.getTipoProducto())) {
+                return p.getPrecioVentaLente();
+            }
+            return null;
         }).orElse(null);
     }
 }
