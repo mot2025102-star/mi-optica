@@ -18,7 +18,6 @@
         </div>
         <div class="topbar-actions">
             <div sec:authorize="hasAnyRole('ADMINISTRADOR','BODEGUERO')" style="display:contents">
-                <button class="btn btn-secondary" onclick="abrirModalMar()"> Marcas</button>
                 <a th:href="@{/productos/nuevo}" class="btn btn-primary"> Nuevo Producto</a>
             </div>
         </div>
@@ -97,16 +96,16 @@
                         <th:block th:if="${tipo == 'ARMAZON'}">
                             <div style="min-width:120px"><label class="form-label">Marca</label><select name="fMarca" class="form-select"><option value="0">Todas</option><option th:each="m:${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${fMarca == m.idMarca}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Modelo</label><input type="text" name="fModelo" class="form-control" th:value="${fModelo}" placeholder="Modelo"></div>
-                            <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option value="ACERO_INOXIDABLE" th:selected="${fMaterial == 'ACERO_INOXIDABLE'}">Acero Inox</option><option value="TITANIUM" th:selected="${fMaterial == 'TITANIUM'}">Titanium</option><option value="ALUMINIO" th:selected="${fMaterial == 'ALUMINIO'}">Aluminio</option><option value="MONEL" th:selected="${fMaterial == 'MONEL'}">Monel</option><option value="ACETATO" th:selected="${fMaterial == 'ACETATO'}">Acetato</option><option value="TR90" th:selected="${fMaterial == 'TR90'}">TR-90</option><option value="INYECTADO" th:selected="${fMaterial == 'INYECTADO'}">Inyectado</option></select></div>
-                            <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fFamilia" class="form-select"><option value="">Todos</option><option value="COMPLETO" th:selected="${fFamilia == 'COMPLETO'}">Aro completo</option><option value="RANURADO" th:selected="${fFamilia == 'RANURADO'}">Ranurado</option><option value="AEREO" th:selected="${fFamilia == 'AEREO'}">Perforado</option></select></div>
-                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${fColor == c}"></option></select></div>
-                            <div style="min-width:120px"><label class="form-label">Forma</label><select name="fForma" class="form-select"><option value="">Todas</option><option value="CUADRADO" th:selected="${fForma == 'CUADRADO'}">Cuadrado</option><option value="OVALADO" th:selected="${fForma == 'OVALADO'}">Ovalado</option><option value="RECTANGULAR" th:selected="${fForma == 'RECTANGULAR'}">Rectangular</option><option value="AVIADOR" th:selected="${fForma == 'AVIADOR'}">Aviador</option><option value="CAT_EYES" th:selected="${fForma == 'CAT_EYES'}">Cat Eyes</option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option th:each="m:${materialesArmazon}" th:value="${m.nombre}" th:text="${m.nombre}" th:selected="${fMaterial == m.nombre}"></option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fFamilia" class="form-select"><option value="">Todos</option><option th:each="f:${familiasArmazon}" th:value="${f.nombre}" th:text="${f.nombre}" th:selected="${fFamilia == f.nombre}"></option></select></div>
+                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option th:each="c : ${colores}" th:value="${c.nombre}" th:text="${c.nombre}" th:selected="${fColor == c.nombre}"></option></select></div>
+                            <div style="min-width:120px"><label class="form-label">Forma</label><select name="fForma" class="form-select"><option value="">Todas</option><option th:each="fo:${formasArmazon}" th:value="${fo.nombre}" th:text="${fo.nombre}" th:selected="${fForma == fo.nombre}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Género</label><select name="fGenero" class="form-select"><option value="">Todos</option><option value="CABALLERO" th:selected="${fGenero == 'CABALLERO'}">Masculino</option><option value="DAMA" th:selected="${fGenero == 'DAMA'}">Femenino</option><option value="UNISEX" th:selected="${fGenero == 'UNISEX'}">Unisex</option><option value="NIÑO" th:selected="${fGenero == 'NIÑO'}">Niño/a</option></select></div>
                         </th:block>
                         <th:block th:if="${tipo == 'LENTE'}">
                             <div style="min-width:120px"><label class="form-label">Tipo</label><select name="fTipoFiltro" class="form-select"><option value="0">Todos</option><option th:each="t:${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}" th:selected="${fTipoFiltro == t.idTipo}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Material</label><select name="fMaterial" class="form-select"><option value="">Todos</option><option th:each="m:${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}" th:selected="${fMaterial == ''+m.idMaterial}"></option></select></div>
-                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${fColor == c}"></option></select></div>
+                            <div style="min-width:100px"><label class="form-label">Color</label><select name="fColor" class="form-select"><option value="">Todos</option><option th:each="c : ${colores}" th:value="${c.nombre}" th:text="${c.nombre}" th:selected="${fColor == c.nombre}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Tratamiento</label><select name="fTratamiento" class="form-select"><option value="0">Todos</option><option th:each="tr:${tratamientos}" th:value="${tr.idTratamiento}" th:text="${tr.nombre}" th:selected="${fTratamiento == tr.idTratamiento}"></option></select></div>
                             <div style="min-width:120px"><label class="form-label">Rango grad.</label><select name="fRango" class="form-select"><option value="">Todos</option><option value="Básica" th:selected="${fRango == 'Básica'}">Básica</option><option value="Media" th:selected="${fRango == 'Media'}">Media</option><option value="Alta" th:selected="${fRango == 'Alta'}">Alta</option><option value="Lente procesado" th:selected="${fRango == 'Lente procesado'}">Lente procesado</option></select></div>
                         </th:block>
@@ -200,8 +199,8 @@
                                 <th:block th:if="${tipo == 'ARMAZON'}">
                                     <td class="text-sm" th:text="${p.codigoFabrica ?: '—'}"></td>
                                     <td><span th:if="${p.marca != null}" class="badge badge--info" style="background:rgba(245,197,24,0.12);color:var(--amarillo)" th:text="${p.marca.nombre}"></span><span th:if="${p.marca == null}" class="text-gris text-sm">—</span></td>
-                                    <td class="text-sm" th:text="${p.materialArmazon ?: '—'}"></td>
-                                    <td class="text-sm" th:text="${p.color ?: '—'}"></td>
+                                    <td class="text-sm" th:text="${p.materialArmazon != null ? p.materialArmazon.nombre : '—'}"></td>
+                                    <td class="text-sm" th:text="${p.color != null ? p.color.nombre : '—'}"></td>
                                 </th:block>
 
                                 <!-- LENTE -->
@@ -209,7 +208,7 @@
                                     <td class="text-sm" th:text="${p.gamaArmazon ?: '—'}"></td>
                                     <td class="text-sm" th:text="${p.materialLente != null ? p.materialLente.nombre : '—'}"></td>
                                     <td class="text-sm" th:text="${p.tratamientoLente != null ? p.tratamientoLente.nombre : '—'}"></td>
-                                    <td class="text-sm" th:text="${p.color ?: '—'}"></td>
+                                    <td class="text-sm" th:text="${p.color != null ? p.color.nombre : '—'}"></td>
                                 </th:block>
 
                                 <!-- LIMPIEZA / ACCESORIO -->
@@ -231,7 +230,7 @@
                                         <span th:if="${p.marca != null}" style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)" th:text="${p.marca.nombre}"></span>
                                         <span th:if="${p.marca == null}" class="text-gris text-sm">—</span>
                                     </td>
-                                    <td class="text-sm" th:text="${p.color != null and !p.color.isEmpty() ? p.color : '—'}"></td>
+                                    <td class="text-sm" th:text="${p.color != null ? p.color.nombre : '—'}"></td>
                                 </th:block>
  
                                 <td style="text-align:center">
@@ -364,9 +363,9 @@
                         <span th:if="${p.marca != null}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(245,197,24,0.12);color:var(--amarillo)"
                               th:text="${p.marca.nombre}"></span>
-                        <span th:if="${p.color != null and !p.color.isEmpty()}"
+                        <span th:if="${p.color != null}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--gris-texto)"
-                              th:text="${p.color}"></span>
+                              th:text="${p.color.nombre}"></span>
                         <span th:if="${p.tipoProducto == 'LENTE' and p.rangoLente != null}"
                               style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(100,180,255,0.1);color:#64b4ff"
                               th:text="${p.rangoLente}"></span>

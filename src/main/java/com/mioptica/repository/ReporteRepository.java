@@ -19,7 +19,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
            "LEFT JOIN Inventario i ON i.producto = d.producto AND i.sucursal = v.sucursal " +
            "WHERE v.fecha BETWEEN :fi AND :ff " +
            "AND v.estado != 'Anulada' " +
-           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
+           "AND (:idSuc IS NULL OR :idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
            "GROUP BY d.producto.idProducto, d.producto.detalle " +
            "ORDER BY SUM(d.subtotal) DESC")
     List<Object[]> topProductos(@Param("fi") LocalDate fi,
@@ -31,7 +31,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
            "FROM Venta v " +
            "WHERE v.fecha BETWEEN :fi AND :ff " +
            "AND v.estado != 'Anulada' " +
-           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
+           "AND (:idSuc IS NULL OR :idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
            "GROUP BY v.usuario.idUsuario, v.usuario.nombreCompleto " +
            "ORDER BY SUM(v.total) DESC")
     List<Object[]> ventasPorVendedor(@Param("fi") LocalDate fi,
@@ -55,7 +55,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
            "FROM Venta v " +
            "WHERE v.fecha BETWEEN :fi AND :ff " +
            "AND v.estado != 'Anulada' " +
-           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
+           "AND (:idSuc IS NULL OR :idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
            "GROUP BY v.fecha " +
            "ORDER BY v.fecha ASC")
     List<Object[]> ventasPorDia(@Param("fi") LocalDate fi,
@@ -66,7 +66,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
     @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v " +
            "WHERE v.fecha BETWEEN :fi AND :ff " +
            "AND v.estado != 'Anulada' " +
-           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc)")
+           "AND (:idSuc IS NULL OR :idSuc = 0 OR v.sucursal.idSucursal = :idSuc)")
     BigDecimal totalPeriodo(@Param("fi") LocalDate fi,
                             @Param("ff") LocalDate ff,
                             @Param("idSuc") Integer idSuc);
@@ -75,7 +75,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
     @Query("SELECT COUNT(v) FROM Venta v " +
            "WHERE v.fecha BETWEEN :fi AND :ff " +
            "AND v.estado != 'Anulada' " +
-           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc)")
+           "AND (:idSuc IS NULL OR :idSuc = 0 OR v.sucursal.idSucursal = :idSuc)")
     Long countPeriodo(@Param("fi") LocalDate fi,
                       @Param("ff") LocalDate ff,
                       @Param("idSuc") Integer idSuc);
@@ -89,7 +89,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
            "LEFT JOIN Inventario i ON i.producto = d.producto AND i.sucursal = v.sucursal " +
            "WHERE v.fecha BETWEEN :fi AND :ff " +
            "AND v.estado != 'Anulada' " +
-           "AND (:idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
+           "AND (:idSuc IS NULL OR :idSuc = 0 OR v.sucursal.idSucursal = :idSuc) " +
            "AND (:idVend = 0 OR v.usuario.idUsuario = :idVend) " +
            "GROUP BY v.idVenta, v.numeroFactura, v.fecha, " +
            "v.usuario.nombreCompleto, d.producto.tipoProducto, " +
@@ -105,13 +105,13 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
     // ════════════════════════════════════════════════════════════════
 
     // ── Ventas por mes (año-mes) ───────────────────────────────────
-    @Query(value = "SELECT DATE_FORMAT(v.fecha, '%Y-%m') AS mes, " +
+    @Query(value = "SELECT TO_CHAR(v.fecha, 'YYYY-MM') AS mes, " +
                    "COUNT(v.id_venta) AS facturas, SUM(v.total) AS total " +
                    "FROM ventas v " +
                    "WHERE v.fecha BETWEEN :fi AND :ff " +
                    "AND v.estado != 'Anulada' " +
                    "AND (:idSuc = 0 OR v.id_sucursal = :idSuc) " +
-                   "GROUP BY DATE_FORMAT(v.fecha, '%Y-%m') " +
+                   "GROUP BY TO_CHAR(v.fecha, 'YYYY-MM') " +
                    "ORDER BY mes ASC",
            nativeQuery = true)
     List<Object[]> ventasPorMes(@Param("fi") LocalDate fi,
@@ -119,12 +119,12 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
                                 @Param("idSuc") Integer idSuc);
 
     // ── Ventas por día de la semana (1=Dom … 7=Sáb en MySQL) ──────
-    @Query(value = "SELECT DAYOFWEEK(v.fecha) AS dow, SUM(v.total) AS total, COUNT(v.id_venta) AS facturas " +
+    @Query(value = "SELECT EXTRACT(DOW FROM v.fecha) + 1 AS dow, SUM(v.total) AS total, COUNT(v.id_venta) AS facturas " +
                    "FROM ventas v " +
                    "WHERE v.fecha BETWEEN :fi AND :ff " +
                    "AND v.estado != 'Anulada' " +
                    "AND (:idSuc = 0 OR v.id_sucursal = :idSuc) " +
-                   "GROUP BY DAYOFWEEK(v.fecha) " +
+                   "GROUP BY EXTRACT(DOW FROM v.fecha) + 1 " +
                    "ORDER BY dow ASC",
            nativeQuery = true)
     List<Object[]> ventasPorDiaSemana(@Param("fi") LocalDate fi,
@@ -153,7 +153,7 @@ public interface ReporteRepository extends JpaRepository<Venta, Integer> {
                    "FROM sucursales s " +
                    "LEFT JOIN ventas v ON v.id_sucursal = s.id_sucursal " +
                    "   AND v.fecha BETWEEN :fi AND :ff AND v.estado != 'Anulada' " +
-                   "WHERE s.activo = 1 " +
+                   "WHERE s.activo = true " +
                    "GROUP BY s.id_sucursal, s.nombre " +
                    "ORDER BY s.nombre ASC",
            nativeQuery = true)

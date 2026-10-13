@@ -354,23 +354,42 @@
 
 <script th:if="${tab == 'graficas'}">
 // ════════════════════════════════════════════════════════════════
-// ANALÍTICAS — Chart.js
+// ANALÍTICAS — Chart.js  (mejorado)
 // ════════════════════════════════════════════════════════════════
 
-const TURQUESA = '#27c2c9';
-const AMARILLO = '#f59e0b';
-const VERDE    = '#10b981';
-const MORADO   = '#8b5cf6';
-const ROJO     = '#ef4444';
-const AZUL     = '#3b82f6';
+// ── Paleta apagada (menos saturada, más profesional) ──────────
+const TURQUESA = '#22a8ae';   // algo más oscuro que antes
+const AMARILLO = '#d97706';   // ámbar apagado
+const VERDE    = '#059669';   // esmeralda apagado
+const MORADO   = '#7c3aed';
+const ROJO     = '#dc2626';
+const AZUL     = '#2563eb';
 
-const COLORES_SEMANA = [TURQUESA, AMARILLO, VERDE, MORADO, ROJO, AZUL, '#f97316'];
-const PALETA_SUC = [TURQUESA, AMARILLO, VERDE, MORADO, ROJO, AZUL, '#f97316', '#ec4899'];
+const COLORES_SEMANA = [TURQUESA, AMARILLO, VERDE, MORADO, ROJO, AZUL, '#ea580c'];
+const PALETA_SUC     = [TURQUESA, AMARILLO, VERDE, MORADO, ROJO, AZUL, '#ea580c', '#db2777'];
 let charts = {};
 
+// Defaults globales de Chart.js ── fuente consistente + tooltips blancos
+Chart.defaults.font.family = getComputedStyle(document.documentElement).fontFamily || 'inherit';
+Chart.defaults.font.size   = 12;
+
+// ── Plugin de tooltip personalizado (fondo blanco, sombra sutil) ─
+const tooltipPlugin = {
+    backgroundColor: '#ffffff',
+    titleColor:      '#1e293b',
+    bodyColor:       '#475569',
+    borderColor:     '#e2e8f0',
+    borderWidth:     1,
+    padding:         10,
+    cornerRadius:    6,
+    boxPadding:      4,
+    displayColors:   true,
+    callbacks: {}   // se sobreescribirán por gráfica
+};
+
 function getAnFechas() {
-    const fi = document.querySelector('input[name="fi"]').value;
-    const ff = document.querySelector('input[name="ff"]').value;
+    const fi         = document.querySelector('input[name="fi"]').value;
+    const ff         = document.querySelector('input[name="ff"]').value;
     const idSucursal = document.querySelector('select[name="idSucursal"]')?.value || '0';
     return { fi, ff, idSucursal };
 }
@@ -379,26 +398,72 @@ function destruirChart(id) {
     if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
+// ── Grid sutil común ──────────────────────────────────────────
+const GRID_COLOR   = 'rgba(148,163,184,0.15)';   // gris muy claro
+const TICK_COLOR   = '#94a3b8';
+
+// ── Opciones base para gráficas verticales ────────────────────
 function opcionesBase(yLabel = 'Q') {
     return {
         responsive: true,
         plugins: {
             legend: { display: false },
             tooltip: {
+                ...tooltipPlugin,
                 callbacks: {
                     label: ctx => yLabel === 'Q'
-                        ? ' Q ' + Number(ctx.parsed.y ?? ctx.parsed.x).toLocaleString('es-GT', {minimumFractionDigits:2})
-                        : ' ' + Number(ctx.parsed.y ?? ctx.parsed.x).toLocaleString('es-GT') + ' uds.'
+                        ? ' Q ' + Number(ctx.parsed.y).toLocaleString('es-GT', { minimumFractionDigits: 2 })
+                        : ' ' + Number(ctx.parsed.y).toLocaleString('es-GT') + ' uds.'
                 }
             }
         },
         scales: {
-            x: { ticks: { color: '#94a3b8', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.07)' },
-                 beginAtZero: true }
+            x: {
+                ticks: { color: TICK_COLOR, maxRotation: 45 },
+                grid:  { color: GRID_COLOR }
+            },
+            y: {
+                ticks:       { color: TICK_COLOR },
+                grid:        { color: GRID_COLOR },
+                beginAtZero: true
+            }
         }
     };
 }
+
+// ── Opciones base para gráficas HORIZONTALES (indexAxis:'y') ──
+function opcionesBaseH(yLabel = 'Q') {
+    return {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                ...tooltipPlugin,
+                callbacks: {
+                    label: ctx => yLabel === 'Q'
+                        ? ' Q ' + Number(ctx.parsed.x).toLocaleString('es-GT', { minimumFractionDigits: 2 })
+                        : ' ' + Number(ctx.parsed.x).toLocaleString('es-GT') + ' uds.'
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks:       { color: TICK_COLOR },
+                grid:        { color: GRID_COLOR },
+                beginAtZero: true
+            },
+            y: {
+                ticks: { color: TICK_COLOR },
+                grid:  { color: 'transparent' }  // sin líneas horizontales en barras H
+            }
+        }
+    };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Carga de gráficas
+// ─────────────────────────────────────────────────────────────
 
 async function cargarTendencia(fi, ff, idSucursal) {
     const r = await fetch(`/reportes/analiticas/tendencia?fi=${fi}&ff=${ff}&idSucursal=${idSucursal}`);
@@ -410,13 +475,13 @@ async function cargarTendencia(fi, ff, idSucursal) {
         data: {
             labels: d.labels,
             datasets: [{
-                data: d.data,
-                borderColor: TURQUESA,
-                backgroundColor: 'rgba(39,194,201,0.12)',
+                data:                 d.data,
+                borderColor:          TURQUESA,
+                backgroundColor:      'rgba(34,168,174,0.10)',
                 pointBackgroundColor: TURQUESA,
-                pointRadius: 4,
-                tension: 0.35,
-                fill: true
+                pointRadius:          4,
+                tension:              0.35,
+                fill:                 true
             }]
         },
         options: opcionesBase('Q')
@@ -428,15 +493,13 @@ async function cargarPorDiaSemana(mes, anio, idSucursal) {
     const d = await r.json();
     destruirChart('semana');
     if (!d.labels || !d.labels.length) return;
+    const maxVal  = Math.max(...d.data);
+    const bgColors = d.data.map(v => v === maxVal ? AMARILLO : TURQUESA + 'b3');   // destaca el día mayor
     charts['semana'] = new Chart(document.getElementById('chartSemana'), {
         type: 'bar',
         data: {
             labels: d.labels,
-            datasets: [{
-                data: d.data,
-                backgroundColor: d.labels.map((_, i) => COLORES_SEMANA[i % COLORES_SEMANA.length]),
-                borderRadius: 6
-            }]
+            datasets: [{ data: d.data, backgroundColor: bgColors, borderRadius: 3 }]
         },
         options: opcionesBase('Q')
     });
@@ -445,11 +508,9 @@ async function cargarPorDiaSemana(mes, anio, idSucursal) {
 function recargarDiaSemana() {
     const input = document.getElementById('inputMesSemana').value;
     if (!input) return;
-    const parts = input.split('-');
-    const anio = parts[0];
-    const mes = parts[1];
+    const parts  = input.split('-');
     const { idSucursal } = getAnFechas();
-    cargarPorDiaSemana(mes, anio, idSucursal);
+    cargarPorDiaSemana(parts[1], parts[0], idSucursal);
 }
 
 async function cargarPorMes(fi, ff, idSucursal) {
@@ -461,11 +522,7 @@ async function cargarPorMes(fi, ff, idSucursal) {
         type: 'bar',
         data: {
             labels: d.labels,
-            datasets: [{
-                data: d.data,
-                backgroundColor: AMARILLO,
-                borderRadius: 6
-            }]
+            datasets: [{ data: d.data, backgroundColor: AMARILLO + 'cc', borderRadius: 3 }]
         },
         options: opcionesBase('Q')
     });
@@ -476,43 +533,36 @@ async function cargarTopProductos(fi, ff, idSucursal) {
     const d = await r.json();
     destruirChart('productos');
     if (!d.labels || !d.labels.length) return;
-    const opts = {
-        indexAxis: 'y',
-        responsive: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: ctx => ' ' + Number(ctx.parsed.x).toLocaleString('es-GT') + ' uds.' } }
-        },
-        scales: {
-            x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true },
-            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.04)' } }
-        }
-    };
     charts['productos'] = new Chart(document.getElementById('chartProductos'), {
         type: 'bar',
         data: {
             labels: d.labels,
-            datasets: [{
-                data: d.data,
-                backgroundColor: VERDE,
-                borderRadius: 4
-            }]
+            datasets: [{ data: d.data, backgroundColor: VERDE + 'cc', borderRadius: 3 }]
         },
-        options: opts
+        options: {
+            ...opcionesBaseH('uds'),
+            plugins: {
+                ...opcionesBaseH('uds').plugins,
+                tooltip: {
+                    ...tooltipPlugin,
+                    callbacks: { label: ctx => ' ' + Number(ctx.parsed.x).toLocaleString('es-GT') + ' uds.' }
+                }
+            }
+        }
     });
 }
 
 async function cargarPorSucursal(fi, ff) {
-    const r = await fetch(`/reportes/analiticas/por-sucursal?fi=${fi}&ff=${ff}`);
+    const r          = await fetch(`/reportes/analiticas/por-sucursal?fi=${fi}&ff=${ff}`);
     const sucursales = await r.json();
-    const grid = document.getElementById('sucursalesGrid');
-    if(!grid) return;
+    const grid       = document.getElementById('sucursalesGrid');
+    if (!grid) return;
     grid.innerHTML = '';
 
     Object.keys(charts).filter(k => k.startsWith('suc_')).forEach(k => { charts[k].destroy(); delete charts[k]; });
 
     sucursales.forEach((suc, idx) => {
-        const color = PALETA_SUC[idx % PALETA_SUC.length];
+        const color    = PALETA_SUC[idx % PALETA_SUC.length];
         const canvasId = `chartSuc_${suc.idSucursal}`;
 
         const col = document.createElement('div');
@@ -523,12 +573,12 @@ async function cargarPorSucursal(fi, ff) {
                 </div>
                 <div class="card-body" style="padding:14px">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-                        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center">
-                            <div style="font-size:20px;font-weight:700;color:${color}">Q ${Number(suc.total).toLocaleString('es-GT', {minimumFractionDigits:2})}</div>
+                        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:10px;text-align:center">
+                            <div style="font-size:18px;font-weight:700;color:${color}">Q ${Number(suc.total).toLocaleString('es-GT', {minimumFractionDigits:2})}</div>
                             <div style="font-size:11px;color:#94a3b8;margin-top:2px">Total vendido</div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center">
-                            <div style="font-size:20px;font-weight:700;color:${color}">${suc.facturas}</div>
+                        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:10px;text-align:center">
+                            <div style="font-size:18px;font-weight:700;color:${color}">${suc.facturas}</div>
                             <div style="font-size:11px;color:#94a3b8;margin-top:2px">Facturas</div>
                         </div>
                     </div>
@@ -541,19 +591,15 @@ async function cargarPorSucursal(fi, ff) {
             charts[`suc_${suc.idSucursal}`] = new Chart(document.getElementById(canvasId), {
                 type: 'bar',
                 data: {
-                    labels: suc.diasLabels,
-                    datasets: [{
-                        data: suc.diasData,
-                        backgroundColor: color + 'cc',
-                        borderRadius: 4
-                    }]
+                    labels:   suc.diasLabels,
+                    datasets: [{ data: suc.diasData, backgroundColor: color + 'b3', borderRadius: 3 }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: { ...tooltipPlugin } },
                     scales: {
-                        x: { ticks: { color: '#94a3b8', maxRotation: 45, font: { size: 9 } }, grid: { display: false } },
-                        y: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.06)' }, beginAtZero: true }
+                        x: { ticks: { color: TICK_COLOR, maxRotation: 45, font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: TICK_COLOR, font: { size: 9 } }, grid: { color: GRID_COLOR }, beginAtZero: true }
                     }
                 }
             });
@@ -565,7 +611,6 @@ async function cargarPorSucursal(fi, ff) {
     });
 }
 
-// Nuevas Gráficas
 async function cargarPorCategoria(fi, ff, idSucursal) {
     const r = await fetch(`/reportes/analiticas/por-categoria?fi=${fi}&ff=${ff}&idSucursal=${idSucursal}`);
     const d = await r.json();
@@ -574,14 +619,10 @@ async function cargarPorCategoria(fi, ff, idSucursal) {
     charts['categoria'] = new Chart(document.getElementById('chartCategoria'), {
         type: 'bar',
         data: {
-            labels: d.labels,
-            datasets: [{
-                data: d.data,
-                backgroundColor: 'rgba(168,85,247,0.8)', // Morado
-                borderRadius: 4
-            }]
+            labels:   d.labels,
+            datasets: [{ data: d.data, backgroundColor: MORADO + 'b3', borderRadius: 3 }]
         },
-        options: { ...opcionesBase('Q'), indexAxis: 'y' }
+        options: opcionesBaseH('Q')
     });
 }
 
@@ -590,17 +631,15 @@ async function cargarMargenProducto(fi, ff, idSucursal) {
     const d = await r.json();
     destruirChart('margen');
     if (!d.labels || !d.labels.length) return;
+    // Colores condicionales: positivo = verde, negativo = rojo
+    const bgColors = d.data.map(v => v >= 0 ? VERDE + 'cc' : ROJO + 'cc');
     charts['margen'] = new Chart(document.getElementById('chartMargen'), {
         type: 'bar',
         data: {
-            labels: d.labels,
-            datasets: [{
-                data: d.data,
-                backgroundColor: VERDE,
-                borderRadius: 4
-            }]
+            labels:   d.labels,
+            datasets: [{ data: d.data, backgroundColor: bgColors, borderRadius: 3 }]
         },
-        options: { ...opcionesBase('Q'), indexAxis: 'y' }
+        options: opcionesBaseH('Q')
     });
 }
 
@@ -612,34 +651,26 @@ async function cargarRankingVendedores(fi, ff, idSucursal) {
     charts['vendedores'] = new Chart(document.getElementById('chartVendedores'), {
         type: 'bar',
         data: {
-            labels: d.labels,
-            datasets: [{
-                data: d.data,
-                backgroundColor: AMARILLO,
-                borderRadius: 4
-            }]
+            labels:   d.labels,
+            datasets: [{ data: d.data, backgroundColor: AMARILLO + 'cc', borderRadius: 3 }]
         },
-        options: { ...opcionesBase('Q'), indexAxis: 'y' }
+        options: opcionesBaseH('Q')
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const { fi, ff, idSucursal } = getAnFechas();
     if (!fi || !ff) return;
-    
-    // Configurar default del selector de mes para Día de Semana
+
     const inputMes = document.getElementById('inputMesSemana');
     if (inputMes) {
         const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        inputMes.value = `${yyyy}-${mm}`;
+        inputMes.value = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
     }
 
-    if(document.getElementById('chartTendencia')) {
+    if (document.getElementById('chartTendencia')) {
         cargarTendencia(fi, ff, idSucursal);
-        
-        // Cargar dia de semana con el mes actual
+
         if (inputMes) {
             const parts = inputMes.value.split('-');
             cargarPorDiaSemana(parts[1], parts[0], idSucursal);

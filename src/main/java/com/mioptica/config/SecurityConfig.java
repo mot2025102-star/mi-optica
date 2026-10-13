@@ -34,8 +34,50 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CommandLineRunner generadorDeHash(PasswordEncoder encoder) {
+    public CommandLineRunner generadorDeHash(PasswordEncoder encoder,
+                                             com.mioptica.repository.UsuarioRepository usuarioRepository,
+                                             com.mioptica.repository.RolRepository rolRepository,
+                                             com.mioptica.repository.SucursalRepository sucursalRepository) {
         return args -> {
+            if (usuarioRepository.count() == 0) {
+                System.out.println("No se encontraron usuarios. Creando datos iniciales...");
+
+                // 1. Crear Roles si no existen
+                if (rolRepository.count() == 0) {
+                    java.util.List<String> roles = java.util.List.of("ADMINISTRADOR", "VENDEDOR", "BODEGUERO", "OPTOMETRISTA", "CONTADOR");
+                    for (String nombreRol : roles) {
+                        com.mioptica.model.Rol rol = new com.mioptica.model.Rol();
+                        rol.setNombre(nombreRol);
+                        rolRepository.save(rol);
+                    }
+                }
+
+                // 2. Crear una sucursal por defecto
+                com.mioptica.model.Sucursal sucursal = sucursalRepository.findById(1).orElse(null);
+                if (sucursal == null) {
+                    sucursal = new com.mioptica.model.Sucursal();
+                    sucursal.setNombre("Central");
+                    sucursal.setDireccion("Dirección Principal");
+                    sucursal.setTelefono("00000000");
+                    sucursal.setActivo(true);
+                    sucursal = sucursalRepository.save(sucursal);
+                }
+
+                // 3. Crear el usuario Administrador por defecto
+                com.mioptica.model.Usuario admin = new com.mioptica.model.Usuario();
+                admin.setNombreCompleto("Administrador del Sistema");
+                admin.setUsername("admin");
+                admin.setPasswordHash(encoder.encode("admin123")); // Contraseña por defecto
+                admin.setRol(rolRepository.findById(1).orElseThrow()); // ID 1 es ADMINISTRADOR
+                admin.setSucursal(sucursal);
+                admin.setPuesto("Gerente");
+                admin.setActivo(true);
+                
+                usuarioRepository.save(admin);
+                System.out.println("=================================================");
+                System.out.println("Usuario Creado -> Username: admin | Password: admin123");
+                System.out.println("=================================================");
+            }
         };
     }
 

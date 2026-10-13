@@ -24,6 +24,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
            " LOWER(p.detalle) LIKE LOWER(CONCAT('%',:q,'%')))")
     List<Producto> buscar(@Param("q") String q);
 
-    @Query("SELECT DISTINCT p.color FROM Producto p WHERE p.color IS NOT NULL AND p.color != '' ORDER BY p.color")
-    List<String> findDistinctColores();
+
 }

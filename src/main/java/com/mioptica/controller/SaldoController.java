@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -21,7 +22,8 @@ public class SaldoController {
     private final SaldoService      saldoService;
     private final UsuarioRepository usuarioRepo;
 
-    // ─── SALDOS PENDIENTES ────────────────────────────────────────
+    // ─── SALDOS Y ENTREGAS PENDIENTES ─────────────────────────────
+    @Transactional(readOnly = true)
     @GetMapping("/saldos")
     public String saldos(
             @RequestParam(defaultValue = "saldos") String tab,
@@ -55,7 +57,7 @@ public class SaldoController {
     @PostMapping("/saldos/pagar")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> pagar(
-            @RequestParam Integer    idFicha,
+            @RequestParam Integer    idVenta,
             @RequestParam BigDecimal monto,
             @RequestParam(defaultValue = "Contado") String formaPago,
             @RequestParam(defaultValue = "")        String nota,
@@ -64,7 +66,7 @@ public class SaldoController {
         try {
             var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();
             BigDecimal nuevoSaldo = saldoService.registrarPago(
-                    idFicha, monto, formaPago, nota, usuario.getIdUsuario());
+                    idVenta, monto, formaPago, nota, usuario.getIdUsuario());
 
             return ResponseEntity.ok(Map.of(
                     "ok",         true,

@@ -14,66 +14,72 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SaldoService {
 
-    private final FichaClinicaRepository fichaRepo;
+    private final VentaRepository        ventaRepo;
     private final ReciboCajaRepository   reciboRepo;
     private final CorrelativoRepository  correlativoRepo;
     private final SucursalRepository     sucursalRepo;
     private final UsuarioRepository      usuarioRepo;
-    private final ClienteRepository      clienteRepo;
 
     // ─── Saldos pendientes ────────────────────────────────────────
-    public List<FichaClinica> saldosPendientes(Integer idSucursal, boolean esAdmin) {
+    public List<Venta> saldosPendientes(Integer idSucursal, boolean esAdmin) {
         return esAdmin
-                ? fichaRepo.findConSaldoPendiente()
-                : fichaRepo.findConSaldoPendienteBySucursal(idSucursal);
+                ? ventaRepo.findConSaldoPendiente()
+                : ventaRepo.findConSaldoPendienteBySucursal(idSucursal);
     }
 
     // ─── Entregas pendientes ──────────────────────────────────────
-    public List<FichaClinica> entregasPendientes(Integer idSucursal, boolean esAdmin) {
+    public List<Venta> entregasPendientes(Integer idSucursal, boolean esAdmin) {
         return esAdmin
-                ? fichaRepo.findEntregasPendientes()
-                : fichaRepo.findEntregasPendientesBySucursal(idSucursal);
+                ? ventaRepo.findEntregasPendientes()
+                : ventaRepo.findEntregasPendientesBySucursal(idSucursal);
     }
 
-    // ─── Registrar pago ───────────────────────────────────────────
+    // ─── Registrar pago sobre una Venta ──────────────────────────
     @Transactional
-    public BigDecimal registrarPago(Integer idFicha,
+    public BigDecimal registrarPago(Integer idVenta,
                                     BigDecimal monto,
                                     String formaPago,
                                     String nota,
                                     Integer idUsuario) throws Exception {
 
-        FichaClinica ficha = fichaRepo.findById(idFicha)
-                .orElseThrow(() -> new Exception("Ficha no encontrada."));
+        Venta venta = ventaRepo.findById(idVenta)
+                .orElseThrow(() -> new Exception("Venta no encontrada."));
 
         if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0)
             throw new Exception("El monto debe ser mayor a 0.");
 
-        if (monto.compareTo(ficha.getSaldo()) > 0)
-            throw new Exception("El monto (Q" + monto + ") supera el saldo (Q" + ficha.getSaldo() + ").");
+        if (monto.compareTo(venta.getSaldoPendiente()) > 0)
+            throw new Exception("El monto (Q" + monto + ") supera el saldo (Q" + venta.getSaldoPendiente() + ").");
 
-        // Actualizar saldo en ficha
-        BigDecimal nuevoSaldo = ficha.getSaldo().subtract(monto);
-        ficha.setSaldo(nuevoSaldo);
-        ficha.setAbono((ficha.getAbono() != null ? ficha.getAbono() : BigDecimal.ZERO).add(monto));
-        fichaRepo.save(ficha);
+        // Actualizar saldo en la venta
+        BigDecimal nuevoSaldo = venta.getSaldoPendiente().subtract(monto);
+        venta.setSaldoPendiente(nuevoSaldo);
+
+        // Si quedó en 0, marcar como Pagada
+        if (nuevoSaldo.compareTo(BigDecimal.ZERO) == 0) {
+            venta.setEstado("Pagada");
+            venta.setEstadoPago("COMPLETO");
+        }
+
+        ventaRepo.save(venta);
 
         // Generar recibo de caja
         Usuario  usuario  = usuarioRepo.findById(idUsuario).orElseThrow();
-        Sucursal sucursal = ficha.getSucursal();
+        Sucursal sucursal = venta.getSucursal();
 
         String numRecibo = generarCorrelativo(sucursal.getIdSucursal(), "Recibo", "RC");
 
         ReciboCaja recibo = new ReciboCaja();
         recibo.setSucursal(sucursal);
         recibo.setUsuario(usuario);
-        recibo.setCliente(ficha.getCliente());
+        recibo.setCliente(venta.getCliente());
         recibo.setNumeroRecibo(numRecibo);
         recibo.setFecha(LocalDate.now());
         recibo.setMonto(monto);
         recibo.setFormaPago(formaPago != null ? formaPago : "Contado");
-        recibo.setConcepto("Abono ficha #" + idFicha +
+        recibo.setConcepto("Abono factura #" + venta.getNumeroFactura() +
                 (nota != null && !nota.isBlank() ? ". " + nota : ""));
+        recibo.setVenta(venta);
         reciboRepo.save(recibo);
 
         return nuevoSaldo;
@@ -81,32 +87,32 @@ public class SaldoService {
 
     // ─── Marcar entrega ───────────────────────────────────────────
     @Transactional
-    public void marcarEntregado(Integer idFicha) throws Exception {
-        FichaClinica ficha = fichaRepo.findById(idFicha)
-                .orElseThrow(() -> new Exception("Ficha no encontrada."));
+    public void marcarEntregado(Integer idVenta) throws Exception {
+        Venta venta = ventaRepo.findById(idVenta)
+                .orElseThrow(() -> new Exception("Venta no encontrada."));
 
-        ficha.setEstadoEntrega("Entregado");
-        ficha.setFechaEntregaReal(LocalDate.now());
-        fichaRepo.save(ficha);
+        venta.setEstadoEntrega("Entregado");
+        venta.setFechaEntregaReal(LocalDate.now());
+        ventaRepo.save(venta);
     }
 
     // ─── Stats para la vista ──────────────────────────────────────
     public BigDecimal totalSaldoPendiente(Integer idSucursal, boolean esAdmin) {
         return saldosPendientes(idSucursal, esAdmin).stream()
-                .map(FichaClinica::getSaldo)
+                .map(Venta::getSaldoPendiente)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public long entregasVencidas(Integer idSucursal, boolean esAdmin) {
         return entregasPendientes(idSucursal, esAdmin).stream()
-                .filter(f -> f.getDiasParaEntrega() < 0)
+                .filter(v -> v.getDiasParaEntrega() < 0)
                 .count();
     }
 
     public long entregasProximas7Dias(Integer idSucursal, boolean esAdmin) {
         return entregasPendientes(idSucursal, esAdmin).stream()
-                .filter(f -> {
-                    long d = f.getDiasParaEntrega();
+                .filter(v -> {
+                    long d = v.getDiasParaEntrega();
                     return d >= 0 && d <= 7;
                 })
                 .count();

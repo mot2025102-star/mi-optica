@@ -5,6 +5,7 @@ import com.mioptica.repository.ClienteRepository;
 import com.mioptica.repository.SucursalRepository;
 import com.mioptica.repository.UsuarioRepository;
 import com.mioptica.service.FichaClinicaService;
+import com.mioptica.service.ProductoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,10 @@ import org.springframework.http.ResponseEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Controller
 @RequestMapping("/fichas")
@@ -27,6 +32,7 @@ public class FichaClinicaController {
     private final ClienteRepository   clienteRepo;
     private final SucursalRepository  sucursalRepo;
     private final UsuarioRepository   usuarioRepo;
+    private final ProductoService     productoService;
 
     // ─── LISTA ────────────────────────────────────────────────────
     @GetMapping
@@ -85,6 +91,10 @@ public class FichaClinicaController {
         model.addAttribute("clientes",   clienteRepo.findByActivoTrueOrderByNombreAsc());
         model.addAttribute("sucursales", sucursalRepo.findByActivoTrue());
         model.addAttribute("optometras", usuarioRepo.findAll());
+        model.addAttribute("tiposLente", productoService.listarTiposLente());
+        model.addAttribute("materiales", productoService.listarMateriales());
+        model.addAttribute("colores",    productoService.listarColores());
+        model.addAttribute("hc",         new HashMap<String, Object>());
         model.addAttribute("editando",   false);
         model.addAttribute("activePage", "fichas");
         return "fichas/formulario";
@@ -98,6 +108,19 @@ public class FichaClinicaController {
             model.addAttribute("clientes",   clienteRepo.findByActivoTrueOrderByNombreAsc());
             model.addAttribute("sucursales", sucursalRepo.findByActivoTrue());
             model.addAttribute("optometras", usuarioRepo.findAll());
+            model.addAttribute("tiposLente", productoService.listarTiposLente());
+            model.addAttribute("materiales", productoService.listarMateriales());
+            model.addAttribute("colores",    productoService.listarColores());
+            Map<String, Object> hcMap = new HashMap<>();
+            if (f.getHistoriaClinica() != null && !f.getHistoriaClinica().trim().isEmpty()) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    hcMap = mapper.readValue(f.getHistoriaClinica(), new TypeReference<Map<String, Object>>(){});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            model.addAttribute("hc",         hcMap);
             model.addAttribute("editando",   true);
             model.addAttribute("activePage", "fichas");
             return "fichas/formulario";
@@ -141,6 +164,10 @@ public class FichaClinicaController {
             parseBigDecimal(params.get("rx_dip")).ifPresent(ficha::setRxDip);
             parseBigDecimal(params.get("rx_ndpOd")).ifPresent(ficha::setRxNdpOd);
             parseBigDecimal(params.get("rx_ndpOi")).ifPresent(ficha::setRxNdpOi);
+            ficha.setRxSegmento(params.getOrDefault("rx_segmento", params.getOrDefault("rxSegmento", "")));
+            if (params.containsKey("vertex")) ficha.setVertex(params.get("vertex"));
+            if (params.containsKey("pantoscopico")) ficha.setPantoscopico(params.get("pantoscopico"));
+            if (params.containsKey("panoramico")) ficha.setPanoramico(params.get("panoramico"));
 
             // ── SUGERENCIA DE MATERIALES ──────────────────────────
             ficha.setSugTipoLente(params.getOrDefault("sug_tipoLente",     ""));

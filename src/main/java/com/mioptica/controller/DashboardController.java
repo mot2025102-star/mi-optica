@@ -22,6 +22,7 @@ public class DashboardController {
     private final ProductoRepository     productoRepo;
     private final InventarioRepository   inventarioRepo;
     private final FichaClinicaRepository fichaRepo;
+    private final VentaRepository        ventaRepo;
     private final VentaService           ventaService;
 
     @GetMapping("/dashboard")
@@ -124,12 +125,28 @@ public class DashboardController {
         var todasFichasAdmin = fichaRepo.findAll();
         var proximosAniversariosAdmin = proximosAniversarioCliente(todasFichasAdmin);
 
+        // Acciones Pendientes Counts
+        long countAgotados = inventarioRepo.findAgotadosGlobal().size();
+        
+        List<com.mioptica.model.Venta> saldos = (idSuc != null) ? ventaRepo.findConSaldoPendienteBySucursal(idSuc) : ventaRepo.findConSaldoPendiente();
+        long countSaldos = saldos.size();
+        
+        List<com.mioptica.model.Venta> entregas = (idSuc != null) ? ventaRepo.findEntregasPendientesBySucursal(idSuc) : ventaRepo.findEntregasPendientes();
+        java.time.LocalDate manana = java.time.LocalDate.now().plusDays(1);
+        long countEntregas = entregas.stream().filter(v -> v.getFechaEntrega() != null && !v.getFechaEntrega().isAfter(manana)).count();
+
         model.addAttribute("totalClientes",  clienteRepo.count());
         model.addAttribute("totalProductos", productoRepo.count());
         model.addAttribute("ventasHoy",      ventaService.totalHoy(idSuc));
         model.addAttribute("pedidosHoy",     ventaService.countHoy(idSuc));
         model.addAttribute("stockBajo",      stockBajo);
         model.addAttribute("proximosAniversarios", proximosAniversariosAdmin);
+        
+        // Atributos de acciones pendientes
+        model.addAttribute("countAgotados", countAgotados);
+        model.addAttribute("countSaldos", countSaldos);
+        model.addAttribute("countEntregas", countEntregas);
+        
         return "dashboard/admin";
     }
 

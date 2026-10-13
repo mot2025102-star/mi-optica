@@ -29,6 +29,11 @@ public class ProductoService {
     private final Precio_lenteRepository      precioLenteRepo;
     private final KardexRepository            kardexRepo;
     private final UsuarioRepository           usuarioRepo;
+    private final ColorRepository             colorRepo;
+    private final MaterialArmazonRepository   materialArmazonRepo;
+    private final FormaArmazonRepository      formaArmazonRepo;
+    private final FamiliaArmazonRepository    familiaArmazonRepo;
+    private final ClasificacionLenteRepository clasificacionLenteRepo;
  
     // ─── Listas ───────────────────────────────────────────────────
     public List<Producto>          listarTodos()          { return productoRepo.findAll(); }
@@ -39,7 +44,11 @@ public class ProductoService {
     public List<Tipo_lente>        listarTiposLente()     { return tipoLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Material_lente>    listarMateriales()     { return materialLenteRepo.findAllByOrderByNombreAsc(); }
     public List<Tratamiento_lente> listarTratamientos()   { return tratamientoLenteRepo.findAllByOrderByIdTratamientoAsc(); }
-    public List<String>            listarColores()        { return productoRepo.findDistinctColores(); }
+    public List<ClasificacionLente> listarClasificacionesLente() { return clasificacionLenteRepo.findAll(); }
+    public List<Color>             listarColores()        { return colorRepo.findAllByOrderByNombreAsc(); }
+    public List<MaterialArmazon>   listarMaterialesArmazon() { return materialArmazonRepo.findAllByOrderByNombreAsc(); }
+    public List<FormaArmazon>      listarFormasArmazon()  { return formaArmazonRepo.findAllByOrderByNombreAsc(); }
+    public List<FamiliaArmazon>    listarFamiliasArmazon(){ return familiaArmazonRepo.findAllByOrderByNombreAsc(); }
     public List<Precio_lente>      listarPreciosLente()   { return precioLenteRepo.findAllByOrderByTipoNombreAscMaterialNombreAsc(); }
  
     // ─── Obtener uno ──────────────────────────────────────────────
@@ -82,6 +91,22 @@ public class ProductoService {
         } else {
             producto.setTratamientoLente(null);
         }
+
+        if (producto.getColor() != null && producto.getColor().getIdColor() != null) {
+            producto.setColor(colorRepo.findById(producto.getColor().getIdColor()).orElse(null));
+        } else { producto.setColor(null); }
+
+        if (producto.getMaterialArmazon() != null && producto.getMaterialArmazon().getIdMaterialArmazon() != null) {
+            producto.setMaterialArmazon(materialArmazonRepo.findById(producto.getMaterialArmazon().getIdMaterialArmazon()).orElse(null));
+        } else { producto.setMaterialArmazon(null); }
+
+        if (producto.getFormaArmazon() != null && producto.getFormaArmazon().getIdFormaArmazon() != null) {
+            producto.setFormaArmazon(formaArmazonRepo.findById(producto.getFormaArmazon().getIdFormaArmazon()).orElse(null));
+        } else { producto.setFormaArmazon(null); }
+
+        if (producto.getFamiliaArmazon() != null && producto.getFamiliaArmazon().getIdFamiliaArmazon() != null) {
+            producto.setFamiliaArmazon(familiaArmazonRepo.findById(producto.getFamiliaArmazon().getIdFamiliaArmazon()).orElse(null));
+        } else { producto.setFamiliaArmazon(null); }
  
         // ── Generación de código interno (SKU) ────────────────────────
         boolean esNuevo = (producto.getIdProducto() == null);
@@ -215,7 +240,37 @@ public class ProductoService {
     // ─── Guardar marca ────────────────────────────────────────────
     @Transactional
     public Marca guardarMarca(String nombre) {
-        return marcaRepo.save(new Marca() {{ setNombre(nombre.trim()); }});
+        Marca m = new Marca();
+        m.setNombre(nombre.trim());
+        return marcaRepo.save(m);
+    }
+ 
+    @Transactional
+    public Color guardarColor(String nombre) {
+        Color c = new Color();
+        c.setNombre(nombre.trim());
+        return colorRepo.save(c);
+    }
+
+    @Transactional
+    public MaterialArmazon guardarMaterialArmazon(String nombre) {
+        MaterialArmazon m = new MaterialArmazon();
+        m.setNombre(nombre.trim());
+        return materialArmazonRepo.save(m);
+    }
+
+    @Transactional
+    public FormaArmazon guardarFormaArmazon(String nombre) {
+        FormaArmazon f = new FormaArmazon();
+        f.setNombre(nombre.trim());
+        return formaArmazonRepo.save(f);
+    }
+
+    @Transactional
+    public FamiliaArmazon guardarFamiliaArmazon(String nombre) {
+        FamiliaArmazon f = new FamiliaArmazon();
+        f.setNombre(nombre.trim());
+        return familiaArmazonRepo.save(f);
     }
  
     // ─── Guardar tipo de lente ────────────────────────────────────

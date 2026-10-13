@@ -615,7 +615,7 @@ public byte[] exportarProductosArmazonesLentes(List<Inventario> inventarios, Str
            if ("LENTE".equals(tipo) && inv.getProducto().getTratamientoLente() != null) {
                tratamiento = inv.getProducto().getTratamientoLente().getNombre();
            } else if ("ARMAZON".equals(tipo) && inv.getProducto().getMaterialArmazon() != null) {
-               tratamiento = inv.getProducto().getMaterialArmazon();
+               tratamiento = inv.getProducto().getMaterialArmazon().getNombre();
            }
 
             BigDecimal costo      = inv.getCosto() != null ? inv.getCosto() : BigDecimal.ZERO;

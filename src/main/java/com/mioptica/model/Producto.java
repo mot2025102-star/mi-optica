@@ -50,24 +50,25 @@ public class Producto {
     @Column(name = "tipo_producto", length = 20)
     private String tipoProducto = "GENERAL";
  
-    @Column(name = "color", length = 50)
-    private String color;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_color")
+    private Color color;
  
     @Column(name = "modelo", length = 80)
     private String modelo;
  
     // ─── Clasificación de Armazón ─────────────────────────────────
-    /** ACERO_INOXIDABLE | TITANIUM | ALUMINIO | MONEL | ACETATO | TR90 | INYECTADO */
-    @Column(name = "material_armazon", length = 30)
-    private String materialArmazon;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_material_armazon")
+    private MaterialArmazon materialArmazon;
  
-    /** COMPLETO | RANURADO | AEREO */
-    @Column(name = "familia_armazon", length = 20)
-    private String familiaArmazon;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_familia_armazon")
+    private FamiliaArmazon familiaArmazon;
  
-    /** CUADRADO | OVALADO | RECTANGULAR | AVIADOR | CAT_EYES */
-    @Column(name = "forma_armazon", length = 20)
-    private String formaArmazon;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_forma_armazon")
+    private FormaArmazon formaArmazon;
  
     /** CABALLERO | DAMA | NIÑO | UNISEX */
     @Column(name = "segmento_armazon", length = 20)
@@ -113,8 +114,9 @@ public class Producto {
      * OFTALMICO_TERMINADO | OFTALMICO_PROCESADO |
      * CONTACTO_DESECHABLE | CONTACTO_GAS_PERMEABLE | CONTACTO_HIBRIDO
      */
-    @Column(name = "clasificacion_lente", length = 30)
-    private String clasificacionLente;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_clasificacion_lente")
+    private ClasificacionLente clasificacionLente;
  
 
  

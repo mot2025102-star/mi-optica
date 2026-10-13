@@ -44,7 +44,7 @@ public class VentaController {
             @AuthenticationPrincipal UserDetails ud,
             Model model) {
 
-        if (fi == null) fi = LocalDate.now().withDayOfMonth(1);
+        if (fi == null) fi = LocalDate.now().minusDays(30);
         if (ff == null) ff = LocalDate.now();
 
         var usuario = usuarioRepo.findByUsername(ud.getUsername()).orElseThrow();

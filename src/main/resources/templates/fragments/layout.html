@@ -192,7 +192,7 @@
         </div>
         <div class="sidebar-user-info">
             <div class="sidebar-user-name" sec:authentication="name">Usuario</div>
-            <div class="sidebar-user-rol" sec:authentication="principal.authorities">Rol</div>
+            <div class="sidebar-user-rol" style="font-size:0.8em; opacity:0.8;" th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(#authentication.principal.authorities[0], 'ROLE_', '')))}">Rol</div>
         </div>
     </a>
 
@@ -298,10 +298,27 @@
 
     </nav>
 
-    <div class="sidebar-footer">
+    <div class="sidebar-footer" style="display:flex; align-items:center; gap:15px; padding:0 20px;">
+        <!-- Campanita -->
+        <div id="notifDropdown" style="position:relative; margin-left:auto;">
+            <a href="#" onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('notifDropdown').classList.toggle('notif-open');"
+               style="color:#cbd5e1; text-decoration:none; position:relative; display:flex; align-items:center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+                </svg>
+                <span id="badge-notif" style="display:none; position:absolute; top:-6px; right:-8px; background:#ef4444; color:white; font-size:10px; padding:2px 5px; border-radius:10px; font-weight:bold; line-height:1;">0</span>
+            </a>
+            <div id="notifMenu" style="display:none; position:absolute; right:0; top:calc(100% + 15px); background:white; min-width:320px; max-height:400px; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.2); border-radius:8px; border:1px solid #eaeaea; z-index:10000; color:#333;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #eaeaea; background:#f8fafc; border-radius:8px 8px 0 0;">
+                    <strong style="font-size:14px; color:#1e293b;">Notificaciones</strong>
+                    <button style="background:none; border:none; color:#0ea5e9; cursor:pointer; font-size:12px; font-weight:500;" onclick="event.preventDefault(); leerTodas();">Marcar leídas</button>
+                </div>
+                <div id="lista-notificaciones"></div>
+            </div>
+        </div>
         <form th:action="@{/logout}" method="post" class="logout-form">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <button type="submit" class="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión">
+            <button type="submit" class="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión" style="display:flex; align-items:center; gap:8px;">
                 <svg class="logout-icon" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
                     <!-- Marco de la puerta (estático) -->
                     <path class="door-frame" d="M6 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/>
@@ -317,4 +334,52 @@
 
 </div>
 
+
+<style>
+    #notifDropdown.notif-open #notifMenu { display: block !important; }
+    .notif-item { display:flex; gap:10px; padding:10px 16px; border-bottom:1px solid #f1f5f9; text-decoration:none; color:inherit; }
+    .notif-item:hover { background:#f8fafc; }
+    .notif-item.notif-unread { background:#f0f9ff; }
+    .notif-title { font-size:13px; font-weight:600; color:#0f172a; margin-bottom:2px; }
+    .notif-msg { font-size:12px; color:#64748b; line-height:1.4; }
+</style>
+<script>
+    document.addEventListener('click', function(e) {
+        var dd = document.getElementById('notifDropdown');
+        if (dd && !dd.contains(e.target)) dd.classList.remove('notif-open');
+    });
+    (function(){
+        var csrfToken  = document.querySelector('meta[name="_csrf"]');
+        var csrfHeader = document.querySelector('meta[name="_csrf_header"]');
+        var ICONOS = { STOCK: { icono:'⚠', color:'#ef4444' }, ENTREGA: { icono:'📦', color:'#4f46e5' }, COBRO: { icono:'💰', color:'#f59e0b' }, default: { icono:'🔔', color:'#3b82f6' } };
+        function cargarNotificaciones() {
+            fetch('/api/notificaciones').then(r=>r.json()).then(data=>{
+                var badge = document.getElementById('badge-notif');
+                if (data.noLeidas > 0) { badge.textContent = data.noLeidas; badge.style.display = 'inline'; } else { badge.style.display = 'none'; }
+                var lista = document.getElementById('lista-notificaciones');
+                if (!data.items || data.items.length === 0) {
+                    lista.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px; margin:0; font-size:13px;">Sin notificaciones</p>';
+                } else {
+                    lista.innerHTML = data.items.map(n=>{
+                        var cfg = ICONOS[n.tipo] || ICONOS.default;
+                        var cls = n.leida ? 'notif-item' : 'notif-item notif-unread';
+                        return '<a href="' + n.url + '" onclick="marcarLeida(' + n.id + ')" class="' + cls + '"><span style="font-size:18px; flex-shrink:0; margin-top:2px;">' + cfg.icono + '</span><div><div class="notif-title">' + n.titulo + '</div><div class="notif-msg">' + n.mensaje + '</div></div></a>';
+                    }).join('');
+                }
+            }).catch(e=>console.log(e));
+        }
+        window.marcarLeida = function(id) {
+            var headers = {'Content-Type':'application/json'};
+            if (csrfToken && csrfHeader) headers[csrfHeader.content] = csrfToken.content;
+            fetch('/api/notificaciones/' + id + '/leer', { method:'PUT', headers: headers });
+        };
+        window.leerTodas = function() {
+            var headers = {'Content-Type':'application/json'};
+            if (csrfToken && csrfHeader) headers[csrfHeader.content] = csrfToken.content;
+            fetch('/api/notificaciones/leer-todas', { method:'PUT', headers: headers }).then(()=>cargarNotificaciones());
+        };
+        cargarNotificaciones();
+        setInterval(cargarNotificaciones, 60000);
+    })();
+</script>
 </html>

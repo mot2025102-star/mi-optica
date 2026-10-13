@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +73,13 @@ public class Venta {
     @JoinColumn(name = "id_sucursal_entrega")
     private Sucursal sucursalEntrega;
 
+    // Estado de entrega física del pedido al cliente
+    @Column(name = "estado_entrega", length = 30)
+    private String estadoEntrega = "Pendiente";
+
+    @Column(name = "fecha_entrega_real")
+    private LocalDate fechaEntregaReal;
+
     // Relación con el detalle (cascada: al guardar la venta, guarda el detalle)
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles = new ArrayList<>();
@@ -78,4 +87,36 @@ public class Venta {
     // Relación con los pagos
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PagoVenta> pagos = new ArrayList<>();
+    // ─── Helpers calculados (usados en la plantilla de Saldos y Entregas) ────
+
+    /** Días que faltan para la fecha de entrega (negativo = ya venció). */
+    public long getDiasParaEntrega() {
+        if (fechaEntrega == null) return 999;
+        return ChronoUnit.DAYS.between(LocalDate.now(), fechaEntrega);
+    }
+
+    /** Color del semáforo según días para la entrega. */
+    public String getSemaforoEntrega() {
+        long dias = getDiasParaEntrega();
+        if (dias < 0)    return "rojo";
+        if (dias == 0)   return "naranja";
+        if (dias <= 3)   return "amarillo";
+        if (dias <= 7)   return "azul";
+        return "verde";
+    }
+
+    /** Días transcurridos desde la fecha de la venta hasta hoy. */
+    public long getDiasPendiente() {
+        if (fecha == null) return 0;
+        return ChronoUnit.DAYS.between(fecha, LocalDate.now());
+    }
+
+    /** Porcentaje ya pagado sobre el total de la venta. */
+    public int getPorcentajePagado() {
+        if (total == null || total.compareTo(BigDecimal.ZERO) == 0) return 0;
+        BigDecimal pagado = total.subtract(saldoPendiente != null ? saldoPendiente : BigDecimal.ZERO);
+        return pagado.multiply(BigDecimal.valueOf(100))
+                     .divide(total, 0, RoundingMode.HALF_UP)
+                     .intValue();
+    }
 }

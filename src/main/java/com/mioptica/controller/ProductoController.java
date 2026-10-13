@@ -77,20 +77,20 @@ public class ProductoController {
         if (!fMaterial.isBlank()) {
             productos = productos.stream().filter(p -> 
                 (p.getMaterialLente() != null && String.valueOf(p.getMaterialLente().getIdMaterial()).equals(fMaterial)) ||
-                (p.getMaterialArmazon() != null && p.getMaterialArmazon().equalsIgnoreCase(fMaterial))
+                (p.getMaterialArmazon() != null && p.getMaterialArmazon().getNombre().equalsIgnoreCase(fMaterial))
             ).toList();
         }
         if (fTipoFiltro > 0) {
             productos = productos.stream().filter(p -> p.getTipoLente() != null && p.getTipoLente().getIdTipo().equals(fTipoFiltro)).toList();
         }
         if (!fColor.isBlank()) {
-            productos = productos.stream().filter(p -> fColor.equalsIgnoreCase(p.getColor())).toList();
+            productos = productos.stream().filter(p -> p.getColor() != null && fColor.equalsIgnoreCase(p.getColor().getNombre())).toList();
         }
         if (!fForma.isBlank()) {
-            productos = productos.stream().filter(p -> fForma.equalsIgnoreCase(p.getFormaArmazon())).toList();
+            productos = productos.stream().filter(p -> p.getFormaArmazon() != null && fForma.equalsIgnoreCase(p.getFormaArmazon().getNombre())).toList();
         }
         if (!fFamilia.isBlank()) {
-            productos = productos.stream().filter(p -> fFamilia.equalsIgnoreCase(p.getFamiliaArmazon())).toList();
+            productos = productos.stream().filter(p -> p.getFamiliaArmazon() != null && fFamilia.equalsIgnoreCase(p.getFamiliaArmazon().getNombre())).toList();
         }
         if (!fGenero.isBlank()) {
             productos = productos.stream().filter(p -> fGenero.equalsIgnoreCase(p.getSegmentoArmazon())).toList();
@@ -169,7 +169,11 @@ public class ProductoController {
         model.addAttribute("tiposLente", productoService.listarTiposLente());
         model.addAttribute("materiales", productoService.listarMateriales());
         model.addAttribute("tratamientos", productoService.listarTratamientos());
-        model.addAttribute("colores", productoService.listarColores());
+        model.addAttribute("clasificacionesLente", productoService.listarClasificacionesLente());
+        model.addAttribute("colores",      productoService.listarColores());
+        model.addAttribute("materialesArmazon", productoService.listarMaterialesArmazon());
+        model.addAttribute("formasArmazon", productoService.listarFormasArmazon());
+        model.addAttribute("familiasArmazon", productoService.listarFamiliasArmazon());
         model.addAttribute("proveedores", proveedorService.listarActivos());
         
         model.addAttribute("activos",    activos);
@@ -208,7 +212,11 @@ public class ProductoController {
         model.addAttribute("tiposLente",   productoService.listarTiposLente());
         model.addAttribute("materiales",   productoService.listarMateriales());
         model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("clasificacionesLente", productoService.listarClasificacionesLente());
         model.addAttribute("colores",      productoService.listarColores());
+        model.addAttribute("materialesArmazon", productoService.listarMaterialesArmazon());
+        model.addAttribute("formasArmazon", productoService.listarFormasArmazon());
+        model.addAttribute("familiasArmazon", productoService.listarFamiliasArmazon());
         model.addAttribute("proveedores",  proveedorService.listarActivos());
         model.addAttribute("editando",     false);
         model.addAttribute("activePage",   "productos");
@@ -233,7 +241,11 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("clasificacionesLente", productoService.listarClasificacionesLente());
             model.addAttribute("colores",      productoService.listarColores());
+        model.addAttribute("materialesArmazon", productoService.listarMaterialesArmazon());
+        model.addAttribute("formasArmazon", productoService.listarFormasArmazon());
+        model.addAttribute("familiasArmazon", productoService.listarFamiliasArmazon());
             model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("invMap",       invMap);
             model.addAttribute("editando",     true);
@@ -274,6 +286,11 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("clasificacionesLente", productoService.listarClasificacionesLente());
+            model.addAttribute("colores",      productoService.listarColores());
+            model.addAttribute("materialesArmazon", productoService.listarMaterialesArmazon());
+            model.addAttribute("formasArmazon", productoService.listarFormasArmazon());
+            model.addAttribute("familiasArmazon", productoService.listarFamiliasArmazon());
             model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("editando",     producto.getIdProducto() != null);
             model.addAttribute("activePage",   "productos");
@@ -293,6 +310,7 @@ public class ProductoController {
             model.addAttribute("tiposLente",   productoService.listarTiposLente());
             model.addAttribute("materiales",   productoService.listarMateriales());
             model.addAttribute("tratamientos", productoService.listarTratamientos());
+        model.addAttribute("clasificacionesLente", productoService.listarClasificacionesLente());
             model.addAttribute("proveedores",  proveedorService.listarActivos());
             model.addAttribute("editando",     producto.getIdProducto() != null);
             model.addAttribute("activePage",   "productos");
@@ -322,6 +340,54 @@ public class ProductoController {
         try {
             Marca m = productoService.guardarMarca(nombre);
             return ResponseEntity.ok(Map.of("ok", true, "id", m.getIdMarca(), "nombre", m.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/color")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> guardarColor(@RequestParam String nombre) {
+        try {
+            Color c = productoService.guardarColor(nombre);
+            return ResponseEntity.ok(Map.of("ok", true, "id", c.getIdColor(), "nombre", c.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/material-armazon")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> guardarMaterialArmazon(@RequestParam String nombre) {
+        try {
+            MaterialArmazon m = productoService.guardarMaterialArmazon(nombre);
+            return ResponseEntity.ok(Map.of("ok", true, "id", m.getIdMaterialArmazon(), "nombre", m.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/forma-armazon")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> guardarFormaArmazon(@RequestParam String nombre) {
+        try {
+            FormaArmazon f = productoService.guardarFormaArmazon(nombre);
+            return ResponseEntity.ok(Map.of("ok", true, "id", f.getIdFormaArmazon(), "nombre", f.getNombre()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/familia-armazon")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','BODEGUERO')")
+    public ResponseEntity<Map<String, Object>> guardarFamiliaArmazon(@RequestParam String nombre) {
+        try {
+            FamiliaArmazon f = productoService.guardarFamiliaArmazon(nombre);
+            return ResponseEntity.ok(Map.of("ok", true, "id", f.getIdFamiliaArmazon(), "nombre", f.getNombre()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("ok", false, "error", e.getMessage()));
         }

@@ -56,16 +56,16 @@
             <input type="hidden" id="hDetalle"       name="detalle"               th:value="${producto.detalle}"/>
             <input type="hidden" id="hDesc"      name="descripcion"           th:value="${producto.descripcion}"/>
             <input type="hidden" id="hUnidad"    name="unidadMedida"          th:value="${producto.unidadMedida != null ? producto.unidadMedida : 'Unidad'}"/>
-            <input type="hidden" id="hColor"     name="color"                 th:value="${producto.color}"/>
+            <input type="hidden" id="hColor"     name="color.idColor"         th:value="${producto.color != null ? producto.color.idColor : ''}"/>
             <input type="hidden" id="hModelo"    name="modelo"                th:value="${producto.modelo}"/>
             <input type="hidden" id="hMarca"     name="marca.idMarca"         th:value="${producto.marca != null ? producto.marca.idMarca : ''}"/>
             <input type="hidden" id="hProveedor" name="proveedor.idProveedor" th:value="${producto.proveedor != null ? producto.proveedor.idProveedor : ''}"/>
             <input type="hidden" id="hTipoL"     name="tipoLente.idTipo"               th:value="${producto.tipoLente != null ? producto.tipoLente.idTipo : ''}"/>
             <input type="hidden" id="hMaterialL" name="materialLente.idMaterial"       th:value="${producto.materialLente != null ? producto.materialLente.idMaterial : ''}"/>
             <input type="hidden" id="hTratL"     name="tratamientoLente.idTratamiento" th:value="${producto.tratamientoLente != null ? producto.tratamientoLente.idTratamiento : ''}"/>
-            <input type="hidden" id="hMaterialA"  name="materialArmazon" th:value="${producto.materialArmazon}"/>
-            <input type="hidden" id="hFamiliaA"   name="familiaArmazon"  th:value="${producto.familiaArmazon}"/>
-            <input type="hidden" id="hFormaA"     name="formaArmazon"    th:value="${producto.formaArmazon}"/>
+            <input type="hidden" id="hMaterialA"  name="materialArmazon.idMaterialArmazon" th:value="${producto.materialArmazon != null ? producto.materialArmazon.idMaterialArmazon : ''}"/>
+            <input type="hidden" id="hFamiliaA"   name="familiaArmazon.idFamiliaArmazon"  th:value="${producto.familiaArmazon != null ? producto.familiaArmazon.idFamiliaArmazon : ''}"/>
+            <input type="hidden" id="hFormaA"     name="formaArmazon.idFormaArmazon"      th:value="${producto.formaArmazon != null ? producto.formaArmazon.idFormaArmazon : ''}"/>
             <input type="hidden" id="hSegmentoA"  name="segmentoArmazon" th:value="${producto.segmentoArmazon}"/>
             <input type="hidden" id="hGamaA"      name="gamaArmazon"     th:value="${producto.gamaArmazon}"/>
             <input type="hidden" id="hMedHorizA"  name="medHorizontal"   th:value="${producto.medHorizontal}"/>
@@ -73,7 +73,7 @@
             <input type="hidden" id="hMedDiagA"   name="medDiagonal"     th:value="${producto.medDiagonal}"/>
             <input type="hidden" id="hMedPuenteA" name="medPuente"       th:value="${producto.medPuente}"/>
             <input type="hidden" id="hMedVarA"    name="medVarrilla"     th:value="${producto.medVarrilla}"/>
-            <input type="hidden" id="hClasifL"      name="clasificacionLente"  th:value="${producto.clasificacionLente}"/>
+            <input type="hidden" id="hClasifL"      name="clasificacionLente.idClasificacion"  th:value="${producto.clasificacionLente != null ? producto.clasificacionLente.idClasificacion : ''}"/>
             <input type="hidden" id="hRangoL"       name="rangoLente"          th:value="${producto.rangoLente}"/>
             <input type="hidden" id="hProveedorL"   name="proveedorLente"      th:value="${producto.proveedorLente}"/>
             <input type="hidden" id="hCodInternoL"  name="codigoInternoLente"  th:value="${producto.codigoInternoLente}"/>
@@ -127,7 +127,7 @@
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Nombre / Detalle *</label><input type="text" id="vDetalleA" class="form-control" placeholder="Ej: Armazón Baron BZ128 Negro" th:value="${producto.detalle}"></div>
-                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaA')">＋</button></div></div>
+                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaA" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('marca', 'vMarcaA', 'Marca')">＋</button></div></div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group">
@@ -142,21 +142,46 @@
                             <div style="display:flex;gap:8px">
                                 <select id="vColorA" class="form-select">
                                     <option value="">— Selecciona —</option>
-                                    <option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${producto.color == c}"></option>
-                                    <!-- Si el producto tiene un color que ya no está en la lista principal, lo mostramos -->
-                                    <option th:if="${producto.color != null and !colores.contains(producto.color)}" th:value="${producto.color}" th:text="${producto.color}" selected></option>
+                                    <option th:each="c : ${colores}" th:value="${c.idColor}" th:text="${c.nombre}" th:selected="${producto.color != null and producto.color.idColor == c.idColor}"></option>
                                 </select>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarColorPersonalizado('vColorA')">＋</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('color', 'vColorA', 'Color')">＋</button>
                             </div>
                         </div>
                     </div>
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Material</label><select id="vMaterialA" class="form-select"><option value="">— Selecciona —</option><option value="ACERO_INOXIDABLE" th:selected="${producto.materialArmazon == 'ACERO_INOXIDABLE'}">Acero Inoxidable</option><option value="TITANIUM" th:selected="${producto.materialArmazon == 'TITANIUM'}">Titanium</option><option value="ALUMINIO" th:selected="${producto.materialArmazon == 'ALUMINIO'}">Aluminio</option><option value="MONEL" th:selected="${producto.materialArmazon == 'MONEL'}">Monel</option><option value="ACETATO" th:selected="${producto.materialArmazon == 'ACETATO'}">Acetato</option><option value="TR90" th:selected="${producto.materialArmazon == 'TR90'}">TR-90</option><option value="INYECTADO" th:selected="${producto.materialArmazon == 'INYECTADO'}">Inyectado</option></select></div>
+                        <div class="form-group">
+                            <label class="form-label">Material</label>
+                            <div style="display:flex;gap:8px">
+                                <select id="vMaterialA" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="m : ${materialesArmazon}" th:value="${m.idMaterialArmazon}" th:text="${m.nombre}" th:selected="${producto.materialArmazon != null and producto.materialArmazon.idMaterialArmazon == m.idMaterialArmazon}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('material-armazon', 'vMaterialA', 'Material')">＋</button>
+                            </div>
+                        </div>
                         <div class="form-group"><label class="form-label">Unidad de Medida</label><select id="vUnidadA" class="form-select"><option value="Unidad" th:selected="${producto.unidadMedida == null or producto.unidadMedida == 'Unidad'}">Unidad</option><option value="Par" th:selected="${producto.unidadMedida == 'Par'}">Par</option><option value="Caja" th:selected="${producto.unidadMedida == 'Caja'}">Caja</option><option value="Docena" th:selected="${producto.unidadMedida == 'Docena'}">Docena</option></select></div>
                     </div>
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Familia / Tipo de Aro</label><select id="vFamiliaA" class="form-select"><option value="">— Selecciona —</option><option value="COMPLETO" th:selected="${producto.familiaArmazon == 'COMPLETO'}">Completo (Full Frame)</option><option value="RANURADO" th:selected="${producto.familiaArmazon == 'RANURADO'}">Ranurado (Semi Rimless)</option><option value="AEREO" th:selected="${producto.familiaArmazon == 'AEREO'}">Aéreo (Rimless)</option></select></div>
-                        <div class="form-group"><label class="form-label">Forma</label><select id="vFormaA" class="form-select"><option value="">— Selecciona —</option><option value="CUADRADO" th:selected="${producto.formaArmazon == 'CUADRADO'}">Cuadrado</option><option value="OVALADO" th:selected="${producto.formaArmazon == 'OVALADO'}">Ovalado</option><option value="RECTANGULAR" th:selected="${producto.formaArmazon == 'RECTANGULAR'}">Rectangular</option><option value="AVIADOR" th:selected="${producto.formaArmazon == 'AVIADOR'}">Aviador</option><option value="CAT_EYES" th:selected="${producto.formaArmazon == 'CAT_EYES'}">Cat Eyes</option></select></div>
+                        <div class="form-group">
+                            <label class="form-label">Familia / Tipo de Aro</label>
+                            <div style="display:flex;gap:8px">
+                                <select id="vFamiliaA" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="f : ${familiasArmazon}" th:value="${f.idFamiliaArmazon}" th:text="${f.nombre}" th:selected="${producto.familiaArmazon != null and producto.familiaArmazon.idFamiliaArmazon == f.idFamiliaArmazon}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('familia-armazon', 'vFamiliaA', 'Familia / Tipo de Aro')">＋</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Forma</label>
+                            <div style="display:flex;gap:8px">
+                                <select id="vFormaA" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="fo : ${formasArmazon}" th:value="${fo.idFormaArmazon}" th:text="${fo.nombre}" th:selected="${producto.formaArmazon != null and producto.formaArmazon.idFormaArmazon == fo.idFormaArmazon}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('forma-armazon', 'vFormaA', 'Forma')">＋</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Segmento / Género</label><select id="vSegmentoA" class="form-select"><option value="">— Selecciona —</option><option value="CABALLERO" th:selected="${producto.segmentoArmazon == 'CABALLERO'}">Caballero</option><option value="DAMA" th:selected="${producto.segmentoArmazon == 'DAMA'}">Dama</option><option value="NIÑO" th:selected="${producto.segmentoArmazon == 'NIÑO'}">Niño</option><option value="UNISEX" th:selected="${producto.segmentoArmazon == 'UNISEX'}">Unisex</option></select></div>
@@ -168,7 +193,7 @@
                         <div class="form-group"><label class="form-label" style="font-size:12px;color:var(--text-gris)">Vertical</label><input type="number" id="vMedVertA" class="form-control" min="0" step="0.1" placeholder="38" th:value="${producto.medVertical}"></div>
                         <div class="form-group"><label class="form-label" style="font-size:12px;color:var(--text-gris)">Diagonal</label><input type="number" id="vMedDiagA" class="form-control" min="0" step="0.1" placeholder="55" th:value="${producto.medDiagonal}"></div>
                         <div class="form-group"><label class="form-label" style="font-size:12px;color:var(--text-gris)">Puente</label><input type="number" id="vMedPuenteA" class="form-control" min="0" step="0.1" placeholder="18" th:value="${producto.medPuente}"></div>
-                        <div class="form-group"><label class="form-label" style="font-size:12px;color:var(--text-gris)">Varilla</label><input type="number" id="vMedVarrillaA" class="form-control" min="0" step="0.1" placeholder="140" th:value="${producto.medVarrilla}"></div>
+                        <div class="form-group"><label class="form-label" style="font-size:12px;color:var(--text-gris)">Varrilla</label><input type="number" id="vMedVarrillaA" class="form-control" min="0" step="0.1" placeholder="140" th:value="${producto.medVarrilla}"></div>
                     </div>
                     <div class="form-group"><label class="form-label">Descripción (opcional)</label><textarea id="vDescA" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea></div>
                 </div>
@@ -250,21 +275,23 @@
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Clasificación (General)</label>
-                            <select id="vClasifL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option value="OFTALMICO_TERMINADO"    th:selected="${producto.clasificacionLente == 'OFTALMICO_TERMINADO'}">Lente Oftálmico Terminado</option>
-                                <option value="OFTALMICO_PROCESADO"    th:selected="${producto.clasificacionLente == 'OFTALMICO_PROCESADO'}">Lente Oftálmico Procesado</option>
-                                <option value="CONTACTO_DESECHABLE"    th:selected="${producto.clasificacionLente == 'CONTACTO_DESECHABLE'}">Lentes de Contacto Desechables</option>
-                                <option value="CONTACTO_GAS_PERMEABLE" th:selected="${producto.clasificacionLente == 'CONTACTO_GAS_PERMEABLE'}">Lentes de Contacto Gas Permeable</option>
-                                <option value="CONTACTO_HIBRIDO"       th:selected="${producto.clasificacionLente == 'CONTACTO_HIBRIDO'}">Lentes de Contacto Híbridos</option>
-                            </select>
+                            <div style="display:flex;gap:8px">
+                                <select id="vClasifL" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="c : ${clasificacionesLente}" th:value="${c.idClasificacion}" th:text="${c.nombre}" th:selected="${producto.clasificacionLente != null and producto.clasificacionLente.idClasificacion == c.idClasificacion}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('clasificacion-lente', 'vClasifL', 'Clasificación (General)')">＋</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Categoría (Tipo de Lentes)</label>
-                            <select id="vTipoL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option th:each="t : ${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}" th:selected="${producto.tipoLente != null and producto.tipoLente.idTipo == t.idTipo}"></option>
-                            </select>
+                            <div style="display:flex;gap:8px">
+                                <select id="vTipoL" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="t : ${tiposLente}" th:value="${t.idTipo}" th:text="${t.nombre}" th:selected="${producto.tipoLente != null and producto.tipoLente.idTipo == t.idTipo}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('categoria-lente', 'vTipoL', 'Categoría (Tipo de Lentes)')">＋</button>
+                            </div>
                         </div>
                     </div>
 
@@ -272,10 +299,13 @@
                     <div class="form-row form-row-2">
                         <div class="form-group">
                             <label class="form-label">Familia (Material)</label>
-                            <select id="vMaterialL" class="form-select">
-                                <option value="">— Selecciona —</option>
-                                <option th:each="m : ${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}" th:selected="${producto.materialLente != null and producto.materialLente.idMaterial == m.idMaterial}"></option>
-                            </select>
+                            <div style="display:flex;gap:8px">
+                                <select id="vMaterialL" class="form-select">
+                                    <option value="">— Selecciona —</option>
+                                    <option th:each="m : ${materiales}" th:value="${m.idMaterial}" th:text="${m.nombre}" th:selected="${producto.materialLente != null and producto.materialLente.idMaterial == m.idMaterial}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('familia-lente', 'vMaterialL', 'Familia (Material)')">＋</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Sub-Familia (Tratamiento adicional)</label>
@@ -306,11 +336,9 @@
                             <div style="display:flex;gap:8px">
                                 <select id="vColorL" class="form-select">
                                     <option value="">— Selecciona —</option>
-                                    <option th:each="c : ${colores}" th:value="${c}" th:text="${c}" th:selected="${producto.color == c}"></option>
-                                    <!-- Si el producto tiene un color que ya no está en la lista principal, lo mostramos -->
-                                    <option th:if="${producto.color != null and !colores.contains(producto.color)}" th:value="${producto.color}" th:text="${producto.color}" selected></option>
+                                    <option th:each="c : ${colores}" th:value="${c.idColor}" th:text="${c.nombre}" th:selected="${producto.color != null and producto.color.idColor == c.idColor}"></option>
                                 </select>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="agregarColorPersonalizado('vColorL')">＋</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('color', 'vColorL', 'Color')">＋</button>
                             </div>
                         </div>
                     </div>
@@ -326,11 +354,14 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Marca</label>
-                            <select id="vMarcaL" class="form-select">
-                                <option value="">— Sin marca —</option>
-                                <option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}"
-                                        th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option>
-                            </select>
+                            <div style="display:flex;gap:8px">
+                                <select id="vMarcaL" class="form-select">
+                                    <option value="">— Sin marca —</option>
+                                    <option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}"
+                                            th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('marca', 'vMarcaL', 'Marca')">＋</button>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group" style="margin-top:8px"><label class="form-label">Descripción adicional (opcional)</label><textarea id="vDescL" class="form-control" rows="2" placeholder="Descripción adicional..." th:text="${producto.descripcion}"></textarea></div>
@@ -413,7 +444,7 @@
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Nombre / Detalle *</label><input type="text" id="vDetalleO" class="form-control" placeholder="Ej: Líquido limpiador" th:value="${producto.detalle}"></div>
-                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="agregarMarca('vMarcaO')">＋</button></div></div>
+                        <div class="form-group"><label class="form-label">Marca</label><div style="display:flex;gap:8px"><select id="vMarcaO" class="form-select"><option value="">— Sin marca —</option><option th:each="m : ${marcas}" th:value="${m.idMarca}" th:text="${m.nombre}" th:selected="${producto.marca != null and producto.marca.idMarca == m.idMarca}"></option></select><button type="button" class="btn btn-secondary btn-sm" onclick="abrirModalUniversal('marca', 'vMarcaO', 'Marca')">＋</button></div></div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group">
@@ -425,7 +456,7 @@
                         </div>
                     </div>
                     <div class="form-row form-row-2">
-                        <div class="form-group"><label class="form-label">Color (opcional)</label><input type="text" id="vColorO" class="form-control" placeholder="Ej: Azul" th:value="${producto.color}"></div>
+                        <div class="form-group"><label class="form-label">Color (opcional)</label><input type="text" id="vColorO" class="form-control" placeholder="Ej: Azul" th:value="${producto.color != null ? producto.color.nombre : ''}"></div>
                     </div>
                     <div class="form-row form-row-2">
                         <div class="form-group"><label class="form-label">Unidad de Medida</label><select id="vUnidadO" class="form-select"><option value="Unidad" th:selected="${producto.unidadMedida == null or producto.unidadMedida == 'Unidad'}">Unidad</option><option value="Par" th:selected="${producto.unidadMedida == 'Par'}">Par</option><option value="Caja" th:selected="${producto.unidadMedida == 'Caja'}">Caja</option><option value="Paquete" th:selected="${producto.unidadMedida == 'Paquete'}">Paquete</option><option value="Frasco" th:selected="${producto.unidadMedida == 'Frasco'}">Frasco</option><option value="Tubo" th:selected="${producto.unidadMedida == 'Tubo'}">Tubo</option><option value="Estuche" th:selected="${producto.unidadMedida == 'Estuche'}">Estuche</option><option value="Kit" th:selected="${producto.unidadMedida == 'Kit'}">Kit</option></select></div>
@@ -489,7 +520,7 @@
     </div>
 </div>
 
-<!-- ═══ MODAL GESTIÓN DE TRATAMIENTOS ══════════════════════════════════════════ -->
+<!-- ═══ MODAL GESTIÓN DE TRATAMIENTOS (Sub-Familia) ══════════════════════════════════════════ -->
 <div id="modalTratamientos" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,27,42,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
     <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;width:min(560px,95vw);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(13,27,42,0.35);overflow:hidden">
         <!-- Cabecera -->
@@ -517,6 +548,40 @@
         <div style="overflow-y:auto;flex:1;padding:16px 24px 20px;background:#ffffff">
             <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Tratamientos existentes</div>
             <div id="listaTratamientosModal">
+                <div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">Cargando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL UNIVERSAL DE CATÁLOGOS ══════════════════════════════════════════ -->
+<div id="modalUniversal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,27,42,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;width:min(560px,95vw);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(13,27,42,0.35);overflow:hidden">
+        <!-- Cabecera -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #f1f5f9;background:#f8fafc">
+            <div>
+                <div id="modalUniversalTitulo" style="font-weight:700;font-size:16px;color:#0f172a">Gestión</div>
+                <div id="modalUniversalDesc" style="font-size:12px;color:#64748b;margin-top:2px">Administra los elementos del catálogo</div>
+            </div>
+            <button type="button" onclick="cerrarModalUniversal()" style="background:none;border:1px solid #e2e8f0;cursor:pointer;color:#64748b;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f1f5f9';this.style.color='#1e293b'" onmouseout="this.style.background='none';this.style.color='#64748b'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <!-- Formulario de agregar -->
+        <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;background:#ffffff">
+            <div style="display:flex;gap:8px">
+                <input type="text" id="inputNuevoElemento" class="form-control" placeholder="Nombre del nuevo elemento..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();guardarNuevoElementoUniversal();}">
+                <button type="button" class="btn btn-primary" onclick="guardarNuevoElementoUniversal()" id="btnGuardarElemento" style="white-space:nowrap;min-width:90px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar
+                </button>
+            </div>
+            <div id="alertaUniversal" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px"></div>
+        </div>
+        <!-- Lista de elementos -->
+        <div style="overflow-y:auto;flex:1;padding:16px 24px 20px;background:#ffffff">
+            <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Elementos existentes</div>
+            <div id="listaUniversalModal">
                 <div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">Cargando...</div>
             </div>
         </div>
@@ -559,10 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.tom-select-proveedor').forEach((el) => {
         new TomSelect(el, {
             create: false,
-            sortField: {
-                field: "text",
-                direction: "asc"
-            }
+            sortField: { field: "text", direction: "asc" }
         });
     });
 
@@ -581,7 +643,6 @@ function seleccionarTipo(tipo) {
     if (card) card.classList.add('activo');
     document.getElementById('hTipo').value = tipo;
 
-    // Autocompletar el preview del código interno si estamos creando un producto nuevo
     if (proximoId > 0 && !document.getElementById('hCodigo').value) {
         let pref = 'PROD';
         if (tipo === 'ARMAZON') pref = 'ARO';
@@ -652,10 +713,6 @@ function calcularUtilidadFila(elemento) {
     const precio = parseFloat(precioInput?.value) || 0;
     const iva = parseFloat(ivaInput?.value) || 0;
     if (costo <= 0 || !utilInput || utilInput.readOnly) return;
-
-    // precio = costo * (1 + utilidad/100) * (1 + iva/100)
-    // precio / (costo * (1 + iva/100)) = 1 + utilidad/100
-    // utilidad = ((precio / (costo * (1 + iva/100))) - 1) * 100
     const factorIva = 1 + (iva / 100);
     const utilidad = ((precio / (costo * factorIva)) - 1) * 100;
     utilInput.value = utilidad > 0 ? utilidad.toFixed(2) : 0;
@@ -704,7 +761,6 @@ function sincronizarYValidar() {
 
         let totalStock = 0;
         const sucursalesIds = Array.from(document.querySelectorAll('input[id^="sucActiva_"]')).map(el => parseInt(el.id.split('_')[1]));
-        
         sucursalesIds.forEach(sid => {
             const div = document.getElementById('divL' + sid);
             if (div && div.style.display !== 'none') {
@@ -717,7 +773,7 @@ function sincronizarYValidar() {
     alerta.style.display = 'none';
     const prefijos = { ARMAZON:'A', LENTE:'L', LIMPIEZA:'O', ACCESORIO:'O' };
     const pre = prefijos[tipo] || 'O';
-    
+
     const allSucursalesIds = Array.from(document.querySelectorAll('input[id^="sucActiva_"]')).map(el => parseInt(el.id.split('_')[1]));
     allSucursalesIds.forEach(sid => {
         const div    = document.getElementById('div' + pre + sid);
@@ -739,17 +795,7 @@ function sincronizarYValidar() {
 }
 
 
-
-async function agregarMarca(selectId) {
-    const nombre = prompt('Nombre de la nueva marca:');
-    if (!nombre?.trim()) return;
-    const csrf = document.querySelector('meta[name="_csrf"]').content;
-    const r = await fetch('/productos/api/marca', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
-    const data = await r.json();
-    if (data.ok) document.getElementById(selectId)?.appendChild(new Option(data.nombre, data.id, true, true));
-    else alert('Error: ' + data.error);
-}
-// ─── Modal Gestión de Tratamientos ──────────────────────────────
+// ─── Modal Gestión de Tratamientos (Sub-Familia) ──────────────────────────────
 let _tratamientoSelectId = null;
 
 function agregarTratamiento(selectId) {
@@ -789,13 +835,13 @@ async function cargarListaTratamientos() {
             contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">No hay tratamientos registrados aún.</div>';
             return;
         }
-        contenedor.innerHTML = lista.map(t => `
-            <div class="trat-fila" id="trat-fila-${t.id}">
-                <span class="trat-id">#${t.id}</span>
-                <span class="trat-nombre" id="trat-nombre-${t.id}">${t.nombre}</span>
-                <button type="button" class="btn-icon" title="Editar" onclick="editarTratamiento(${t.id}, '${t.nombre.replace(/'/g, "\\'")}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                <button type="button" class="btn-icon eliminar" title="Eliminar" onclick="eliminarTratamiento(${t.id}, '${t.nombre.replace(/'/g, "\\'")}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
-            </div>`).join('');
+        contenedor.innerHTML = lista.map(t => 
+            '<div class="trat-fila" id="trat-fila-' + t.id + '">' +
+                '<span class="trat-id">#' + t.id + '</span>' +
+                '<span class="trat-nombre" id="trat-nombre-' + t.id + '">' + t.nombre + '</span>' +
+                '<button type="button" class="btn-icon" title="Editar" onclick="editarTratamiento(' + t.id + ', \'' + t.nombre.replace(/'/g, "\\'") + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+                '<button type="button" class="btn-icon eliminar" title="Eliminar" onclick="eliminarTratamiento(' + t.id + ', \'' + t.nombre.replace(/'/g, "\\'") + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' +
+            '</div>').join('');
     } catch(e) {
         contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#DC2626;font-size:13px">Error al cargar tratamientos.</div>';
     }
@@ -810,20 +856,17 @@ async function guardarNuevoTratamiento() {
     ocultarAlertaTratamiento();
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     try {
-        const r = await fetch('/productos/api/tratamiento', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nombre)}&_csrf=${csrf}` });
+        const r = await fetch('/productos/api/tratamiento', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: 'nombre=' + encodeURIComponent(nombre) + '&_csrf=' + csrf });
         const data = await r.json();
         if (data.ok) {
-            mostrarAlertaTratamiento(`✓ Tratamiento "${data.nombre}" agregado.`, false);
+            mostrarAlertaTratamiento('✓ Tratamiento \"' + data.nombre + '\" agregado.', false);
             input.value = '';
-            // Auto-seleccionar en el desplegable principal
             if (_tratamientoSelectId) {
                 const sel = document.getElementById(_tratamientoSelectId);
                 if (sel) {
-                    // Quitar si ya existe
                     const yaExiste = Array.from(sel.options).find(o => o.value == data.id);
                     if (!yaExiste) sel.appendChild(new Option(data.nombre, data.id));
                     sel.value = data.id;
-                    // Sync al hidden
                     document.getElementById('hTratL').value = data.id;
                 }
             }
@@ -838,39 +881,16 @@ async function guardarNuevoTratamiento() {
     }
 }
 
-function agregarColorPersonalizado(selectId) {
-    const nuevoColor = prompt('Escribe el nuevo color (Ej: ESMERALDA):');
-    if (!nuevoColor || !nuevoColor.trim()) return;
-    
-    const colorMayus = nuevoColor.trim().toUpperCase();
-    const sel = document.getElementById(selectId);
-    
-    // Verificar si ya existe
-    const existe = Array.from(sel.options).find(o => o.value.toUpperCase() === colorMayus);
-    if (existe) {
-        sel.value = existe.value;
-    } else {
-        sel.appendChild(new Option(colorMayus, colorMayus));
-        sel.value = colorMayus;
-    }
-    
-    // Si hay un hidden input de sync, actualizarlo
-    const hidden = document.getElementById('hColor');
-    if (hidden) hidden.value = colorMayus;
-}
-
 async function editarTratamiento(id, nombreActual) {
     const nuevoNombre = prompt('Editar tratamiento:', nombreActual);
     if (!nuevoNombre?.trim() || nuevoNombre.trim() === nombreActual) return;
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     try {
-        const r = await fetch(`/productos/api/tratamiento/${id}`, { method:'PUT', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`nombre=${encodeURIComponent(nuevoNombre.trim())}&_csrf=${csrf}` });
+        const r = await fetch(('/productos/api/tratamiento/' + id), { method:'PUT', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'nombre=' + encodeURIComponent(nuevoNombre.trim()) + '&_csrf=' + csrf });
         const data = await r.json();
         if (data.ok) {
-            // Actualizar texto en la fila del modal
-            const span = document.getElementById(`trat-nombre-${id}`);
+            const span = document.getElementById('trat-nombre-' + id);
             if (span) span.textContent = data.nombre;
-            // Actualizar en el select principal si existe
             if (_tratamientoSelectId) {
                 const sel = document.getElementById(_tratamientoSelectId);
                 const opt = sel ? Array.from(sel.options).find(o => o.value == id) : null;
@@ -886,23 +906,20 @@ async function editarTratamiento(id, nombreActual) {
 }
 
 async function eliminarTratamiento(id, nombre) {
-    if (!confirm(`¿Eliminar el tratamiento "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
+    if (!confirm('¿Eliminar el tratamiento \"' + nombre + '\"?\nEsta acción no se puede deshacer.')) return;
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     try {
-        const r = await fetch(`/productos/api/tratamiento/${id}`, { method:'DELETE', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`_csrf=${csrf}` });
+        const r = await fetch(('/productos/api/tratamiento/' + id), { method:'DELETE', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'_csrf=' + csrf });
         const data = await r.json();
         if (data.ok) {
-            // Eliminar fila del modal
-            const fila = document.getElementById(`trat-fila-${id}`);
+            const fila = document.getElementById('trat-fila-' + id);
             if (fila) fila.remove();
-            // Eliminar del select principal si existe
             if (_tratamientoSelectId) {
                 const sel = document.getElementById(_tratamientoSelectId);
                 const opt = sel ? Array.from(sel.options).find(o => o.value == id) : null;
                 if (opt) { opt.remove(); sel.value = ''; document.getElementById('hTratL').value = ''; }
             }
             mostrarAlertaTratamiento(`✓ Tratamiento eliminado.`, false);
-            // Recargar si queda vacío
             const lista = document.getElementById('listaTratamientosModal');
             if (lista && lista.querySelectorAll('.trat-fila').length === 0) cargarListaTratamientos();
         } else {
@@ -913,9 +930,154 @@ async function eliminarTratamiento(id, nombre) {
     }
 }
 
-// Cerrar modal al hacer clic en el fondo oscuro
 document.getElementById('modalTratamientos')?.addEventListener('click', function(e) {
     if (e.target === this) cerrarModalTratamientos();
+});
+
+// ─── Modal Universal de Catálogos ──────────────────────────────
+let _modalTipoEntidad = null;
+let _modalSelectId    = null;
+
+function abrirModalUniversal(tipoEntidad, selectId, tituloModal) {
+    _modalTipoEntidad = tipoEntidad;
+    _modalSelectId    = selectId;
+    document.getElementById('modalUniversalTitulo').textContent = 'Gestión de ' + tituloModal;
+    document.getElementById('modalUniversalDesc').textContent   = 'Administra los elementos del catálogo';
+    document.getElementById('inputNuevoElemento').value = '';
+    ocultarAlertaUniversal();
+    document.getElementById('modalUniversal').style.display = 'flex';
+    cargarListaUniversal();
+    setTimeout(() => document.getElementById('inputNuevoElemento').focus(), 80);
+}
+
+function cerrarModalUniversal() {
+    document.getElementById('modalUniversal').style.display = 'none';
+}
+
+function mostrarAlertaUniversal(msg, esError) {
+    const el = document.getElementById('alertaUniversal');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = esError ? 'rgba(239,68,68,0.12)' : 'rgba(39,194,201,0.12)';
+    el.style.color = esError ? '#ef4444' : 'var(--turquesa)';
+    el.style.border = esError ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(39,194,201,0.3)';
+}
+
+function ocultarAlertaUniversal() {
+    document.getElementById('alertaUniversal').style.display = 'none';
+}
+
+async function cargarListaUniversal() {
+    const contenedor = document.getElementById('listaUniversalModal');
+    contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">Cargando...</div>';
+    try {
+        const r = await fetch('/productos/api/catalogo/' + _modalTipoEntidad + '/lista');
+        const lista = await r.json();
+        if (lista.length === 0) {
+            contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">No hay elementos registrados aún.</div>';
+            return;
+        }
+        contenedor.innerHTML = lista.map(t => 
+            '<div class="trat-fila" id="univ-fila-' + t.id + '">' +
+                '<span class="trat-id">#' + t.id + '</span>' +
+                '<span class="trat-nombre" id="univ-nombre-' + t.id + '">' + t.nombre + '</span>' +
+                '<button type="button" class="btn-icon" title="Editar" onclick="editarElementoUniversal(' + t.id + ', \'' + t.nombre.replace(/'/g, "\\'") + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+                '<button type="button" class="btn-icon eliminar" title="Eliminar" onclick="eliminarElementoUniversal(' + t.id + ', \'' + t.nombre.replace(/'/g, "\\'") + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' +
+            '</div>').join('');
+    } catch(e) {
+        contenedor.innerHTML = '<div style="text-align:center;padding:24px;color:#DC2626;font-size:13px">Error al cargar elementos.</div>';
+    }
+}
+
+async function guardarNuevoElementoUniversal() {
+    const input = document.getElementById('inputNuevoElemento');
+    const nombre = input.value.trim();
+    if (!nombre) { mostrarAlertaUniversal('Por favor escribe un nombre.', true); return; }
+    const btn = document.getElementById('btnGuardarElemento');
+    btn.disabled = true;
+    ocultarAlertaUniversal();
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    try {
+        const r = await fetch('/productos/api/catalogo/' + _modalTipoEntidad, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: 'nombre=' + encodeURIComponent(nombre) + '&_csrf=' + csrf });
+        const data = await r.json();
+        if (data.ok) {
+            mostrarAlertaUniversal('✓ \"' + data.nombre + '\" agregado correctamente.', false);
+            input.value = '';
+            if (_modalSelectId) {
+                const sel = document.getElementById(_modalSelectId);
+                if (sel) {
+                    const yaExiste = Array.from(sel.options).find(o => o.value == data.id);
+                    if (!yaExiste) sel.appendChild(new Option(data.nombre, data.id));
+                    sel.value = data.id;
+                    // Sync al hidden de color si aplica
+                    if (_modalSelectId === 'vColorA' || _modalSelectId === 'vColorL') {
+                        const hColor = document.getElementById('hColor');
+                        if (hColor) hColor.value = data.id;
+                    }
+                }
+            }
+            cargarListaUniversal();
+        } else {
+            mostrarAlertaUniversal(data.error || 'Error al guardar.', true);
+        }
+    } catch(e) {
+        mostrarAlertaUniversal('Error de conexión.', true);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function editarElementoUniversal(id, nombreActual) {
+    const nuevoNombre = prompt('Editar elemento:', nombreActual);
+    if (!nuevoNombre?.trim() || nuevoNombre.trim() === nombreActual) return;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    try {
+        const r = await fetch(('/productos/api/catalogo/' + _modalTipoEntidad + '/' + id), { method:'PUT', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'nombre=' + encodeURIComponent(nuevoNombre.trim()) + '&_csrf=' + csrf });
+        const data = await r.json();
+        if (data.ok) {
+            const span = document.getElementById('univ-nombre-' + id);
+            if (span) span.textContent = data.nombre;
+            if (_modalSelectId) {
+                const sel = document.getElementById(_modalSelectId);
+                const opt = sel ? Array.from(sel.options).find(o => o.value == id) : null;
+                if (opt) opt.text = data.nombre;
+            }
+            mostrarAlertaUniversal(`✓ Elemento actualizado correctamente.`, false);
+        } else {
+            alert('Error: ' + (data.error || 'No se pudo actualizar.'));
+        }
+    } catch(e) {
+        alert('Error de conexión.');
+    }
+}
+
+async function eliminarElementoUniversal(id, nombre) {
+    if (!confirm('¿Eliminar \"' + nombre + '\"?\nEsta acción no se puede deshacer.')) return;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    try {
+        const r = await fetch(('/productos/api/catalogo/' + _modalTipoEntidad + '/' + id), { method:'DELETE', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'_csrf=' + csrf });
+        const data = await r.json();
+        if (data.ok) {
+            const fila = document.getElementById('univ-fila-' + id);
+            if (fila) fila.remove();
+            if (_modalSelectId) {
+                const sel = document.getElementById(_modalSelectId);
+                const opt = sel ? Array.from(sel.options).find(o => o.value == id) : null;
+                if (opt) { opt.remove(); sel.value = ''; }
+            }
+            mostrarAlertaUniversal(`✓ Elemento eliminado.`, false);
+            const lista = document.getElementById('listaUniversalModal');
+            if (lista && lista.querySelectorAll('.trat-fila').length === 0) cargarListaUniversal();
+        } else {
+            mostrarAlertaUniversal(data.error || 'No se pudo eliminar.', true);
+        }
+    } catch(e) {
+        mostrarAlertaUniversal('Error de conexión.', true);
+    }
+}
+
+document.getElementById('modalUniversal')?.addEventListener('click', function(e) {
+    if (e.target === this) cerrarModalUniversal();
 });
 </script>
 </body>

@@ -454,7 +454,7 @@ public class VentaService {
                         
                         if (p.getMaterialLente() != null) detLab.setMaterial(p.getMaterialLente().getNombre());
                         if (p.getTratamientoLente() != null) detLab.setTratamiento(p.getTratamientoLente().getNombre());
-                        detLab.setColorTinte(p.getColor());
+                        detLab.setColorTinte(p.getColor() != null ? p.getColor().getNombre() : null);
                         
                         productosLab.add(detLab);
                     }

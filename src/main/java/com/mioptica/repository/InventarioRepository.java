@@ -42,4 +42,12 @@ public interface InventarioRepository extends JpaRepository<Inventario, Integer>
         "AND (:idSuc = 0 OR i.sucursal.idSucursal = :idSuc) " +
         "ORDER BY i.producto.tipoProducto ASC, i.producto.detalle ASC")
     List<Inventario> findArazonesYLentesBySucursal(@Param("idSuc") Integer idSuc);
+
+    // Queries for Notifications
+    @Query("SELECT i FROM Inventario i WHERE i.existencia <= 0 AND i.producto.activo = true")
+    List<Inventario> findAgotadosGlobal();
+
+    @Query("SELECT i FROM Inventario i WHERE i.existencia > 0 AND i.existencia <= 5 AND i.producto.activo = true")
+    List<Inventario> findBajosGlobal();
 }
+
